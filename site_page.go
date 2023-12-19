@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -12,19 +13,26 @@ type SitePage struct {
 	ID       primitive.ObjectID `json:"ID" bson:"_id,omitempty"`
 	Link     string             `json:"Link" bson:"link"`
 	Title    string             `json:"Title" bson:"title"`
-	SCards   []Stanza           `json:"SCards" bson:"scards"`
+	SCards   []Illustrated      `json:"SCards" bson:"scards"`
 	Contents []Stanza           `json:"Contents" bson:"content"`
-	ECards   []Stanza           `json:"ECards" bson:"ecards"`
+	ECards   []Illustrated      `json:"ECards" bson:"ecards"`
 	Infos    MetaInfo           `json:"Infos" bson:"infos"`
 }
 
-type Stanza struct {
+type Illustrated struct {
 	ID      primitive.ObjectID `json:"ID" bson:"_id,omitempty"`
-	Link    string             `json:"Link" bson:"link"`
-	Header  string             `json:"Header" bson:"header"`
+	Title   string             `json:"Title" bson:"title"`
 	Image   string             `json:"Image" bson:"image"`
-	Content string             `json:"Content" bson:"content"`
-	Infos   MetaInfo           `json:"Infos" bson:"infos"`
+	Content Stanza             `json:"Content" bson:"content"`
+}
+
+type Stanza struct {
+	ID               primitive.ObjectID `json:"ID" bson:"_id,omitempty"`
+	Content          string             `json:"Content" bson:"content"`
+	CreateTime       time.Time          `json:"CreateTime" bson:"create_time"`
+	BasePage         primitive.ObjectID `json:"BasePage" bson:"base_page"`
+	PreviousVersion  primitive.ObjectID `json:"PreviousVersion" bson:"previous_version"`
+	InheritedVersion primitive.ObjectID `json:"InhertedVersion" bson:"inherted_version"`
 }
 
 type LinkInfo struct {
