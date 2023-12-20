@@ -115,12 +115,12 @@ func setNewRequestSession(w http.ResponseWriter, r *http.Request) *WebSession {
 	}
 	// Create a new cookie
 	cookie := http.Cookie{
-		Name:     "session",
-		Value:    encodedSess,
-		Path:     "/",     // The cookie is accessible on all paths
-		Domain:   domain,  // Accessible by mypierian.com and all its subdomains
-		MaxAge:   1469000, // Expires after ~17 days
-		HttpOnly: true,    // Not accessible via JavaScript
+		Name:   "session",
+		Value:  encodedSess,
+		Path:   "/",     // The cookie is accessible on all paths
+		Domain: domain,  // Accessible by mypierian.com and all its subdomains
+		MaxAge: 1469000, // Expires after ~17 days
+		// HttpOnly: httpOnly, // Not accessible via JavaScript
 	}
 
 	// Set the cookie in the response header
@@ -155,7 +155,10 @@ func RefreshRequestSession(w http.ResponseWriter, r *http.Request) *WebSession {
 	return session
 }
 
-func (sess WebSession) GenerateHexID(message string) string {
+func (sess *WebSession) GenerateHexID(message string) string {
+	if sess == nil {
+		return ""
+	}
 	idbytes := sha256.Sum256([]byte(sess.ID.Hex() + message))
 	//convert bytes to hex string
 	return string(hex.EncodeToString(idbytes[:12]))
