@@ -10,13 +10,16 @@ import (
 )
 
 type SitePage struct {
-	ID       primitive.ObjectID `json:"ID" bson:"_id,omitempty"`
-	Link     string             `json:"Link" bson:"link"`
-	Title    string             `json:"Title" bson:"title"`
-	SCards   []Illustrated      `json:"SCards" bson:"scards"`
-	Contents []Stanza           `json:"Contents" bson:"content"`
-	ECards   []Illustrated      `json:"ECards" bson:"ecards"`
-	Infos    MetaInfo           `json:"Infos" bson:"infos"`
+	ID               primitive.ObjectID `json:"ID" bson:"_id,omitempty"`
+	Link             string             `json:"Link" bson:"link"`
+	Title            string             `json:"Title" bson:"title"`
+	SCards           []Illustrated      `json:"SCards" bson:"scards"`
+	Contents         []Stanza           `json:"Contents" bson:"content"`
+	ECards           []Illustrated      `json:"ECards" bson:"ecards"`
+	Infos            MetaInfo           `json:"Infos" bson:"infos"`
+	UpdatedTime      time.Time          `json:"UpdatedTime" bson:"updated_time"`
+	PreviousVersion  primitive.ObjectID `json:"PreviousVersion" bson:"previous_version"`
+	CreatorSessionId primitive.ObjectID `json:"SessionId" bson:"session_id"`
 }
 
 type Illustrated struct {
@@ -27,12 +30,11 @@ type Illustrated struct {
 }
 
 type Stanza struct {
-	ID               primitive.ObjectID `json:"ID" bson:"_id,omitempty"`
-	Content          string             `json:"Content" bson:"content"`
-	CreateTime       time.Time          `json:"CreateTime" bson:"create_time"`
-	BasePage         primitive.ObjectID `json:"BasePage" bson:"base_page"`
-	PreviousVersion  primitive.ObjectID `json:"PreviousVersion" bson:"previous_version"`
-	InheritedVersion primitive.ObjectID `json:"InhertedVersion" bson:"inherted_version"`
+	ID              primitive.ObjectID `json:"ID" bson:"_id,omitempty"`
+	Content         string             `json:"Content" bson:"content"`
+	UpdatedTime     time.Time          `json:"UpdatedTime" bson:"updated_time"`
+	BasePage        primitive.ObjectID `json:"BasePage" bson:"base_page"`
+	PreviousVersion primitive.ObjectID `json:"PreviousVersion" bson:"previous_version"`
 }
 
 type LinkInfo struct {
