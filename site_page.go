@@ -9,31 +9,31 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type SitePageAgg struct {
-	ID               primitive.ObjectID `json:"ID" bson:"_id,omitempty"`
-	Link             string             `json:"Link" bson:"link"`
-	Title            string             `json:"Title" bson:"title"`
-	SCards           []Illustrated      `json:"SCards" bson:"scards"`
-	Contents         []Stanza           `json:"Contents" bson:"content"`
-	ECards           []Illustrated      `json:"ECards" bson:"ecards"`
-	Infos            MetaInfo           `json:"Infos" bson:"infos"`
-	CreatedTime      time.Time          `json:"CreatedTime" bson:"created_time"`
-	UpdatedTime      time.Time          `json:"UpdatedTime" bson:"updated_time"`
-	PreviousVersion  primitive.ObjectID `json:"PreviousVersion" bson:"previous_version"`
-	CreatorSessionId primitive.ObjectID `json:"SessionId" bson:"session_id"`
-}
-
 type SitePage struct {
 	ID               primitive.ObjectID   `json:"ID" bson:"_id,omitempty"`
 	Link             string               `json:"Link" bson:"link"`
 	Title            string               `json:"Title" bson:"title"`
 	SCards           []primitive.ObjectID `json:"SCards" bson:"scards"`
-	Contents         []primitive.ObjectID `json:"Contents" bson:"content"`
+	Contents         []primitive.ObjectID `json:"Contents" bson:"contents"`
 	ECards           []primitive.ObjectID `json:"ECards" bson:"ecards"`
 	Infos            MetaInfo             `json:"Infos" bson:"infos"`
 	UpdatedTime      time.Time            `json:"UpdatedTime" bson:"updated_time"`
 	PreviousVersion  primitive.ObjectID   `json:"PreviousVersion" bson:"previous_version"`
 	CreatorSessionId primitive.ObjectID   `json:"SessionId" bson:"session_id"`
+}
+
+type SitePageAgg struct {
+	ID               primitive.ObjectID   `json:"ID" bson:"_id,omitempty"`
+	Link             string               `json:"Link" bson:"link"`
+	Title            string               `json:"Title" bson:"title"`
+	SCards           []primitive.ObjectID `json:"SCards" bson:"scards"`
+	Contents         []primitive.ObjectID `json:"Contents" bson:"contents"`
+	ECards           []primitive.ObjectID `json:"ECards" bson:"ecards"`
+	Infos            MetaInfo             `json:"Infos" bson:"infos"`
+	UpdatedTime      time.Time            `json:"UpdatedTime" bson:"updated_time"`
+	PreviousVersion  primitive.ObjectID   `json:"PreviousVersion" bson:"previous_version"`
+	CreatorSessionId primitive.ObjectID   `json:"SessionId" bson:"session_id"`
+	ContentData      []Stanza             `json:"ContentData" bson:"content_data"`
 }
 
 type Illustrated struct {
