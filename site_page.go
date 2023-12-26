@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type SitePage struct {
+type SitePageAgg struct {
 	ID               primitive.ObjectID `json:"ID" bson:"_id,omitempty"`
 	Link             string             `json:"Link" bson:"link"`
 	Title            string             `json:"Title" bson:"title"`
@@ -17,9 +17,24 @@ type SitePage struct {
 	Contents         []Stanza           `json:"Contents" bson:"content"`
 	ECards           []Illustrated      `json:"ECards" bson:"ecards"`
 	Infos            MetaInfo           `json:"Infos" bson:"infos"`
+	CreatedTime      time.Time          `json:"CreatedTime" bson:"created_time"`
 	UpdatedTime      time.Time          `json:"UpdatedTime" bson:"updated_time"`
 	PreviousVersion  primitive.ObjectID `json:"PreviousVersion" bson:"previous_version"`
 	CreatorSessionId primitive.ObjectID `json:"SessionId" bson:"session_id"`
+}
+
+type SitePage struct {
+	ID               primitive.ObjectID   `json:"ID" bson:"_id,omitempty"`
+	Link             string               `json:"Link" bson:"link"`
+	Title            string               `json:"Title" bson:"title"`
+	SCards           []primitive.ObjectID `json:"SCards" bson:"scards"`
+	Contents         []primitive.ObjectID `json:"Contents" bson:"content"`
+	ECards           []primitive.ObjectID `json:"ECards" bson:"ecards"`
+	Infos            MetaInfo             `json:"Infos" bson:"infos"`
+	CreatedTime      time.Time            `json:"CreatedTime" bson:"created_time"`
+	UpdatedTime      time.Time            `json:"UpdatedTime" bson:"updated_time"`
+	PreviousVersion  primitive.ObjectID   `json:"PreviousVersion" bson:"previous_version"`
+	CreatorSessionId primitive.ObjectID   `json:"SessionId" bson:"session_id"`
 }
 
 type Illustrated struct {
