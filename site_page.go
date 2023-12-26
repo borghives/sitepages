@@ -63,14 +63,14 @@ type MetaInfo struct {
 	Deeper       []LinkInfo `json:"Deeper" bson:"deeper"`
 }
 
-func LoadSitePages(site string) map[string]SitePage {
+func LoadSitePages(site string) map[string]SitePageAgg {
 	file, err := os.Open(site)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer file.Close()
 
-	var retval map[string]SitePage
+	var retval map[string]SitePageAgg
 	err = json.NewDecoder(file).Decode(&retval)
 	if err != nil {
 		log.Fatal(err)
