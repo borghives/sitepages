@@ -31,7 +31,6 @@ type SitePage struct {
 	Contents         []primitive.ObjectID `json:"Contents" bson:"content"`
 	ECards           []primitive.ObjectID `json:"ECards" bson:"ecards"`
 	Infos            MetaInfo             `json:"Infos" bson:"infos"`
-	CreatedTime      time.Time            `json:"CreatedTime" bson:"created_time"`
 	UpdatedTime      time.Time            `json:"UpdatedTime" bson:"updated_time"`
 	PreviousVersion  primitive.ObjectID   `json:"PreviousVersion" bson:"previous_version"`
 	CreatorSessionId primitive.ObjectID   `json:"SessionId" bson:"session_id"`
