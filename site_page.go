@@ -44,11 +44,12 @@ type Illustrated struct {
 }
 
 type Stanza struct {
-	ID              primitive.ObjectID `json:"ID" bson:"_id,omitempty"`
-	Content         string             `json:"Content" bson:"content"`
-	UpdatedTime     time.Time          `json:"UpdatedTime" bson:"updated_time"`
-	BasePage        primitive.ObjectID `json:"BasePage" bson:"base_page"`
-	PreviousVersion primitive.ObjectID `json:"PreviousVersion" bson:"previous_version"`
+	ID                 primitive.ObjectID `json:"ID" bson:"_id,omitempty"`
+	Content            string             `json:"Content" bson:"content"`
+	UpdatedTime        time.Time          `json:"UpdatedTime" bson:"updated_time"`
+	BasePage           primitive.ObjectID `json:"BasePage" bson:"base_page"`
+	PreviousVersion    primitive.ObjectID `json:"PreviousVersion" bson:"previous_version"`
+	PreviousVersionIdx uint16             `json:"PreviousVersionIdx" bson:"previous_version_idx"`
 }
 
 type LinkInfo struct {
