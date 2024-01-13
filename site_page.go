@@ -11,6 +11,7 @@ import (
 
 type SitePage struct {
 	ID               primitive.ObjectID   `json:"ID" bson:"_id,omitempty"`
+	Root             primitive.ObjectID   `json:"Root" bson:"root"`
 	Link             string               `json:"Link" bson:"link"`
 	Title            string               `json:"Title" bson:"title"`
 	Contents         []primitive.ObjectID `json:"Contents" bson:"contents"`
@@ -22,7 +23,7 @@ type SitePage struct {
 
 type Stanza struct {
 	ID                 primitive.ObjectID `json:"ID" bson:"_id,omitempty"`
-	RootID             primitive.ObjectID `json:"RootID" bson:"root_id"`
+	Root               primitive.ObjectID `json:"Root" bson:"root"`
 	Content            string             `json:"Content" bson:"content"`
 	UpdatedTime        time.Time          `json:"UpdatedTime" bson:"updated_time"`
 	Context            primitive.ObjectID `json:"Context" bson:"context"`
@@ -31,16 +32,13 @@ type Stanza struct {
 	PreviousVersionIdx uint16             `json:"PreviousVersionIdx" bson:"previous_version_idx"`
 }
 
-type Appendix struct {
-	ID               primitive.ObjectID `json:"ID" bson:"_id,omitempty"`
-	Content          string             `json:"Content" bson:"content"`
-	Updated          time.Time          `json:"Updated" bson:"updated"`
-	BasePage         primitive.ObjectID `json:"BasePage" bson:"base_page"`
-	StanzaRootID     primitive.ObjectID `json:"RootID" bson:"root_id"` //if RootId is empty then Context is of another Appendix object
-	Context          primitive.ObjectID `json:"Context" bson:"context"`
-	CreatorSessionId primitive.ObjectID `bson:"session_id"`
-	Challenge        string             `json:"Challenge" bson:"challenge"`
-	Answer           string             `json:"Answer" bson:"answer"`
+type Synapse struct {
+	FromPageId  primitive.ObjectID `json:"PageId" bson:"page_id"`
+	FromStanza  primitive.ObjectID `json:"Stanza" bson:"stanza"`
+	ToPageId    primitive.ObjectID `json:"ToPageId" bson:"to_page_id"`
+	ToStanza    primitive.ObjectID `json:"ToStanza" bson:"to_stanza"`
+	Info        string             `json:"Info" bson:"info"`
+	UpdatedTime time.Time          `json:"UpdatedTime" bson:"updated_time"`
 }
 
 type SitePageAgg struct {
