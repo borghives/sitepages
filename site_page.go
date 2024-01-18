@@ -48,6 +48,7 @@ type Synapse struct {
 
 type SitePageAgg struct {
 	ID               primitive.ObjectID   `json:"ID" bson:"_id,omitempty"`
+	Root             primitive.ObjectID   `json:"Root" bson:"root"`
 	Link             string               `json:"Link" bson:"link"`
 	Title            string               `json:"Title" bson:"title"`
 	Contents         []primitive.ObjectID `json:"Contents" bson:"contents"`
