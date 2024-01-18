@@ -4,10 +4,15 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+//TODO: Concept of divergence (when different than that of most people agreement)
+//a good concept can withstand the decay of Time
+//Trust takes time to build
 
 type SitePage struct {
 	ID               primitive.ObjectID   `json:"ID" bson:"_id,omitempty"`
@@ -80,6 +85,14 @@ func SaveSitePages(file string, pages []SitePageAgg) error {
 	defer f.Close()
 
 	return json.NewEncoder(f).Encode(pages)
+}
+
+func GeneratePageToken(session *WebSession, refPageId string, pageRootId string) string {
+	return session.GenerateHexID("page" + refPageId + pageRootId)
+}
+
+func GenerateStanzaToken(session *WebSession, pageId string, referenceStanza string, index uint16) string {
+	return session.GenerateHexID("stanza" + pageId + referenceStanza + strconv.Itoa(int(index)))
 }
 
 func LoadSitePages(site string) []SitePageAgg {
