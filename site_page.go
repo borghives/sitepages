@@ -55,7 +55,7 @@ type SitePageAgg struct {
 	Infos            MetaInfo             `json:"Infos" bson:"infos"`
 	UpdatedTime      time.Time            `json:"UpdatedTime" bson:"updated_time"`
 	PreviousVersion  primitive.ObjectID   `json:"PreviousVersion" bson:"previous_version"`
-	CreatorSessionId primitive.ObjectID   `json:"SessionId" bson:"session_id"`
+	CreatorSessionId primitive.ObjectID   `bson:"session_id"`
 	ContentData      []Stanza             `json:"ContentData" bson:"content_data"`
 }
 
