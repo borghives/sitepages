@@ -18,27 +18,32 @@ type WebSession struct {
 	GenerateTime time.Time          `json:"GenTm" bson:"gen_tm"`
 	GenerateCnt  int32              `json:"GenCnt" bson:"gen_cnt"`
 	GenerateFrom primitive.ObjectID `json:"GenFrm" bson:"gen_frm"`
+	FirstID      primitive.ObjectID `json:"FrstID" bson:"frst_id"`
 	FirstTime    time.Time          `json:"FrstTm" bson:"frst_tm"`
 	FirstIp      string             `json:"FrstIp" bson:"frst_ip"`
 }
 
-func NewWebSession(r *http.Request) WebSession {
+func NewWebSession(realIP string) *WebSession {
 	currentTime := time.Now()
-	return WebSession{
-		ID:           primitive.NewObjectID(),
+	id := primitive.NewObjectID()
+
+	return &WebSession{
+		ID:           id,
 		GenerateTime: currentTime,
 		GenerateCnt:  1,
+		FirstID:      id,
 		FirstTime:    currentTime,
-		FirstIp:      getRealIPFromRequest(r),
+		FirstIp:      realIP, //getRealIPFromRequest(r),
 	}
 }
 
-func RefreshWebSession(oldSession WebSession) WebSession {
-	return WebSession{
+func RefreshWebSession(oldSession *WebSession) *WebSession {
+	return &WebSession{
 		ID:           primitive.NewObjectID(),
 		GenerateTime: time.Now(),
 		GenerateCnt:  oldSession.GenerateCnt + 1,
 		GenerateFrom: oldSession.ID,
+		FirstID:      oldSession.FirstID,
 		FirstTime:    oldSession.FirstTime,
 		FirstIp:      oldSession.FirstIp,
 	}
@@ -46,6 +51,7 @@ func RefreshWebSession(oldSession WebSession) WebSession {
 
 func EncodeSession(session WebSession) (string, error) {
 	secret := os.Getenv("SESSION_LATEST")
+
 	encodedBytes, err := bson.Marshal(session)
 	if err != nil {
 		return "", err
@@ -64,6 +70,7 @@ func DecodeSession(encodedSession string) (*WebSession, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &session, nil
 }
 
@@ -93,25 +100,35 @@ func getRealIPFromRequest(r *http.Request) string {
 	return ip
 }
 
-func getHost(r *http.Request) string {
-	host, _, _ := net.SplitHostPort(r.Host)
-	return host
-}
+// func getHost(r *http.Request) string {
+// 	host, _, _ := net.SplitHostPort(r.Host)
+// 	return host
+// }
 
-func getDomain(host string) string {
-	if host == "127.0.0.1" {
-		return host
+func getDomain() string {
+
+	domain := os.Getenv("SITE_DOMAIN")
+	if domain == "" {
+		domain = "127.0.0.1"
 	}
-
-	return os.Getenv("SITE_DOMAIN")
+	return domain
 }
 
-func setNewRequestSession(w http.ResponseWriter, r *http.Request) *WebSession {
-	host := getHost(r)
-	domain := getDomain(host)
-	encodedSess, err := EncodeSession(NewWebSession(r))
+func setNewRequestSession(w http.ResponseWriter, realIP string) *WebSession {
+
+	// Create a new session
+	session := NewWebSession(realIP)
+	setSessionCookie(w, session)
+	return session
+}
+
+func setSessionCookie(w http.ResponseWriter, session *WebSession) error {
+	domain := getDomain()
+
+	// Create a new session
+	encodedSess, err := EncodeSession(*session)
 	if err != nil {
-		return nil
+		return err
 	}
 	// Create a new cookie
 	cookie := http.Cookie{
@@ -149,7 +166,7 @@ func RefreshRequestSession(w http.ResponseWriter, r *http.Request) *WebSession {
 	// Get the session from the request
 	session := getRequestSession(r)
 	if session == nil {
-		return setNewRequestSession(w, r)
+		return setNewRequestSession(w, getRealIPFromRequest(r))
 	}
 
 	return session

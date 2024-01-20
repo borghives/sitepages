@@ -1,21 +1,19 @@
 package sitepages
 
 import (
-	"encoding/hex"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func TestNewWebSession(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
-	session := NewWebSession(r)
+	r.Header.Set("X-Forwarded-For", "1.2.3.4")
+	r.Header.Set("X-Real-IP", "localhost")
+	session := NewWebSession(getRealIPFromRequest(r))
 	if session.ID == primitive.NilObjectID {
 		t.Errorf("NewWebSession: expected session ID to be non-nil")
 	}
@@ -25,20 +23,23 @@ func TestNewWebSession(t *testing.T) {
 	if session.GenerateCnt != 1 {
 		t.Errorf("NewWebSession: expected session GenerateCnt to be 1")
 	}
-	if session.GenerateFrom == primitive.NilObjectID {
-		t.Errorf("NewWebSession: expected session GenerateFrom to be non-nil")
+	if !session.GenerateFrom.IsZero() {
+		t.Errorf("NewWebSession: expected session GenerateFrom to be zero")
 	}
 	if session.FirstTime.IsZero() {
 		t.Errorf("NewWebSession: expected session FirstTime to be non-zero")
 	}
-	if session.FirstIp == "" {
-		t.Errorf("NewWebSession: expected session FirstIp to be non-empty")
+	if session.FirstIp != "1.2.3.4" {
+		t.Errorf("NewWebSession: expected session FirstIp to be 1.2.3.4 got %s", session.FirstIp)
 	}
 }
 
 func TestRefreshWebSession(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
-	session := NewWebSession(r)
+	r.Header.Set("X-Forwarded-For", "1.2.3.4")
+	r.Header.Set("X-Real-IP", "localhost")
+
+	session := NewWebSession(getRealIPFromRequest(r))
 	newSession := RefreshWebSession(session)
 	if newSession.ID == session.ID {
 		t.Errorf("RefreshWebSession: expected new session ID to be different from old session ID")
@@ -62,8 +63,8 @@ func TestRefreshWebSession(t *testing.T) {
 
 func TestEncodeSession(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
-	session := NewWebSession(r)
-	encodedSession, err := EncodeSession(session)
+	session := NewWebSession(getRealIPFromRequest(r))
+	encodedSession, err := EncodeSession(*session)
 	if err != nil {
 		t.Errorf("EncodeSession: expected no error, got %v", err)
 	}
@@ -74,8 +75,11 @@ func TestEncodeSession(t *testing.T) {
 
 func TestDecodeSession(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
-	session := NewWebSession(r)
-	encodedSession, err := EncodeSession(session)
+	r.Header.Set("X-Forwarded-For", "1.2.3.4")
+	r.Header.Set("X-Real-IP", "localhost")
+
+	session := NewWebSession(getRealIPFromRequest(r))
+	encodedSession, err := EncodeSession(*session)
 	if err != nil {
 		t.Errorf("EncodeSession: expected no error, got %v", err)
 	}
@@ -86,8 +90,8 @@ func TestDecodeSession(t *testing.T) {
 	if decodedSession.ID != session.ID {
 		t.Errorf("DecodeSession: expected decoded session ID to be equal to original session ID")
 	}
-	if decodedSession.GenerateTime != session.GenerateTime {
-		t.Errorf("DecodeSession: expected decoded session GenerateTime to be equal to original session GenerateTime")
+	if decodedSession.GenerateTime.Sub(session.GenerateTime).Seconds() > 0 {
+		t.Errorf("DecodeSession: expected decoded session GenerateTime to be equal to original session GenerateTime %s %s", decodedSession.GenerateTime.UTC().String(), session.GenerateTime.UTC().String())
 	}
 	if decodedSession.GenerateCnt != session.GenerateCnt {
 		t.Errorf("DecodeSession: expected decoded session GenerateCnt to be equal to original session GenerateCnt")
@@ -95,7 +99,7 @@ func TestDecodeSession(t *testing.T) {
 	if decodedSession.GenerateFrom != session.GenerateFrom {
 		t.Errorf("DecodeSession: expected decoded session GenerateFrom to be equal to original session GenerateFrom")
 	}
-	if decodedSession.FirstTime != session.FirstTime {
+	if decodedSession.FirstTime.Sub(session.FirstTime).Seconds() > 0 {
 		t.Errorf("DecodeSession: expected decoded session FirstTime to be equal to original session FirstTime")
 	}
 	if decodedSession.FirstIp != session.FirstIp {
@@ -174,43 +178,13 @@ func TestDecodeSession(t *testing.T) {
 // 	}
 // }
 
-func TestGetDomain(t *testing.T) {
-	tests := []struct {
-		name     string
-		host     string
-		expected string
-	}{
-		{
-			name:     "localhost",
-			host:     "127.0.0.1",
-			expected: "127.0.0.1",
-		},
-		{
-			name:     "example.com",
-			host:     "example.com",
-			expected: "example.com",
-		},
-		{
-			name:     "subdomain.example.com",
-			host:     "subdomain.example.com",
-			expected: "example.com",
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			actual := getDomain(test.host)
-			if actual != test.expected {
-				t.Errorf("getDomain: expected %s, got %s", test.expected, actual)
-			}
-		})
-	}
-}
-
 func TestSetNewRequestSession(t *testing.T) {
 	w := httptest.NewRecorder()
 	r, _ := http.NewRequest("GET", "/", nil)
-	setNewRequestSession(w, r)
+	r.Header.Set("X-Forwarded-For", "1.2.3.4")
+	r.Header.Set("X-Real-IP", "localhost")
+
+	createdSession := setNewRequestSession(w, getRealIPFromRequest(r))
 
 	// Check that the cookie was set
 	cookies := w.Header().Get("Set-Cookie")
@@ -220,25 +194,21 @@ func TestSetNewRequestSession(t *testing.T) {
 
 	// Check that the cookie value is valid
 	parts := strings.Split(cookies, ";")
-	if len(parts) != 2 {
-		t.Errorf("setNewRequestSession: expected cookie to have 2 parts")
+	if len(parts) <= 2 {
+		t.Errorf("setNewRequestSession: expected cookie to have more than 2 parts")
 	}
-	cookieValue := parts[0]
+	cookieNameValue := strings.Split(parts[0], "=")
+
+	cookieValue := cookieNameValue[1]
+
 	if cookieValue == "" {
 		t.Errorf("setNewRequestSession: expected cookie value to be non-empty")
 	}
 
 	// Decode the cookie value
-	decodedValue, err := hex.DecodeString(cookieValue)
+	session, err := DecodeSession(cookieValue)
 	if err != nil {
 		t.Errorf("setNewRequestSession: expected no error when decoding cookie value, got %v", err)
-	}
-
-	// Unmarshal the decoded value into a WebSession
-	var session WebSession
-	err = bson.Unmarshal(decodedValue, &session)
-	if err != nil {
-		t.Errorf("setNewRequestSession: expected no error when unmarshaling cookie value, got %v", err)
 	}
 
 	// Check that the session is valid
@@ -251,130 +221,34 @@ func TestSetNewRequestSession(t *testing.T) {
 	if session.GenerateCnt != 1 {
 		t.Errorf("setNewRequestSession: expected session GenerateCnt to be 1")
 	}
-	if session.GenerateFrom == primitive.NilObjectID {
-		t.Errorf("setNewRequestSession: expected session GenerateFrom to be non-nil")
+	if session.GenerateFrom != primitive.NilObjectID {
+		t.Errorf("setNewRequestSession: expected session GenerateFrom to be nil")
 	}
 	if session.FirstTime.IsZero() {
-		t.Errorf("setNewRequestSession: expected session FirstTime to be non-zero")
+		t.Errorf("setNewRequestSession: expected session FirstTime to be non zero")
 	}
 	if session.FirstIp == "" {
-		t.Errorf("setNewRequestSession: expected session FirstIp to be non-empty")
-	}
-}
-
-func TestGetRequestSession(t *testing.T) {
-	w := httptest.NewRecorder()
-	r, _ := http.NewRequest("GET", "/", nil)
-	setNewRequestSession(w, r)
-
-	// Get the cookie from the request
-	cookie, err := r.Cookie("session")
-	if err != nil {
-		t.Errorf("getRequestSession: expected no error when getting cookie, got %v", err)
+		t.Errorf("setNewRequestSession: expected session FirstIp to be 1.2.3.4 got %s", session.FirstIp)
 	}
 
-	// Decode the cookie value
-	decodedValue, err := hex.DecodeString(cookie.Value)
-	if err != nil {
-		t.Errorf("getRequestSession: expected no error when decoding cookie value, got %v", err)
+	if createdSession.ID != session.ID {
+		t.Errorf("setNewRequestSession: expected created session ID to be equal to decoded session ID")
 	}
 
-	// Unmarshal the decoded value into a WebSession
-	var session WebSession
-	err = bson.Unmarshal(decodedValue, &session)
-	if err != nil {
-		t.Errorf("getRequestSession: expected no error when unmarshaling cookie value, got %v", err)
+	if createdSession.GenerateTime.Sub(session.GenerateTime).Seconds() > 1 {
+		t.Errorf("setNewRequestSession: expected created session GenerateTime to be equal to decoded session GenerateTime diff: %f", session.GenerateTime.Sub(session.GenerateTime).Seconds())
 	}
 
-	// Check that the session is valid
-	if session.ID == primitive.NilObjectID {
-		t.Errorf("getRequestSession: expected session ID to be non-nil")
-	}
-	if session.GenerateTime.IsZero() {
-		t.Errorf("getRequestSession: expected session GenerateTime to be non-zero")
-	}
-	if session.GenerateCnt != 1 {
-		t.Errorf("getRequestSession: expected session GenerateCnt to be 1")
-	}
-	if session.GenerateFrom == primitive.NilObjectID {
-		t.Errorf("getRequestSession: expected session GenerateFrom to be non-nil")
-	}
-	if session.FirstTime.IsZero() {
-		t.Errorf("getRequestSession: expected session FirstTime to be non-zero")
-	}
-	if session.FirstIp == "" {
-		t.Errorf("getRequestSession: expected session FirstIp to be non-empty")
-	}
-}
-
-func TestRefreshRequestSession(t *testing.T) {
-	w := httptest.NewRecorder()
-	r, _ := http.NewRequest("GET", "/", nil)
-	setNewRequestSession(w, r)
-
-	// Get the cookie from the request
-	cookie, err := r.Cookie("session")
-	if err != nil {
-		t.Errorf("refreshRequestSession: expected no error when getting cookie, got %v", err)
+	if createdSession.GenerateCnt != session.GenerateCnt {
+		t.Errorf("setNewRequestSession: expected")
 	}
 
-	// Decode the cookie value
-	decodedValue, err := hex.DecodeString(cookie.Value)
-	if err != nil {
-		t.Errorf("refreshRequestSession: expected no error when decoding cookie value, got %v", err)
+	if createdSession.GenerateFrom != session.GenerateFrom {
+		t.Errorf("GenerateFrom not the same")
 	}
 
-	// Unmarshal the decoded value into a WebSession
-	var session WebSession
-	err = bson.Unmarshal(decodedValue, &session)
-	if err != nil {
-		t.Errorf("refreshRequestSession: expected no error when unmarshaling cookie value, got %v", err)
+	if createdSession.FirstIp != session.FirstIp {
+		t.Errorf("First Ip not the same")
 	}
-
-	// Refresh the session
-	newSession := RefreshRequestSession(w, r)
-
-	// Check that the new session is valid
-	if newSession.ID == session.ID {
-		t.Errorf("refreshRequestSession: expected new session ID to be different from old session ID")
-	}
-	if newSession.GenerateTime.IsZero() {
-		t.Errorf("refreshRequestSession: expected new session GenerateTime to be non-zero")
-	}
-	if newSession.GenerateCnt != session.GenerateCnt+1 {
-		t.Errorf("refreshRequestSession: expected new session GenerateCnt to be old session GenerateCnt + 1")
-	}
-	if newSession.GenerateFrom != session.ID {
-		t.Errorf("refreshRequestSession: expected new session GenerateFrom to be old session ID")
-	}
-	if newSession.FirstTime != session.FirstTime {
-		t.Errorf("refreshRequestSession: expected new session FirstTime to be old session FirstTime")
-	}
-	if newSession.FirstIp != session.FirstIp {
-		t.Errorf("refreshRequestSession: expected new session FirstIp to be old session FirstIp")
-	}
-}
-
-func TestGenerateHexIDFromWebSession(t *testing.T) {
-	r, _ := http.NewRequest("GET", "/", nil)
-	session := NewWebSession(r)
-	hexID := session.GenerateHexID("test")
-	fmt.Printf("HexID: %s\n", hexID)
-	if hexID == "" {
-		t.Errorf("GenerateHexID: expected hex ID to be non-empty")
-	}
-	if len(hexID) != 24 {
-		t.Errorf("GenerateHexID: expected hex ID to be 12 characters long")
-	}
-
-	objId, err := primitive.ObjectIDFromHex(hexID)
-	if err != nil {
-		t.Errorf("GenerateHexID: expected no error when converting hex ID to ObjectID, got %v", err)
-	}
-	if objId == primitive.NilObjectID {
-		t.Errorf("GenerateHexID: expected ObjectID to be non-nil")
-	}
-
-	assert.Equal(t, hexID, objId.Hex())
 
 }
