@@ -174,7 +174,7 @@ func RefreshRequestSession(w http.ResponseWriter, r *http.Request) *WebSession {
 
 func (sess *WebSession) GenerateHexID(message string) string {
 	if sess == nil {
-		return ""
+		return primitive.ObjectID{}.Hex()
 	}
 	idbytes := sha256.Sum256([]byte(sess.ID.Hex() + message))
 	//convert bytes to hex string
