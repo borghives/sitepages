@@ -143,7 +143,7 @@ func GetRequestSession(r *http.Request) (*WebSession, error) {
 	cookie, err := r.Cookie("session")
 	if err != nil {
 		return nil, &WebSessionError{
-			Message: "No session found",
+			Message: "No session found; ",
 			Code:    SESSION_ERROR_NO_SESSION,
 		}
 	}
@@ -152,7 +152,7 @@ func GetRequestSession(r *http.Request) (*WebSession, error) {
 	session, err := DecodeSession(cookie.Value)
 	if err != nil {
 		return nil, &WebSessionError{
-			Message: "FAILED to decode session",
+			Message: "FAILED to decode session; ",
 			Code:    SESSION_ERROR_DECODING_FAILED,
 		}
 	}

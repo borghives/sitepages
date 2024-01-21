@@ -36,7 +36,7 @@ func GetAndVerifySession(r *http.Request) (*WebSession, error) {
 	}
 
 	if session == nil {
-		sessionError.Message += "No session found; "
+		sessionError.Message += "Session Empty; "
 		sessionError.Code |= SESSION_ERROR_NO_SESSION
 		return session, sessionError
 	}
