@@ -13,25 +13,21 @@ func TestNewWebSession(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
 	r.Header.Set("X-Forwarded-For", "1.2.3.4")
 	r.Header.Set("X-Real-IP", "localhost")
-	session := NewWebSession(getRealIPFromRequest(r))
+	session := NewWebSession(GetRealIPFromRequest(r))
 	if session.ID == primitive.NilObjectID {
 		t.Errorf("NewWebSession: expected session ID to be non-nil")
 	}
 	if session.GenerateTime.IsZero() {
 		t.Errorf("NewWebSession: expected session GenerateTime to be non-zero")
 	}
-	if session.GenerateCnt != 1 {
-		t.Errorf("NewWebSession: expected session GenerateCnt to be 1")
-	}
+
 	if !session.GenerateFrom.IsZero() {
 		t.Errorf("NewWebSession: expected session GenerateFrom to be zero")
 	}
 	if session.FirstTime.IsZero() {
 		t.Errorf("NewWebSession: expected session FirstTime to be non-zero")
 	}
-	if session.FirstIp != "1.2.3.4" {
-		t.Errorf("NewWebSession: expected session FirstIp to be 1.2.3.4 got %s", session.FirstIp)
-	}
+
 }
 
 func TestRefreshWebSession(t *testing.T) {
@@ -39,31 +35,27 @@ func TestRefreshWebSession(t *testing.T) {
 	r.Header.Set("X-Forwarded-For", "1.2.3.4")
 	r.Header.Set("X-Real-IP", "localhost")
 
-	session := NewWebSession(getRealIPFromRequest(r))
-	newSession := RefreshWebSession(session)
+	session := NewWebSession(GetRealIPFromRequest(r))
+	newSession := RefreshWebSession(GetRealIPFromRequest(r), session)
 	if newSession.ID == session.ID {
 		t.Errorf("RefreshWebSession: expected new session ID to be different from old session ID")
 	}
 	if newSession.GenerateTime.IsZero() {
 		t.Errorf("RefreshWebSession: expected new session GenerateTime to be non-zero")
 	}
-	if newSession.GenerateCnt != session.GenerateCnt+1 {
-		t.Errorf("RefreshWebSession: expected new session GenerateCnt to be old session GenerateCnt + 1")
-	}
+
 	if newSession.GenerateFrom != session.ID {
 		t.Errorf("RefreshWebSession: expected new session GenerateFrom to be old session ID")
 	}
 	if newSession.FirstTime != session.FirstTime {
 		t.Errorf("RefreshWebSession: expected new session FirstTime to be old session FirstTime")
 	}
-	if newSession.FirstIp != session.FirstIp {
-		t.Errorf("RefreshWebSession: expected new session FirstIp to be old session FirstIp")
-	}
+
 }
 
 func TestEncodeSession(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
-	session := NewWebSession(getRealIPFromRequest(r))
+	session := NewWebSession(GetRealIPFromRequest(r))
 	encodedSession, err := EncodeSession(*session)
 	if err != nil {
 		t.Errorf("EncodeSession: expected no error, got %v", err)
@@ -78,7 +70,7 @@ func TestDecodeSession(t *testing.T) {
 	r.Header.Set("X-Forwarded-For", "1.2.3.4")
 	r.Header.Set("X-Real-IP", "localhost")
 
-	session := NewWebSession(getRealIPFromRequest(r))
+	session := NewWebSession(GetRealIPFromRequest(r))
 	encodedSession, err := EncodeSession(*session)
 	if err != nil {
 		t.Errorf("EncodeSession: expected no error, got %v", err)
@@ -93,18 +85,14 @@ func TestDecodeSession(t *testing.T) {
 	if decodedSession.GenerateTime.Sub(session.GenerateTime).Seconds() > 0 {
 		t.Errorf("DecodeSession: expected decoded session GenerateTime to be equal to original session GenerateTime %s %s", decodedSession.GenerateTime.UTC().String(), session.GenerateTime.UTC().String())
 	}
-	if decodedSession.GenerateCnt != session.GenerateCnt {
-		t.Errorf("DecodeSession: expected decoded session GenerateCnt to be equal to original session GenerateCnt")
-	}
+
 	if decodedSession.GenerateFrom != session.GenerateFrom {
 		t.Errorf("DecodeSession: expected decoded session GenerateFrom to be equal to original session GenerateFrom")
 	}
 	if decodedSession.FirstTime.Sub(session.FirstTime).Seconds() > 0 {
 		t.Errorf("DecodeSession: expected decoded session FirstTime to be equal to original session FirstTime")
 	}
-	if decodedSession.FirstIp != session.FirstIp {
-		t.Errorf("DecodeSession: expected decoded session FirstIp to be equal to original session FirstIp")
-	}
+
 }
 
 // func TestGetRealIPFromRequest(t *testing.T) {
@@ -184,7 +172,7 @@ func TestSetNewRequestSession(t *testing.T) {
 	r.Header.Set("X-Forwarded-For", "1.2.3.4")
 	r.Header.Set("X-Real-IP", "localhost")
 
-	createdSession := setNewRequestSession(w, getRealIPFromRequest(r))
+	createdSession := setNewRequestSession(w, GetRealIPFromRequest(r))
 
 	// Check that the cookie was set
 	cookies := w.Header().Get("Set-Cookie")
@@ -218,17 +206,12 @@ func TestSetNewRequestSession(t *testing.T) {
 	if session.GenerateTime.IsZero() {
 		t.Errorf("setNewRequestSession: expected session GenerateTime to be non-zero")
 	}
-	if session.GenerateCnt != 1 {
-		t.Errorf("setNewRequestSession: expected session GenerateCnt to be 1")
-	}
+
 	if session.GenerateFrom != primitive.NilObjectID {
 		t.Errorf("setNewRequestSession: expected session GenerateFrom to be nil")
 	}
 	if session.FirstTime.IsZero() {
 		t.Errorf("setNewRequestSession: expected session FirstTime to be non zero")
-	}
-	if session.FirstIp == "" {
-		t.Errorf("setNewRequestSession: expected session FirstIp to be 1.2.3.4 got %s", session.FirstIp)
 	}
 
 	if createdSession.ID != session.ID {
@@ -239,16 +222,8 @@ func TestSetNewRequestSession(t *testing.T) {
 		t.Errorf("setNewRequestSession: expected created session GenerateTime to be equal to decoded session GenerateTime diff: %f", session.GenerateTime.Sub(session.GenerateTime).Seconds())
 	}
 
-	if createdSession.GenerateCnt != session.GenerateCnt {
-		t.Errorf("setNewRequestSession: expected")
-	}
-
 	if createdSession.GenerateFrom != session.GenerateFrom {
 		t.Errorf("GenerateFrom not the same")
-	}
-
-	if createdSession.FirstIp != session.FirstIp {
-		t.Errorf("First Ip not the same")
 	}
 
 }

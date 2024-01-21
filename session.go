@@ -13,14 +13,15 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+var WEB_SESSION_TTL = time.Hour * 12
+
 type WebSession struct {
 	ID           primitive.ObjectID `json:"ID" bson:"_id,omitempty"`
+	FromIp       string             `json:"ip" bson:"ip"`
 	GenerateTime time.Time          `json:"GenTm" bson:"gen_tm"`
-	GenerateCnt  int32              `json:"GenCnt" bson:"gen_cnt"`
 	GenerateFrom primitive.ObjectID `json:"GenFrm" bson:"gen_frm"`
 	FirstID      primitive.ObjectID `json:"FrstID" bson:"frst_id"`
 	FirstTime    time.Time          `json:"FrstTm" bson:"frst_tm"`
-	FirstIp      string             `json:"FrstIp" bson:"frst_ip"`
 }
 
 func NewWebSession(realIP string) *WebSession {
@@ -29,23 +30,21 @@ func NewWebSession(realIP string) *WebSession {
 
 	return &WebSession{
 		ID:           id,
+		FromIp:       realIP,
 		GenerateTime: currentTime,
-		GenerateCnt:  1,
 		FirstID:      id,
 		FirstTime:    currentTime,
-		FirstIp:      realIP, //getRealIPFromRequest(r),
 	}
 }
 
-func RefreshWebSession(oldSession *WebSession) *WebSession {
+func RefreshWebSession(realIP string, oldSession *WebSession) *WebSession {
 	return &WebSession{
 		ID:           primitive.NewObjectID(),
+		FromIp:       realIP,
 		GenerateTime: time.Now(),
-		GenerateCnt:  oldSession.GenerateCnt + 1,
 		GenerateFrom: oldSession.ID,
 		FirstID:      oldSession.FirstID,
 		FirstTime:    oldSession.FirstTime,
-		FirstIp:      oldSession.FirstIp,
 	}
 }
 
@@ -75,7 +74,7 @@ func DecodeSession(encodedSession string) (*WebSession, error) {
 }
 
 // getRealIPFromRequest extracts the client's real IP address from http.Request
-func getRealIPFromRequest(r *http.Request) string {
+func GetRealIPFromRequest(r *http.Request) string {
 	// Check the X-Forwarded-For header first
 	xForwardedFor := r.Header.Get("X-Forwarded-For")
 	if xForwardedFor != "" {
@@ -100,13 +99,7 @@ func getRealIPFromRequest(r *http.Request) string {
 	return ip
 }
 
-// func getHost(r *http.Request) string {
-// 	host, _, _ := net.SplitHostPort(r.Host)
-// 	return host
-// }
-
 func getDomain() string {
-
 	domain := os.Getenv("SITE_DOMAIN")
 	if domain == "" {
 		domain = "127.0.0.1"
@@ -145,31 +138,41 @@ func setSessionCookie(w http.ResponseWriter, session *WebSession) error {
 	return nil
 }
 
-func getRequestSession(r *http.Request) *WebSession {
+func GetRequestSession(r *http.Request) (*WebSession, error) {
 	// Get the cookie from the request
 	cookie, err := r.Cookie("session")
 	if err != nil {
-		return nil
+		return nil, &WebSessionError{
+			Message: "No session found",
+			Code:    SESSION_ERROR_NO_SESSION,
+		}
 	}
 
 	// Decode the cookie value
 	session, err := DecodeSession(cookie.Value)
 	if err != nil {
-		return nil
+		return nil, &WebSessionError{
+			Message: "FAILED to decode session",
+			Code:    SESSION_ERROR_DECODING_FAILED,
+		}
 	}
 
 	// Return the decoded session
-	return session
+	return session, nil
 }
 
 func RefreshRequestSession(w http.ResponseWriter, r *http.Request) *WebSession {
 	// Get the session from the request
-	session := getRequestSession(r)
+	session, _ := GetRequestSession(r)
 	if session == nil {
-		return setNewRequestSession(w, getRealIPFromRequest(r))
+		return setNewRequestSession(w, GetRealIPFromRequest(r))
 	}
 
 	return session
+}
+
+func (sess WebSession) GetAge() time.Duration {
+	return time.Since(sess.GenerateTime)
 }
 
 func (sess *WebSession) GenerateHexID(message string) string {
