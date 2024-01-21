@@ -13,7 +13,7 @@ type RutimeHostInfo struct {
 	ImageId    string `bson:"image_id"`
 }
 
-func GetHostInfo() RutimeHostInfo {
+func GetHostInstanceInfo() RutimeHostInfo {
 	resp, err := http.Get("http://metadata.google.internal/instance/id")
 	if err != nil {
 		log.Printf("GetHostInfo: Error metadata get: %s", err.Error())
