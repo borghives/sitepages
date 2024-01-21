@@ -163,8 +163,8 @@ func GetRequestSession(r *http.Request) (*WebSession, error) {
 
 func RefreshRequestSession(w http.ResponseWriter, r *http.Request) *WebSession {
 	// Get the session from the request
-	session, _ := GetRequestSession(r)
-	if session == nil {
+	session, err := GetAndVerifySession(r)
+	if session == nil || err != nil {
 		return setNewRequestSession(w, GetRealIPFromRequest(r))
 	}
 

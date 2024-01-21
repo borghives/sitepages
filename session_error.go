@@ -22,7 +22,7 @@ var SESSION_ERROR_IP_MISMATCH = 1 << 4
 
 // VerifySession verifies that the session is valid
 
-func VerifySession(r *http.Request) error {
+func GetAndVerifySession(r *http.Request) (*WebSession, error) {
 	// Get the session from the request
 	var sessionError *WebSessionError
 	session, err := GetRequestSession(r)
@@ -38,7 +38,7 @@ func VerifySession(r *http.Request) error {
 	if session == nil {
 		sessionError.Message += "No session found; "
 		sessionError.Code |= SESSION_ERROR_NO_SESSION
-		return sessionError
+		return session, sessionError
 	}
 
 	// Check if the session is valid
@@ -55,8 +55,8 @@ func VerifySession(r *http.Request) error {
 	}
 
 	if sessionError.Code == 0 {
-		return nil
+		return session, nil
 	}
 
-	return sessionError
+	return session, sessionError
 }

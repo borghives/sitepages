@@ -15,7 +15,7 @@ func TestVerifyGoodSession(t *testing.T) {
 
 	setNewRequestSession(w, GetRealIPFromRequest(r))
 	r.AddCookie(w.Result().Cookies()[0])
-	err := VerifySession(r)
+	_, err := GetAndVerifySession(r)
 	if err != nil {
 		t.Errorf("Expected no error but got %s", err)
 	}
@@ -30,7 +30,7 @@ func TestVerifyMissMatchIPSession(t *testing.T) {
 
 	setNewRequestSession(w, "1234")
 	r.AddCookie(w.Result().Cookies()[0])
-	err := VerifySession(r)
+	_, err := GetAndVerifySession(r)
 	if err == nil {
 		t.Errorf("Expected error but got none")
 	}
