@@ -110,3 +110,37 @@ func LoadSitePages(site string) []SitePageAgg {
 	}
 	return retval
 }
+
+func ConvertSitePageAggToSitePage(sp *SitePageAgg) *SitePage {
+	if sp == nil {
+		return &SitePage{}
+	}
+
+	return &SitePage{
+		ID:               sp.ID,
+		Title:            sp.Title,
+		Link:             sp.Link,
+		Contents:         sp.Contents,
+		Infos:            sp.Infos,
+		UpdatedTime:      sp.UpdatedTime,
+		PreviousVersion:  sp.PreviousVersion,
+		CreatorSessionId: sp.CreatorSessionId,
+	}
+}
+
+func ConvertSitePageToSitePageAgg(sp *SitePage) *SitePageAgg {
+	if sp == nil {
+		return &SitePageAgg{}
+	}
+
+	return &SitePageAgg{
+		ID:               sp.ID,
+		Title:            sp.Title,
+		Link:             sp.Link,
+		Contents:         sp.Contents,
+		Infos:            sp.Infos,
+		UpdatedTime:      sp.UpdatedTime,
+		PreviousVersion:  sp.PreviousVersion,
+		CreatorSessionId: sp.CreatorSessionId,
+	}
+}
