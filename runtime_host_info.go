@@ -12,6 +12,7 @@ type RutimeHostInfo struct {
 	BuildId   string             `bson:"build_id"`
 	ImageId   string             `bson:"image_id"`
 	StartTime time.Time          `bson:"start_time"`
+	EndTime   time.Time          `bson:"end_time"`
 }
 
 func NewHostInstanceInfo() RutimeHostInfo {
