@@ -3,6 +3,7 @@ package sitepages
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"log"
 	"net"
 	"net/http"
 	"os"
@@ -84,13 +85,16 @@ func GetRealIPFromRequest(r *http.Request) string {
 		for i, p := range parts {
 			parts[i] = strings.TrimSpace(p)
 		}
+		log.Printf("X-Forwarded-For: %v", parts)
 		return parts[0]
 	}
 
 	// If X-Forwarded-For is empty, check the X-Real-IP header
 	xRealIP := r.Header.Get("X-Real-IP")
 	if xRealIP != "" {
-		return xRealIP
+		ip := strings.TrimSpace(xRealIP)
+		log.Printf("X-Real-IP: %v", ip)
+		return ip
 	}
 
 	// If neither header is present, use the remote address from the request
