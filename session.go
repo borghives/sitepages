@@ -17,12 +17,12 @@ import (
 var WEB_SESSION_TTL = time.Hour * 12
 
 type WebSession struct {
-	ID           primitive.ObjectID `json:"ID" bson:"_id,omitempty"`
-	FromIp       string             `json:"ip" bson:"ip"`
-	GenerateTime time.Time          `json:"GenTm" bson:"gen_tm"`
-	GenerateFrom primitive.ObjectID `json:"GenFrm" bson:"gen_frm"`
-	FirstID      primitive.ObjectID `json:"FrstID" bson:"frst_id"`
-	FirstTime    time.Time          `json:"FrstTm" bson:"frst_tm"`
+	ID           primitive.ObjectID `bson:"_id,omitempty"`
+	FromIp       string             `bson:"ip"`
+	GenerateTime time.Time          `bson:"gen_tm"`
+	GenerateFrom primitive.ObjectID `bson:"gen_frm"`
+	FirstID      primitive.ObjectID `bson:"frst_id"`
+	FirstTime    time.Time          `bson:"frst_tm"`
 }
 
 func NewWebSession(realIP string) *WebSession {
