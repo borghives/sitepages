@@ -51,19 +51,30 @@ func refreshWebSession(realIP string, clientSignature string, oldSession *WebSes
 	}
 }
 
-func EncodeSession(session WebSession) (string, error) {
+func getSessionSecret() string {
 	secret := os.Getenv("SESSION_LATEST")
+	if secret == "" {
+		log.Fatal("FATAL: CANNOT FIND LATESET SESSION SECRET")
+	}
+	return secret
+}
 
+func SessionInitCheck() {
+	if getSessionSecret() == "" {
+		log.Fatal("FATAL: CANNOT FIND SESSION SECRET")
+	}
+}
+
+func EncodeSession(session WebSession) (string, error) {
 	encodedBytes, err := bson.Marshal(session)
 	if err != nil {
 		return "", err
 	}
-	return EncryptMessage(secret, encodedBytes)
+	return EncryptMessage(getSessionSecret(), encodedBytes)
 }
 
 func DecodeSession(encodedSession string) (*WebSession, error) {
-	secret := os.Getenv("SESSION_LATEST")
-	decodedBytes, err := DecryptMessage(secret, encodedSession)
+	decodedBytes, err := DecryptMessage(getSessionSecret(), encodedSession)
 	if err != nil {
 		return nil, err
 	}
