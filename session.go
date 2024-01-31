@@ -28,7 +28,7 @@ type WebSession struct {
 
 func newWebSession(realIP string, clientSignature string) *WebSession {
 	currentTime := time.Now()
-	id := primitive.NewObjectID()
+	id := primitive.NewObjectIDFromTimestamp(currentTime)
 	clientHash := HashToIdHexString(clientSignature)
 	return &WebSession{
 		ID:           id,
@@ -211,5 +211,5 @@ func (sess *WebSession) GenerateHexID(message string) string {
 		return primitive.ObjectID{}.Hex()
 	}
 
-	return HashToIdHexString(sess.ID.Hex() + message)
+	return HashToIdHexString(sess.ID.Hex() + sess.GenerateFrom.Hex() + message)
 }
