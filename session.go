@@ -25,7 +25,7 @@ type WebSession struct {
 	FirstTime    time.Time          `bson:"frst_tm"`
 }
 
-func NewWebSession(realIP string) *WebSession {
+func newWebSession(realIP string) *WebSession {
 	currentTime := time.Now()
 	id := primitive.NewObjectID()
 
@@ -38,7 +38,7 @@ func NewWebSession(realIP string) *WebSession {
 	}
 }
 
-func RefreshWebSession(realIP string, oldSession *WebSession) *WebSession {
+func refreshWebSession(realIP string, oldSession *WebSession) *WebSession {
 	return &WebSession{
 		ID:           primitive.NewObjectID(),
 		FromIp:       realIP,
@@ -114,7 +114,7 @@ func getDomain() string {
 func setNewRequestSession(w http.ResponseWriter, realIP string) *WebSession {
 
 	// Create a new session
-	session := NewWebSession(realIP)
+	session := newWebSession(realIP)
 	setSessionCookie(w, session)
 	return session
 }
@@ -168,8 +168,10 @@ func GetRequestSession(r *http.Request) (*WebSession, error) {
 func RefreshRequestSession(w http.ResponseWriter, r *http.Request) *WebSession {
 	// Get the session from the request
 	session, err := GetAndVerifySession(r)
-	if session == nil || err != nil {
+	if session == nil {
 		return setNewRequestSession(w, GetRealIPFromRequest(r))
+	} else if err != nil {
+		return refreshWebSession(GetRealIPFromRequest(r), session)
 	}
 
 	return session
