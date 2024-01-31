@@ -59,6 +59,7 @@ func getSessionSecret() string {
 	return secret
 }
 
+// fatal if cannot secure session
 func SessionInitCheck() {
 	if getSessionSecret() == "" {
 		log.Fatal("FATAL: CANNOT FIND SESSION SECRET")
