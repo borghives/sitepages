@@ -13,7 +13,7 @@ func TestVerifyGoodSession(t *testing.T) {
 	r.Header.Set("X-Forwarded-For", "1.2.3.4")
 	r.Header.Set("X-Real-IP", "localhost")
 
-	setNewRequestSession(w, GetRealIPFromRequest(r))
+	setNewRequestSession(w, GetRealIPFromRequest(r), GetClientSignature(r))
 	r.AddCookie(w.Result().Cookies()[0])
 	_, err := GetAndVerifySession(r)
 	if err != nil {
@@ -28,7 +28,7 @@ func TestVerifyMissMatchIPSession(t *testing.T) {
 	r.Header.Set("X-Forwarded-For", "1.2.3.4")
 	r.Header.Set("X-Real-IP", "localhost")
 
-	setNewRequestSession(w, "1234")
+	setNewRequestSession(w, "1234", GetClientSignature(r))
 	r.AddCookie(w.Result().Cookies()[0])
 	_, err := GetAndVerifySession(r)
 	if err == nil {

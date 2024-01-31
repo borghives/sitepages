@@ -13,7 +13,7 @@ func TestNewWebSession(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
 	r.Header.Set("X-Forwarded-For", "1.2.3.4")
 	r.Header.Set("X-Real-IP", "localhost")
-	session := newWebSession(GetRealIPFromRequest(r))
+	session := newWebSession(GetRealIPFromRequest(r), GetClientSignature(r))
 	if session.ID == primitive.NilObjectID {
 		t.Errorf("NewWebSession: expected session ID to be non-nil")
 	}
@@ -35,8 +35,8 @@ func TestRefreshWebSession(t *testing.T) {
 	r.Header.Set("X-Forwarded-For", "1.2.3.4")
 	r.Header.Set("X-Real-IP", "localhost")
 
-	session := newWebSession(GetRealIPFromRequest(r))
-	newSession := refreshWebSession(GetRealIPFromRequest(r), session)
+	session := newWebSession(GetRealIPFromRequest(r), GetClientSignature(r))
+	newSession := refreshWebSession(GetRealIPFromRequest(r), GetClientSignature(r), session)
 	if newSession.ID == session.ID {
 		t.Errorf("RefreshWebSession: expected new session ID to be different from old session ID")
 	}
@@ -55,7 +55,7 @@ func TestRefreshWebSession(t *testing.T) {
 
 func TestEncodeSession(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
-	session := newWebSession(GetRealIPFromRequest(r))
+	session := newWebSession(GetRealIPFromRequest(r), GetClientSignature(r))
 	encodedSession, err := EncodeSession(*session)
 	if err != nil {
 		t.Errorf("EncodeSession: expected no error, got %v", err)
@@ -70,7 +70,7 @@ func TestDecodeSession(t *testing.T) {
 	r.Header.Set("X-Forwarded-For", "1.2.3.4")
 	r.Header.Set("X-Real-IP", "localhost")
 
-	session := newWebSession(GetRealIPFromRequest(r))
+	session := newWebSession(GetRealIPFromRequest(r), GetClientSignature(r))
 	encodedSession, err := EncodeSession(*session)
 	if err != nil {
 		t.Errorf("EncodeSession: expected no error, got %v", err)
@@ -172,7 +172,7 @@ func TestSetNewRequestSession(t *testing.T) {
 	r.Header.Set("X-Forwarded-For", "1.2.3.4")
 	r.Header.Set("X-Real-IP", "localhost")
 
-	createdSession := setNewRequestSession(w, GetRealIPFromRequest(r))
+	createdSession := setNewRequestSession(w, GetRealIPFromRequest(r), GetClientSignature(r))
 
 	// Check that the cookie was set
 	cookies := w.Header().Get("Set-Cookie")
