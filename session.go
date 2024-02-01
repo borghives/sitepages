@@ -140,6 +140,17 @@ func setNewRequestSession(w http.ResponseWriter, realIP string, clientSignature 
 	return session
 }
 
+func refreshRequestSession(w http.ResponseWriter, realIP string, clientSignature string, oldSession *WebSession) *WebSession {
+	// Create a new session
+	if oldSession == nil {
+		return setNewRequestSession(w, realIP, clientSignature)
+	}
+
+	session := refreshWebSession(realIP, clientSignature, oldSession)
+	setSessionCookie(w, session)
+	return session
+}
+
 func setSessionCookie(w http.ResponseWriter, session *WebSession) error {
 	domain := getDomain()
 
@@ -189,13 +200,12 @@ func GetRequestSession(r *http.Request) (*WebSession, error) {
 func RefreshRequestSession(w http.ResponseWriter, r *http.Request) *WebSession {
 	// Get the session from the request
 	session, err := GetAndVerifySession(r)
-	if session == nil {
-		return setNewRequestSession(w, GetRealIPFromRequest(r), GetClientSignature(r))
-	} else if err != nil {
-		return refreshWebSession(GetRealIPFromRequest(r), GetClientSignature(r), session)
+	if err != nil {
+		return refreshRequestSession(w, GetRealIPFromRequest(r), GetClientSignature(r), session)
 	}
 
-	return session
+	return setNewRequestSession(w, GetRealIPFromRequest(r), GetClientSignature(r))
+
 }
 
 func (sess WebSession) GetAge() time.Duration {
