@@ -41,6 +41,7 @@ func newWebSession(realIP string, clientSignature string) *WebSession {
 }
 
 func refreshWebSession(realIP string, clientSignature string, oldSession *WebSession) *WebSession {
+	clientHash := HashToIdHexString(clientSignature)
 	return &WebSession{
 		ID:           primitive.NewObjectID(),
 		FromIp:       realIP,
@@ -48,6 +49,7 @@ func refreshWebSession(realIP string, clientSignature string, oldSession *WebSes
 		GenerateFrom: oldSession.ID,
 		FirstID:      oldSession.FirstID,
 		FirstTime:    oldSession.FirstTime,
+		ClientHash:   clientHash,
 	}
 }
 
@@ -99,7 +101,7 @@ func GetRealIPFromRequest(r *http.Request) string {
 		for i, p := range parts {
 			parts[i] = strings.TrimSpace(p)
 		}
-		log.Printf("X-Forwarded-For: %v", parts)
+		// log.Printf("X-Forwarded-For: %v", parts)
 		return parts[0]
 	}
 
