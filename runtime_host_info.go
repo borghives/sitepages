@@ -9,20 +9,20 @@ import (
 )
 
 type RutimeHostInfo struct {
-	Id        primitive.ObjectID `bson:"_id"`
-	BuildId   string             `bson:"build_id"`
-	ImageId   string             `bson:"image_id"`
-	AppName   string             `bson:"app_name"`
-	StartTime time.Time          `bson:"start_time"`
-	EndTime   time.Time          `bson:"end_time"`
+	Id         primitive.ObjectID `bson:"_id"`
+	BuildId    string             `bson:"build_id"`
+	ImageId    string             `bson:"image_id"`
+	AppCommand string             `bson:"app_command"`
+	StartTime  time.Time          `bson:"start_time"`
+	EndTime    time.Time          `bson:"end_time"`
 }
 
 func NewHostInstanceInfo() RutimeHostInfo {
 	return RutimeHostInfo{
-		Id:        primitive.NewObjectID(),
-		BuildId:   os.Getenv("BUILD_ID"),
-		ImageId:   os.Getenv("IMAGE_DIGEST"),
-		AppName:   strings.Join(os.Args, " "),
-		StartTime: time.Now(),
+		Id:         primitive.NewObjectID(),
+		BuildId:    os.Getenv("BUILD_ID"),
+		ImageId:    os.Getenv("IMAGE_DIGEST"),
+		AppCommand: strings.Join(os.Args, " "),
+		StartTime:  time.Now(),
 	}
 }
