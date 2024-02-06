@@ -88,11 +88,11 @@ func SaveSitePages(file string, pages []SitePageAgg) error {
 	return json.NewEncoder(f).Encode(pages)
 }
 
-func GeneratePageToken(session *WebSession, refPageId string, pageRootId string) string {
+func GeneratePageToken(session WebSession, refPageId string, pageRootId string) string {
 	return session.GenerateHexID("page" + refPageId + pageRootId)
 }
 
-func GenerateStanzaToken(session *WebSession, pageId string, referenceStanza string, index uint16) string {
+func GenerateStanzaToken(session WebSession, pageId string, referenceStanza string, index uint16) string {
 	return session.GenerateHexID("stanza" + pageId + referenceStanza + strconv.Itoa(int(index)))
 }
 
