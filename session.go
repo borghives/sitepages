@@ -56,7 +56,7 @@ func refreshWebSession(realIP string, clientSignature string, oldSession *WebSes
 func getSessionSecret() string {
 	secret := os.Getenv("SECRET_SESSION")
 	if secret == "" {
-		log.Fatal("FATAL: CANNOT FIND  SESSION SECRET")
+		log.Fatal("FATAL: CANNOT FIND SECRET_SESSION")
 	}
 	return secret
 }
@@ -64,7 +64,7 @@ func getSessionSecret() string {
 // fatal if cannot secure session
 func SessionInitCheck() {
 	if getSessionSecret() == "" {
-		log.Fatal("FATAL: CANNOT FIND SESSION SECRET")
+		log.Fatal("FATAL: CANNOT FIND SECRET_SESSION")
 	}
 }
 
