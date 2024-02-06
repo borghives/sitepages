@@ -54,9 +54,9 @@ func refreshWebSession(realIP string, clientSignature string, oldSession *WebSes
 }
 
 func getSessionSecret() string {
-	secret := os.Getenv("SESSION_LATEST")
+	secret := os.Getenv("SECRET_SESSION")
 	if secret == "" {
-		log.Fatal("FATAL: CANNOT FIND LATESET SESSION SECRET")
+		log.Fatal("FATAL: CANNOT FIND  SESSION SECRET")
 	}
 	return secret
 }
