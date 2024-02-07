@@ -3,6 +3,7 @@ package sitepages
 import (
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -30,8 +31,20 @@ func getNonSecretEnvVars() []string {
 	}
 	return envVars
 }
-func NewHostInstanceInfo() RutimeHostInfo {
 
+var (
+	hostinfo RutimeHostInfo
+	once     sync.Once
+)
+
+func GetHostInfo() RutimeHostInfo {
+	once.Do(func() {
+		hostinfo = getHostInfo()
+	})
+	return hostinfo
+}
+
+func getHostInfo() RutimeHostInfo {
 	return RutimeHostInfo{
 		Id:         primitive.NewObjectID(),
 		BuildId:    os.Getenv("BUILD_ID"),
