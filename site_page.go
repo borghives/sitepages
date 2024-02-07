@@ -19,8 +19,9 @@ type SitePage struct {
 	Root             primitive.ObjectID   `json:"Root" bson:"root"`
 	Link             string               `json:"Link" bson:"link"`
 	Title            string               `json:"Title" bson:"title"`
-	Contents         []primitive.ObjectID `json:"Contents" bson:"contents"`
-	Infos            MetaInfo             `json:"Infos" bson:"infos"`
+	Summary          string               `json:"Summary,omitempty" bson:"summary,omitempty"`
+	Contents         []primitive.ObjectID `json:"Contents,omitempty" bson:"contents,omitempty"`
+	Infos            MetaInfo             `json:"Infos,omitempty" bson:"infos,omitempty"`
 	UpdatedTime      time.Time            `json:"UpdatedTime" bson:"updated_time"`
 	PreviousVersion  primitive.ObjectID   `json:"PreviousVersion" bson:"previous_version"`
 	CreatorSessionId primitive.ObjectID   `bson:"session_id"`
@@ -31,7 +32,7 @@ type Stanza struct {
 	Root               primitive.ObjectID `json:"Root" bson:"root"`
 	Content            string             `json:"Content" bson:"content"`
 	UpdatedTime        time.Time          `json:"UpdatedTime" bson:"updated_time"`
-	Context            primitive.ObjectID `json:"Context" bson:"context"`
+	Context            primitive.ObjectID `json:"Context,omitempty" bson:"context,omitempty"`
 	BasePage           primitive.ObjectID `json:"BasePage" bson:"base_page"`
 	PreviousVersion    primitive.ObjectID `json:"PreviousVersion" bson:"previous_version"`
 	PreviousVersionIdx uint16             `json:"PreviousVersionIdx" bson:"previous_version_idx"`
