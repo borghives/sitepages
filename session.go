@@ -70,6 +70,9 @@ func SessionInitCheck() {
 }
 
 func EncodeSession(session WebSession) (string, error) {
+	//empty client sig only encrypting client hash
+	session.ClientSig = ""
+
 	encodedBytes, err := bson.Marshal(session)
 	if err != nil {
 		return "", err
