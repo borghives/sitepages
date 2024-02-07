@@ -14,7 +14,7 @@ type RutimeHostInfo struct {
 	ImageId    string             `bson:"image_id"`
 	AppName    string             `bson:"app_name"`
 	AppCommand string             `bson:"app_command"`
-	EventAt    time.Time          `bson:"event_at"`
+	CreatedAt  time.Time          `bson:"created_at"`
 	EnvVars    []string           `bson:"env_vars"`
 }
 
@@ -39,6 +39,6 @@ func NewHostInstanceInfo() RutimeHostInfo {
 		AppName:    os.Getenv("APP_NAME"),
 		AppCommand: strings.Join(os.Args, " "),
 		EnvVars:    getNonSecretEnvVars(),
-		EventAt:    time.Now(),
+		CreatedAt:  time.Now(),
 	}
 }
