@@ -24,6 +24,7 @@ type WebSession struct {
 	FirstID      primitive.ObjectID `bson:"frst_id"`
 	FirstTime    time.Time          `bson:"frst_tm"`
 	ClientHash   string             `bson:"client_hash"`
+	ClientSig    string             `bson:"client_sig,omitempty"`
 }
 
 func newWebSession(realIP string, clientSignature string) *WebSession {
@@ -179,7 +180,7 @@ func GetRequestSession(r *http.Request) (*WebSession, error) {
 	cookie, err := r.Cookie("session")
 	if err != nil {
 		return nil, &WebSessionError{
-			Message: "No session found; ",
+			Message: "no session found; ",
 			Code:    SESSION_ERROR_NO_SESSION,
 		}
 	}
@@ -188,8 +189,20 @@ func GetRequestSession(r *http.Request) (*WebSession, error) {
 	session, err := DecodeSession(cookie.Value)
 	if err != nil {
 		return nil, &WebSessionError{
-			Message: "FAILED to decode session; ",
+			Message: "failed to decode session; ",
 			Code:    SESSION_ERROR_DECODING_FAILED,
+		}
+	}
+
+	clientSignature := GetClientSignature(r)
+	clientHash := HashToIdHexString(clientSignature)
+
+	if clientHash == session.ClientHash {
+		session.ClientSig = clientSignature
+	} else {
+		err = &WebSessionError{
+			Message: "failed to assign client with hash mismatch; ",
+			Code:    SESSION_ERROR_CLIENT_MISMATCH,
 		}
 	}
 
@@ -213,6 +226,11 @@ func (sess WebSession) GetAge() time.Duration {
 }
 
 func HashToIdHexString(message string) string {
+	if message == "" {
+		return primitive.NilObjectID.Hex()
+	}
+
+	//convert string to bytes
 	idbytes := sha256.Sum256([]byte(message))
 	//convert bytes to hex string
 	return string(hex.EncodeToString(idbytes[:12]))
@@ -220,7 +238,7 @@ func HashToIdHexString(message string) string {
 
 func (sess *WebSession) GenerateHexID(message string) string {
 	if sess == nil {
-		return primitive.ObjectID{}.Hex()
+		return primitive.NilObjectID.Hex()
 	}
 
 	return HashToIdHexString(sess.ID.Hex() + sess.GenerateFrom.Hex() + message)
