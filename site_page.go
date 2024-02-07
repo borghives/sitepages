@@ -19,12 +19,13 @@ type SitePage struct {
 	Root             primitive.ObjectID   `json:"Root" bson:"root"`
 	Link             string               `json:"Link" bson:"link"`
 	Title            string               `json:"Title" bson:"title"`
-	Summary          string               `json:"Summary,omitempty" bson:"summary,omitempty"`
+	Abstract         string               `json:"Abstract" bson:"abstract"`
 	Contents         []primitive.ObjectID `json:"Contents,omitempty" bson:"contents,omitempty"`
 	Infos            MetaInfo             `json:"Infos,omitempty" bson:"infos,omitempty"`
 	UpdatedTime      time.Time            `json:"UpdatedTime" bson:"updated_time"`
 	PreviousVersion  primitive.ObjectID   `json:"PreviousVersion" bson:"previous_version"`
 	CreatorSessionId primitive.ObjectID   `bson:"session_id"`
+	ContentData      []Stanza             `json:"ContentData,omitempty" bson:"content_data,omitempty"`
 }
 
 type Stanza struct {
@@ -47,19 +48,6 @@ type Synapse struct {
 	UpdatedTime time.Time          `json:"UpdatedTime" bson:"updated_time"`
 }
 
-type SitePageAgg struct {
-	ID               primitive.ObjectID   `json:"ID" bson:"_id,omitempty"`
-	Root             primitive.ObjectID   `json:"Root" bson:"root"`
-	Link             string               `json:"Link" bson:"link"`
-	Title            string               `json:"Title" bson:"title"`
-	Contents         []primitive.ObjectID `json:"Contents" bson:"contents"`
-	Infos            MetaInfo             `json:"Infos" bson:"infos"`
-	UpdatedTime      time.Time            `json:"UpdatedTime" bson:"updated_time"`
-	PreviousVersion  primitive.ObjectID   `json:"PreviousVersion" bson:"previous_version"`
-	CreatorSessionId primitive.ObjectID   `bson:"session_id"`
-	ContentData      []Stanza             `json:"ContentData" bson:"content_data"`
-}
-
 type LinkInfo struct {
 	Link string `json:"Link" bson:"link"`
 	Name string `json:"Name" bson:"name"`
@@ -78,7 +66,7 @@ type Illustrated struct {
 	Content Stanza             `json:"Content" bson:"content"`
 }
 
-func SaveSitePages(file string, pages []SitePageAgg) error {
+func SaveSitePages(file string, pages []SitePage) error {
 	// Open the file for writing
 	f, err := os.Create(file)
 	if err != nil {
@@ -97,51 +85,17 @@ func GenerateStanzaToken(session WebSession, pageId string, referenceStanza stri
 	return session.GenerateHexID("stanza" + pageId + referenceStanza + strconv.Itoa(int(index)))
 }
 
-func LoadSitePages(site string) []SitePageAgg {
+func LoadSitePages(site string) []SitePage {
 	file, err := os.Open(site)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer file.Close()
 
-	var retval []SitePageAgg
+	var retval []SitePage
 	err = json.NewDecoder(file).Decode(&retval)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return retval
-}
-
-func ConvertSitePageAggToSitePage(sp *SitePageAgg) *SitePage {
-	if sp == nil {
-		return &SitePage{}
-	}
-
-	return &SitePage{
-		ID:               sp.ID,
-		Title:            sp.Title,
-		Link:             sp.Link,
-		Contents:         sp.Contents,
-		Infos:            sp.Infos,
-		UpdatedTime:      sp.UpdatedTime,
-		PreviousVersion:  sp.PreviousVersion,
-		CreatorSessionId: sp.CreatorSessionId,
-	}
-}
-
-func ConvertSitePageToSitePageAgg(sp *SitePage) *SitePageAgg {
-	if sp == nil {
-		return &SitePageAgg{}
-	}
-
-	return &SitePageAgg{
-		ID:               sp.ID,
-		Title:            sp.Title,
-		Link:             sp.Link,
-		Contents:         sp.Contents,
-		Infos:            sp.Infos,
-		UpdatedTime:      sp.UpdatedTime,
-		PreviousVersion:  sp.PreviousVersion,
-		CreatorSessionId: sp.CreatorSessionId,
-	}
 }
