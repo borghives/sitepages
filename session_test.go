@@ -95,76 +95,70 @@ func TestDecodeSession(t *testing.T) {
 
 }
 
-// func TestGetRealIPFromRequest(t *testing.T) {
-// 	tests := []struct {
-// 		name     string
-// 		request  *http.Request
-// 		expected string
-// 	}{
-// 		{
-// 			name:     "no X-Forwarded-For header",
-// 			request:  httptest.NewRequest("GET", "/", nil),
-// 			expected: "127.0.0.1",
-// 		},
-// 		{
-// 			name:     "X-Forwarded-For header with one IP",
-// 			request:  httptest.NewRequest("GET", "/", nil).Header().Set("X-Forwarded-For", "1.2.3.4"),
-// 			expected: "1.2.3.4",
-// 		},
-// 		{
-// 			name:     "X-Forwarded-For header with multiple IPs",
-// 			request:  httptest.NewRequest("GET", "/", nil).Header().Set("X-Forwarded-For", "1.2.3.4, 5.6.7.8"),
-// 			expected: "1.2.3.4",
-// 		},
-// 		{
-// 			name:     "X-Real-IP header",
-// 			request:  httptest.NewRequest("GET", "/", nil).Header().Set("X-Real-IP", "9.8.7.6"),
-// 			expected: "9.8.7.6",
-// 		},
-// 	}
+// Test client signature in session
+func TestClientSignatureInSessionRequest(t *testing.T) {
+	userAgentStr := "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+	r, _ := http.NewRequest("GET", "/", nil)
+	r.Header.Set("X-Forwarded-For", "1.2.3.4")
+	r.Header.Set("X-Real-IP", "localhost")
+	r.Header.Set("User-Agent", userAgentStr)
+	r.Header.Set("Accept-Language", "en-US,en;q=0.9")
 
-// 	for _, test := range tests {
-// 		t.Run(test.name, func(t *testing.T) {
-// 			actual := getRealIPFromRequest(test.request)
-// 			if actual != test.expected {
-// 				t.Errorf("getRealIPFromRequest: expected %s, got %s", test.expected, actual)
-// 			}
-// 		})
-// 	}
-// }
+	w := httptest.NewRecorder()
+	createdSession := setNewRequestSession(w, GetRealIPFromRequest(r), GetClientSignature(r))
 
-// func TestGetHost(t *testing.T) {
-// 	tests := []struct {
-// 		name     string
-// 		request  *http.Request
-// 		expected string
-// 	}{
-// 		{
-// 			name:     "no Host header",
-// 			request:  httptest.NewRequest("GET", "/", nil),
-// 			expected: "",
-// 		},
-// 		{
-// 			name:     "Host header with port",
-// 			request:  httptest.NewRequest("GET", "/", nil).Header().Set("Host", "example.com:8080"),
-// 			expected: "example.com",
-// 		},
-// 		{
-// 			name:     "Host header without port",
-// 			request:  httptest.NewRequest("GET", "/", nil).Header().Set("Host", "example.com"),
-// 			expected: "example.com",
-// 		},
-// 	}
+	r.AddCookie(w.Result().Cookies()[0])
+	returnedSession, err := GetAndVerifySession(r)
+	if err != nil {
+		t.Errorf("Expected no error but got %s", err)
+	}
 
-// 	for _, test := range tests {
-// 		t.Run(test.name, func(t *testing.T) {
-// 			actual := getHost(test.request)
-// 			if actual != test.expected {
-// 				t.Errorf("getHost: expected %s, got %s", test.expected, actual)
-// 			}
-// 		})
-// 	}
-// }
+	if returnedSession.ID != createdSession.ID {
+		t.Errorf("Expected returned session ID to be equal to created session ID")
+	}
+
+	if returnedSession.ClientHash != createdSession.ClientHash {
+		t.Errorf("Expected returned session ClientHash to be equal to created session ClientHash.  Got: %s Expected: %s", returnedSession.ClientHash, createdSession.ClientHash)
+	}
+
+	if returnedSession.ClientSig != userAgentStr {
+		t.Errorf("Expected returned session ClientSig to be equal to created session ClientSig.  Got: %s Expected: %s", returnedSession.ClientSig, userAgentStr)
+	}
+
+	if returnedSession.GenerateFrom != createdSession.GenerateFrom {
+		t.Errorf("Expected returned session GenerateFrom to be equal to created session GenerateFrom")
+	}
+
+	badRequest, _ := http.NewRequest("GET", "/", nil)
+	badRequest.Header.Set("X-Forwarded-For", "1.2.3.4")
+	badRequest.Header.Set("X-Real-IP", "localhost")
+	badRequest.Header.Set("User-Agent", "badUserAgent")
+	badRequest.Header.Set("Accept-Language", "en-US,en;q=0.9")
+	badRequest.AddCookie(w.Result().Cookies()[0])
+
+	returnedSessionFromBadUserAgent, err := GetAndVerifySession(badRequest)
+	if err == nil {
+		t.Errorf("Expected error but got none")
+	}
+
+	sessionError, ok := err.(*WebSessionError)
+	if !ok {
+		t.Errorf("Expected WebSessionError but got %T", err)
+	}
+
+	if !sessionError.ClientMismatch() {
+		t.Errorf("Expected client mismatch error but got %s", sessionError.Error())
+	}
+
+	if returnedSessionFromBadUserAgent.ClientHash != createdSession.ClientHash {
+		t.Errorf("Expected returned session ClientHash to be equal to created session ClientHash.  Got: %s Expected: %s", returnedSession.ClientHash, createdSession.ClientHash)
+	}
+
+	if returnedSessionFromBadUserAgent.ClientSig != "" {
+		t.Errorf("Expected returned session ClientSig to be empty but got %s", returnedSessionFromBadUserAgent.ClientSig)
+	}
+
+}
 
 func TestSetNewRequestSession(t *testing.T) {
 	w := httptest.NewRecorder()
