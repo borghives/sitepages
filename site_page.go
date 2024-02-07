@@ -14,6 +14,8 @@ import (
 //a good concept can withstand the decay of Time
 //Trust takes time to build
 
+var MAX_LINK_LENGTH = 127
+
 type SitePage struct {
 	ID               primitive.ObjectID   `json:"ID" bson:"_id,omitempty"`
 	Root             primitive.ObjectID   `json:"Root" bson:"root"`
