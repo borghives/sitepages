@@ -2,6 +2,7 @@ package sitepages
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"log"
 	"os"
 	"strconv"
@@ -17,12 +18,13 @@ import (
 var MAX_LINK_LENGTH = 127
 
 type SitePage struct {
-	ID               primitive.ObjectID   `json:"ID" bson:"_id,omitempty"`
-	Root             primitive.ObjectID   `json:"Root" bson:"root"`
+	XMLName          xml.Name             `xml:"page"`
+	ID               primitive.ObjectID   `xml:"id,attr" json:"ID" bson:"_id,omitempty"`
+	Root             primitive.ObjectID   `xml:"data-root,attr" json:"Root" bson:"root"`
 	Link             string               `json:"Link" bson:"link"`
 	Title            string               `json:"Title" bson:"title"`
 	Abstract         string               `json:"Abstract" bson:"abstract"`
-	Contents         []primitive.ObjectID `json:"Contents,omitempty" bson:"contents,omitempty"`
+	Contents         []primitive.ObjectID `xml:"contents" json:"Contents,omitempty" bson:"contents,omitempty"`
 	Infos            MetaInfo             `json:"Infos,omitempty" bson:"infos,omitempty"`
 	UpdatedTime      time.Time            `json:"UpdatedTime" bson:"updated_time"`
 	PreviousVersion  primitive.ObjectID   `json:"PreviousVersion" bson:"previous_version"`
@@ -31,14 +33,15 @@ type SitePage struct {
 }
 
 type Stanza struct {
-	ID                 primitive.ObjectID `json:"ID" bson:"_id,omitempty"`
+	XMLName            xml.Name           `xml:"stanza"`
+	ID                 primitive.ObjectID `xml:"id,attr" json:"ID" bson:"_id,omitempty"`
 	Root               primitive.ObjectID `json:"Root" bson:"root"`
-	Content            string             `json:"Content" bson:"content"`
+	Content            string             `xml:"content" json:"Content" bson:"content"`
 	UpdatedTime        time.Time          `json:"UpdatedTime" bson:"updated_time"`
 	Context            primitive.ObjectID `json:"Context,omitempty" bson:"context,omitempty"`
 	BasePage           primitive.ObjectID `json:"BasePage" bson:"base_page"`
 	PreviousVersion    primitive.ObjectID `json:"PreviousVersion" bson:"previous_version"`
-	PreviousVersionIdx uint16             `json:"PreviousVersionIdx" bson:"previous_version_idx"`
+	PreviousVersionIdx uint16             `xml:"data-previdx" json:"PreviousVersionIdx" bson:"previous_version_idx"`
 }
 
 type Synapse struct {
