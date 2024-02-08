@@ -16,32 +16,35 @@ import (
 //Trust takes time to build
 
 var MAX_LINK_LENGTH = 127
+var MAX_TITLE_LENGTH = 255
 
 type SitePage struct {
 	XMLName          xml.Name             `xml:"page"`
 	ID               primitive.ObjectID   `xml:"id,attr" json:"ID" bson:"_id,omitempty"`
 	Root             primitive.ObjectID   `xml:"data-root,attr" json:"Root" bson:"root"`
-	Link             string               `json:"Link" bson:"link"`
-	Title            string               `json:"Title" bson:"title"`
-	Abstract         string               `json:"Abstract" bson:"abstract"`
-	Contents         []primitive.ObjectID `xml:"contents" json:"Contents,omitempty" bson:"contents,omitempty"`
-	Infos            MetaInfo             `json:"Infos,omitempty" bson:"infos,omitempty"`
-	UpdatedTime      time.Time            `json:"UpdatedTime" bson:"updated_time"`
-	PreviousVersion  primitive.ObjectID   `json:"PreviousVersion" bson:"previous_version"`
-	CreatorSessionId primitive.ObjectID   `bson:"session_id"`
-	ContentData      []Stanza             `json:"ContentData,omitempty" bson:"content_data,omitempty"`
+	Link             string               `xml:"Link,omitempty" json:"Link" bson:"link"`
+	Title            string               `xml:"Title" json:"Title" bson:"title"`
+	Abstract         string               `xml:"Abstract,omitempty" json:"Abstract,omitempty" bson:"abstract,omitempty"`
+	Image            string               `xml:"Image,omitempty" json:"Image,omitempty" bson:"image,omitempty"`
+	Synapses         []Synapse            `xml:"Synapse,omitempty" json:"Synapses,omitempty" bson:"synapses,omitempty"`
+	Contents         []primitive.ObjectID `xml:"Content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
+	Infos            MetaInfo             `xml:"info,omitempty" json:"Infos,omitempty" bson:"infos,omitempty"`
+	UpdatedTime      time.Time            `xml:"-" json:"UpdatedTime" bson:"updated_time"`
+	PreviousVersion  primitive.ObjectID   `xml:"-" json:"PreviousVersion" bson:"previous_version"`
+	CreatorSessionId primitive.ObjectID   `xml:"-" json:"-" bson:"session_id"`
+	ContentData      []Stanza             `xml:",omitempty" json:"ContentData,omitempty" bson:"content_data,omitempty"`
 }
 
 type Stanza struct {
 	XMLName            xml.Name           `xml:"stanza"`
 	ID                 primitive.ObjectID `xml:"id,attr" json:"ID" bson:"_id,omitempty"`
-	Root               primitive.ObjectID `json:"Root" bson:"root"`
-	Content            string             `xml:"content" json:"Content" bson:"content"`
-	UpdatedTime        time.Time          `json:"UpdatedTime" bson:"updated_time"`
-	Context            primitive.ObjectID `json:"Context,omitempty" bson:"context,omitempty"`
-	BasePage           primitive.ObjectID `json:"BasePage" bson:"base_page"`
-	PreviousVersion    primitive.ObjectID `json:"PreviousVersion" bson:"previous_version"`
-	PreviousVersionIdx uint16             `xml:"data-previdx" json:"PreviousVersionIdx" bson:"previous_version_idx"`
+	Root               primitive.ObjectID `xml:"data-root,attr" json:"Root" bson:"root"`
+	Content            string             `xml:"Content" json:"Content" bson:"content"`
+	UpdatedTime        time.Time          `xml:"-" json:"UpdatedTime" bson:"updated_time"`
+	Context            primitive.ObjectID `xml:",omitempty" json:"Context,omitempty" bson:"context,omitempty"`
+	BasePage           primitive.ObjectID `xml:"data-base,attr" json:"BasePage" bson:"base_page"`
+	PreviousVersion    primitive.ObjectID `xml:"data-prev,attr" json:"PreviousVersion" bson:"previous_version"`
+	PreviousVersionIdx uint16             `xml:"data-previdx,attr" json:"PreviousVersionIdx" bson:"previous_version_idx"`
 }
 
 type Synapse struct {

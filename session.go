@@ -17,14 +17,15 @@ import (
 var WEB_SESSION_TTL = time.Hour * 12
 
 type WebSession struct {
-	ID           primitive.ObjectID `bson:"_id,omitempty"`
-	FromIp       string             `bson:"ip"`
-	GenerateTime time.Time          `bson:"gen_tm"`
-	GenerateFrom primitive.ObjectID `bson:"gen_frm"`
-	FirstID      primitive.ObjectID `bson:"frst_id"`
-	FirstTime    time.Time          `bson:"frst_tm"`
-	ClientHash   string             `bson:"client_hash"`
-	ClientSig    string             `bson:"client_sig,omitempty"`
+	ID           primitive.ObjectID `xml:"-" json:"-" bson:"_id,omitempty"`
+	FromIp       string             `xml:"-" json:"-" bson:"ip"`
+	GenerateTime time.Time          `xml:"-" json:"-" bson:"gen_tm"`
+	GenerateFrom primitive.ObjectID `xml:"-" json:"-" bson:"gen_frm"`
+	FirstID      primitive.ObjectID `xml:"-" json:"-" bson:"frst_id"`
+	FirstTime    time.Time          `xml:"-" json:"-" bson:"frst_tm"`
+	SecretToken  string             `xml:"-" json:"-" bson:"secret_token"`
+	ClientHash   string             `xml:"-" json:"-" bson:"client_hash"`
+	ClientSig    string             `xml:"-" json:"-" bson:"client_sig,omitempty"`
 }
 
 func newWebSession(realIP string, clientSignature string) *WebSession {
@@ -38,6 +39,7 @@ func newWebSession(realIP string, clientSignature string) *WebSession {
 		FirstID:      id,
 		FirstTime:    currentTime,
 		ClientHash:   clientHash,
+		SecretToken:  GetRandomHexString(),
 	}
 }
 
@@ -51,6 +53,7 @@ func refreshWebSession(realIP string, clientSignature string, oldSession *WebSes
 		FirstID:      oldSession.FirstID,
 		FirstTime:    oldSession.FirstTime,
 		ClientHash:   clientHash,
+		SecretToken:  GetRandomHexString(),
 	}
 }
 

@@ -8,6 +8,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"io"
 	"log"
 	"math/big"
@@ -117,4 +118,15 @@ func DecryptMessage(secret string, encryptedMessage string) ([]byte, error) {
 
 	// Decrypt message
 	return gcm.Open(nil, nonce, cipherText, nil)
+}
+
+// function to get 12 random bytes in hex string
+// returned empty string if error
+func GetRandomHexString() string {
+	b := make([]byte, 12)
+	if _, err := rand.Read(b); err != nil {
+		return ""
+	}
+
+	return hex.EncodeToString(b)
 }
