@@ -28,7 +28,7 @@ type SitePage struct {
 	Image            string               `xml:"Image,omitempty" json:"Image,omitempty" bson:"image,omitempty"`
 	Synapses         []Synapse            `xml:"Synapse,omitempty" json:"Synapses,omitempty" bson:"synapses,omitempty"`
 	Contents         []primitive.ObjectID `xml:"Content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
-	Infos            MetaInfo             `xml:"info,omitempty" json:"Infos,omitempty" bson:"infos,omitempty"`
+	Infos            MetaInfo             `xml:"_" json:"Infos,omitempty" bson:"infos,omitempty"`
 	UpdatedTime      time.Time            `xml:"-" json:"UpdatedTime" bson:"updated_time"`
 	PreviousVersion  primitive.ObjectID   `xml:"-" json:"PreviousVersion" bson:"previous_version"`
 	CreatorSessionId primitive.ObjectID   `xml:"-" json:"-" bson:"session_id"`
@@ -62,7 +62,7 @@ type LinkInfo struct {
 }
 
 type MetaInfo struct {
-	Contributors string     `json:"Contributors" bson:"_id,contributors"`
+	Contributors string     `json:"Contributors" bson:"contributors"`
 	Promoters    string     `json:"Promoters" bson:"promoters"`
 	Deeper       []LinkInfo `json:"Deeper" bson:"deeper"`
 }
