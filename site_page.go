@@ -27,7 +27,7 @@ type SitePage struct {
 	Abstract         string               `xml:"Abstract,omitempty" json:"Abstract,omitempty" bson:"abstract,omitempty"`
 	Image            string               `xml:"Image,omitempty" json:"Image,omitempty" bson:"image,omitempty"`
 	Synapses         []Synapse            `xml:"Synapse,omitempty" json:"Synapses,omitempty" bson:"synapses,omitempty"`
-	Contents         []primitive.ObjectID `xml:"view>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
+	Contents         []primitive.ObjectID `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
 	Infos            MetaInfo             `xml:"_" json:"Infos,omitempty" bson:"infos,omitempty"`
 	UpdatedTime      time.Time            `xml:"-" json:"UpdatedTime" bson:"updated_time"`
 	PreviousVersion  primitive.ObjectID   `xml:"-" json:"PreviousVersion" bson:"previous_version"`
