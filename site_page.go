@@ -19,14 +19,14 @@ var MAX_LINK_LENGTH = 127
 var MAX_TITLE_LENGTH = 255
 
 type SitePage struct {
-	XMLName          xml.Name             `xml:"page"`
+	XMLName          xml.Name             `xml:"page" json:"-" bson:"-"`
 	ID               primitive.ObjectID   `xml:"id,attr" json:"ID" bson:"_id,omitempty"`
 	Root             primitive.ObjectID   `xml:"data-root,attr" json:"Root" bson:"root"`
-	Link             string               `xml:"Link,omitempty" json:"Link" bson:"link"`
-	Title            string               `xml:"Title" json:"Title" bson:"title"`
-	Abstract         string               `xml:"Abstract,omitempty" json:"Abstract,omitempty" bson:"abstract,omitempty"`
-	Image            string               `xml:"Image,omitempty" json:"Image,omitempty" bson:"image,omitempty"`
-	Synapses         []Synapse            `xml:"Synapse,omitempty" json:"Synapses,omitempty" bson:"synapses,omitempty"`
+	Link             string               `xml:"linkname,omitempty" json:"Link" bson:"link"`
+	Title            string               `xml:"title" json:"Title" bson:"title"`
+	Abstract         string               `xml:"abstract,omitempty" json:"Abstract,omitempty" bson:"abstract,omitempty"`
+	Image            string               `xml:"image,omitempty" json:"Image,omitempty" bson:"image,omitempty"`
+	Synapses         []Synapse            `xml:"synapse,omitempty" json:"Synapses,omitempty" bson:"synapses,omitempty"`
 	Contents         []primitive.ObjectID `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
 	Infos            MetaInfo             `xml:"-" json:"Infos,omitempty" bson:"infos,omitempty"`
 	UpdatedTime      time.Time            `xml:"-" json:"UpdatedTime" bson:"updated_time"`
@@ -36,10 +36,10 @@ type SitePage struct {
 }
 
 type Stanza struct {
-	XMLName            xml.Name           `xml:"stanza"`
+	XMLName            xml.Name           `xml:"stanza" json:"-" bson:"-"`
 	ID                 primitive.ObjectID `xml:"id,attr" json:"ID" bson:"_id,omitempty"`
 	Root               primitive.ObjectID `xml:"data-root,attr" json:"Root" bson:"root"`
-	Content            string             `xml:"Content" json:"Content" bson:"content"`
+	Content            string             `xml:"content" json:"Content" bson:"content"`
 	UpdatedTime        time.Time          `xml:"-" json:"UpdatedTime" bson:"updated_time"`
 	Context            primitive.ObjectID `xml:"-" json:"Context,omitempty" bson:"context,omitempty"`
 	BasePage           primitive.ObjectID `xml:"data-base,attr" json:"BasePage" bson:"base_page"`
