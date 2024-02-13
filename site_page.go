@@ -21,7 +21,7 @@ var MAX_TITLE_LENGTH = 255
 type SitePage struct {
 	XMLName          xml.Name             `xml:"page" json:"-" bson:"-"`
 	ID               primitive.ObjectID   `xml:"id,attr" json:"ID" bson:"_id,omitempty"`
-	Root             primitive.ObjectID   `xml:"data-root,attr" json:"Root" bson:"root"`
+	Root             primitive.ObjectID   `xml:"root" json:"Root" bson:"root"`
 	Link             string               `xml:"linkname,omitempty" json:"Link" bson:"link"`
 	Title            string               `xml:"title" json:"Title" bson:"title"`
 	Abstract         string               `xml:"abstract,omitempty" json:"Abstract,omitempty" bson:"abstract,omitempty"`
@@ -38,13 +38,13 @@ type SitePage struct {
 type Stanza struct {
 	XMLName            xml.Name           `xml:"stanza" json:"-" bson:"-"`
 	ID                 primitive.ObjectID `xml:"id,attr" json:"ID" bson:"_id,omitempty"`
-	Root               primitive.ObjectID `xml:"data-root,attr" json:"Root" bson:"root"`
+	Root               primitive.ObjectID `xml:"root" json:"Root" bson:"root"`
 	Content            string             `xml:"content" json:"Content" bson:"content"`
 	UpdatedTime        time.Time          `xml:"-" json:"UpdatedTime" bson:"updated_time"`
 	Context            primitive.ObjectID `xml:"-" json:"Context,omitempty" bson:"context,omitempty"`
-	BasePage           primitive.ObjectID `xml:"data-base,attr" json:"BasePage" bson:"base_page"`
-	PreviousVersion    primitive.ObjectID `xml:"data-prev,attr" json:"PreviousVersion" bson:"previous_version"`
-	PreviousVersionIdx uint16             `xml:"data-previdx,attr" json:"PreviousVersionIdx" bson:"previous_version_idx"`
+	BasePage           primitive.ObjectID `xml:"basepage" json:"BasePage" bson:"base_page"`
+	PreviousVersion    primitive.ObjectID `xml:"previousversion" json:"PreviousVersion" bson:"previous_version"`
+	PreviousVersionIdx uint16             `xml:"previousversionidx" json:"PreviousVersionIdx" bson:"previous_version_idx"`
 }
 
 type Synapse struct {
