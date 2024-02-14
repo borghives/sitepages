@@ -41,7 +41,7 @@ type Stanza struct {
 	Root               primitive.ObjectID `xml:"root" json:"Root" bson:"root"`
 	Content            string             `xml:"content" json:"Content" bson:"content"`
 	UpdatedTime        time.Time          `xml:"-" json:"UpdatedTime" bson:"updated_time"`
-	Context            primitive.ObjectID `xml:"-" json:"Context,omitempty" bson:"context,omitempty"`
+	Context            primitive.ObjectID `xml:"context,omitempty" json:"Context,omitempty" bson:"context,omitempty"`
 	BasePage           primitive.ObjectID `xml:"basepage" json:"BasePage" bson:"base_page"`
 	PreviousVersion    primitive.ObjectID `xml:"previousversion" json:"PreviousVersion" bson:"previous_version"`
 	PreviousVersionIdx uint16             `xml:"previousversionidx" json:"PreviousVersionIdx" bson:"previous_version_idx"`
