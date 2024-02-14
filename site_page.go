@@ -32,7 +32,7 @@ type SitePage struct {
 	UpdatedTime      time.Time            `xml:"-" json:"UpdatedTime" bson:"updated_time"`
 	PreviousVersion  primitive.ObjectID   `xml:"-" json:"PreviousVersion" bson:"previous_version"`
 	CreatorSessionId primitive.ObjectID   `xml:"-" json:"-" bson:"session_id"`
-	ContentData      []Stanza             `xml:"contentdata>stanza,omitempty" json:"ContentData,omitempty" bson:"content_data,omitempty"`
+	ContentData      []Stanza             `xml:"-" json:"ContentData,omitempty" bson:"content_data,omitempty"` //mainly for aggregate querying and not for storing into database or display as xml model
 }
 
 type Stanza struct {
