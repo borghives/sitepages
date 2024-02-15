@@ -44,7 +44,7 @@ type Stanza struct {
 	Context            primitive.ObjectID `xml:"context,omitempty" json:"Context,omitempty" bson:"context,omitempty"`
 	BasePage           primitive.ObjectID `xml:"basepage" json:"BasePage" bson:"base_page"`
 	PreviousVersion    primitive.ObjectID `xml:"previousversion" json:"PreviousVersion" bson:"previous_version"`
-	PreviousVersionIdx uint16             `xml:"previousversionidx" json:"PreviousVersionIdx" bson:"previous_version_idx"`
+	PreviousVersionIdx uint16             `xml:"previousversionidx" json:"PreviousVersionIdx" bson:"-"`
 }
 
 type Synapse struct {
