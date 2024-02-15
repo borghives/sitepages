@@ -17,6 +17,7 @@ import (
 
 var MAX_LINK_LENGTH = 127
 var MAX_TITLE_LENGTH = 255
+var MAX_CHUNK_INDEX = 100
 
 type SitePage struct {
 	XMLName          xml.Name             `xml:"page" json:"-" bson:"-"`
@@ -36,15 +37,15 @@ type SitePage struct {
 }
 
 type Stanza struct {
-	XMLName            xml.Name           `xml:"stanza" json:"-" bson:"-"`
-	ID                 primitive.ObjectID `xml:"id,attr" json:"ID" bson:"_id,omitempty"`
-	Root               primitive.ObjectID `xml:"root" json:"Root" bson:"root"`
-	Content            string             `xml:"content" json:"Content" bson:"content"`
-	UpdatedTime        time.Time          `xml:"-" json:"UpdatedTime" bson:"updated_time"`
-	Context            primitive.ObjectID `xml:"context,omitempty" json:"Context,omitempty" bson:"context,omitempty"`
-	BasePage           primitive.ObjectID `xml:"basepage" json:"BasePage" bson:"base_page"`
-	PreviousVersion    primitive.ObjectID `xml:"previousversion" json:"PreviousVersion" bson:"previous_version"`
-	PreviousVersionIdx uint16             `xml:"previousversionidx" json:"PreviousVersionIdx" bson:"-"`
+	XMLName         xml.Name           `xml:"stanza" json:"-" bson:"-"`
+	ID              primitive.ObjectID `xml:"id,attr" json:"ID" bson:"_id,omitempty"`
+	Root            primitive.ObjectID `xml:"root" json:"Root" bson:"root"`
+	Content         string             `xml:"content" json:"Content" bson:"content"`
+	UpdatedTime     time.Time          `xml:"-" json:"UpdatedTime" bson:"updated_time"`
+	Context         primitive.ObjectID `xml:"context,omitempty" json:"Context,omitempty" bson:"context,omitempty"`
+	BasePage        primitive.ObjectID `xml:"basepage" json:"BasePage" bson:"base_page"`
+	PreviousVersion primitive.ObjectID `xml:"previousversion" json:"PreviousVersion" bson:"previous_version"`
+	ChunkIndex      uint16             `xml:"chunkidx" json:"chunkIdx" bson:"-"` //only for control and not for persist in state
 }
 
 type Synapse struct {
