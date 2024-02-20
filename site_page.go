@@ -18,6 +18,7 @@ import (
 var MAX_LINK_LENGTH = 127
 var MAX_TITLE_LENGTH = 255
 var MAX_CHUNK_INDEX = 100
+var MAX_ABSTRACT_LENGTH = 255
 
 type SitePage struct {
 	XMLName          xml.Name             `xml:"page" json:"-" bson:"-"`
