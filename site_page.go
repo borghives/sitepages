@@ -31,7 +31,7 @@ type SitePage struct {
 	Synapses         []Synapse            `xml:"synapse,omitempty" json:"Synapses,omitempty" bson:"synapses,omitempty"`
 	Contents         []primitive.ObjectID `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
 	Infos            MetaInfo             `xml:"-" json:"Infos,omitempty" bson:"infos,omitempty"`
-	UpdatedTime      time.Time            `xml:"-" json:"-" bson:"updated_time"`
+	UpdatedTime      time.Time            `xml:"updated" json:"-" bson:"updated_time"`
 	PreviousVersion  primitive.ObjectID   `xml:"previousversion" json:"PreviousVersion" bson:"previous_version"`
 	CreatorSessionId primitive.ObjectID   `xml:"-" json:"-" bson:"session_id"`
 	StanzaData       []Stanza             `xml:"-" json:"StanzaData,omitempty" bson:"stanza_data,omitempty"` //mainly for aggregate querying and not for storing into database or display as xml model
