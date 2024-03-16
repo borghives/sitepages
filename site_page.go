@@ -31,6 +31,7 @@ type SitePage struct {
 	Synapses         []Synapse            `xml:"synapse,omitempty" json:"Synapses,omitempty" bson:"synapses,omitempty"`
 	Contents         []primitive.ObjectID `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
 	Infos            MetaInfo             `xml:"-" json:"Infos,omitempty" bson:"infos,omitempty"`
+	EventAt          time.Time            `xml:"eventat" json:"EventAt" bson:"event_at"`
 	UpdatedTime      time.Time            `xml:"updated" json:"updated" bson:"updated_time"`
 	PreviousVersion  primitive.ObjectID   `xml:"previousversion" json:"PreviousVersion" bson:"previous_version"`
 	CreatorSessionId primitive.ObjectID   `xml:"-" json:"-" bson:"session_id"`
