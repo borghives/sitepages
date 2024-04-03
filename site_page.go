@@ -38,6 +38,15 @@ type SitePage struct {
 	StanzaData       []Stanza             `xml:"-" json:"StanzaData,omitempty" bson:"stanza_data,omitempty"` //mainly for aggregate querying and not for storing into database or display as xml model
 }
 
+type Bundle struct {
+	XMLName          xml.Name             `xml:"bundle" json:"-" bson:"-"`
+	ID               primitive.ObjectID   `xml:"id,attr" json:"ID" bson:"_id,omitempty"`
+	Contents         []primitive.ObjectID `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
+	EventAt          time.Time            `xml:"eventat" json:"EventAt" bson:"event_at"`
+	PreviousBundleId primitive.ObjectID   `xml:"previousbundleid" json:"PreviousBundleId" bson:"previous_bundle_id"`
+	PageData         []SitePage           `xml:"-" json:"PageData,omitempty" bson:"page_data,omitempty"` //mainly for aggregate querying and not for storing into database or display as xml model
+}
+
 type Stanza struct {
 	XMLName         xml.Name           `xml:"stanza" json:"-" bson:"-"`
 	ID              primitive.ObjectID `xml:"id,attr" json:"ID" bson:"_id,omitempty"`
