@@ -74,8 +74,8 @@ type LinkInfo struct {
 }
 
 type MetaInfo struct {
-	Reference string     `xml:"source,omitempty" json:"Source,omitempty" bson:"source,omitempty"`
-	Deeper    []LinkInfo `xml:"deeper,omitempty" json:"Deeper,omitempty" bson:"deeper,omitempty"`
+	Source string     `xml:"source,omitempty" json:"Source,omitempty" bson:"source,omitempty"`
+	Deeper []LinkInfo `xml:"deeper,omitempty" json:"Deeper,omitempty" bson:"deeper,omitempty"`
 }
 
 type Illustrated struct {
