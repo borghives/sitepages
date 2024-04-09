@@ -30,7 +30,7 @@ type SitePage struct {
 	Image            string               `xml:"image,omitempty" json:"Image,omitempty" bson:"image,omitempty"`
 	Synapses         []Synapse            `xml:"synapse,omitempty" json:"Synapses,omitempty" bson:"synapses,omitempty"`
 	Contents         []primitive.ObjectID `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
-	Infos            MetaInfo             `xml:"-" json:"Infos,omitempty" bson:"infos,omitempty"`
+	Infos            MetaInfo             `xml:"infos,omitempty" json:"Infos,omitempty" bson:"infos,omitempty"`
 	EventAt          time.Time            `xml:"eventat" json:"EventAt" bson:"event_at"`
 	UpdatedTime      time.Time            `xml:"updated" json:"updated" bson:"updated_time"`
 	PreviousVersion  primitive.ObjectID   `xml:"previousversion" json:"PreviousVersion" bson:"previous_version"`
@@ -50,7 +50,6 @@ type Bundle struct {
 type Stanza struct {
 	XMLName         xml.Name           `xml:"stanza" json:"-" bson:"-"`
 	ID              primitive.ObjectID `xml:"id,attr" json:"ID" bson:"_id,omitempty"`
-	Root            primitive.ObjectID `xml:"root" json:"Root" bson:"root"`
 	Content         string             `xml:"content" json:"Content" bson:"content"`
 	UpdatedTime     time.Time          `xml:"-" json:"UpdatedTime" bson:"updated_time"`
 	Context         primitive.ObjectID `xml:"context,omitempty" json:"Context,omitempty" bson:"context,omitempty"`
@@ -75,9 +74,8 @@ type LinkInfo struct {
 }
 
 type MetaInfo struct {
-	Contributors string     `json:"Contributors" bson:"contributors"`
-	Promoters    string     `json:"Promoters" bson:"promoters"`
-	Deeper       []LinkInfo `json:"Deeper" bson:"deeper"`
+	Reference string     `xml:"source,omitempty" json:"Source,omitempty" bson:"source,omitempty"`
+	Deeper    []LinkInfo `xml:"deeper,omitempty" json:"Deeper,omitempty" bson:"deeper,omitempty"`
 }
 
 type Illustrated struct {
