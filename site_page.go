@@ -69,13 +69,26 @@ type Synapse struct {
 }
 
 type LinkInfo struct {
-	Link string `json:"Link" bson:"link"`
-	Name string `json:"Name" bson:"name"`
+	Link string `xml:"link,omitempty" json:"Link" bson:"link"`
+	Name string `xml:"name,omitempty" json:"Name" bson:"name"`
 }
 
 type MetaInfo struct {
 	Source string     `xml:"source,omitempty" json:"Source,omitempty" bson:"source,omitempty"`
 	Deeper []LinkInfo `xml:"deeper,omitempty" json:"Deeper,omitempty" bson:"deeper,omitempty"`
+}
+
+type Princigo struct { //a deeper private self: an entity that mediates between our instincts and the social word.  It caries multiple persona, the social mask we wear.
+	ID       primitive.ObjectID   `json:"ID" bson:"_id,omitempty"`
+	Name     string               `json:"Name" bson:"name"`         //a public label of the self
+	Personas []primitive.ObjectID `json:"Personas" bson:"personas"` //collection of personas that bridge the self to the world
+	Shem     string               `bson:"shem"`                     //a private label to link with the world
+}
+
+type Persona struct {
+	ID       primitive.ObjectID `json:"ID,omitempty" bson:"_id,omitempty"`
+	EgoId    primitive.ObjectID `json:"EgoId,omitempty" bson:"_id,omitempty"`
+	Labeling string             `json:"labeling,omitempty" bson:"labeling,omitempty"` //ex: "a Philosipher, a Scientist, and an Engineer"
 }
 
 type Illustrated struct {
