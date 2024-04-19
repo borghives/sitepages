@@ -134,7 +134,7 @@ func GetClientSignature(r *http.Request) string {
 func getDomain() string {
 	domain := os.Getenv("SITE_DOMAIN")
 	if domain == "" {
-		domain = "127.0.0.1"
+		domain = "localhost"
 	}
 	return domain
 }
@@ -247,5 +247,5 @@ func (sess *WebSession) GenerateHexID(message string) string {
 		return primitive.NilObjectID.Hex()
 	}
 
-	return HashToIdHexString(sess.ID.Hex() + sess.GenerateFrom.Hex() + message)
+	return HashToIdHexString(sess.ID.Hex() + sess.SecretToken + sess.GenerateFrom.Hex() + message)
 }
