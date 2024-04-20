@@ -242,10 +242,19 @@ func HashToIdHexString(message string) string {
 	return string(hex.EncodeToString(idbytes[:12]))
 }
 
+func (sess *WebSession) GenerateHashBytes(message string) [32]byte {
+	if message == "" {
+		message = "0"
+	}
+
+	//convert string to bytes
+	return sha256.Sum256([]byte(sess.ID.Hex() + sess.SecretToken + sess.GenerateFrom.Hex() + message))
+}
+
 func (sess *WebSession) GenerateHexID(message string) string {
 	if sess == nil {
 		return primitive.NilObjectID.Hex()
 	}
-
-	return HashToIdHexString(sess.ID.Hex() + sess.SecretToken + sess.GenerateFrom.Hex() + message)
+	idbytes := sess.GenerateHashBytes(message)
+	return string(hex.EncodeToString(idbytes[:12]))
 }
