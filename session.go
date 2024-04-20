@@ -147,7 +147,7 @@ func setNewRequestSession(w http.ResponseWriter, realIP string, clientSignature 
 	return session
 }
 
-func refreshRequestSession(w http.ResponseWriter, realIP string, clientSignature string, oldSession *WebSession) *WebSession {
+func refreshNewRequestSession(w http.ResponseWriter, realIP string, clientSignature string, oldSession *WebSession) *WebSession {
 	// Create a new session
 	if oldSession == nil {
 		return setNewRequestSession(w, realIP, clientSignature)
@@ -220,11 +220,16 @@ func RefreshRequestSession(w http.ResponseWriter, r *http.Request) *WebSession {
 	// Get the session from the request
 	session, err := GetAndVerifySession(r)
 	if err != nil {
-		return refreshRequestSession(w, GetRealIPFromRequest(r), GetClientSignature(r), session)
+		return refreshNewRequestSession(w, GetRealIPFromRequest(r), GetClientSignature(r), session)
 	}
 
 	return setNewRequestSession(w, GetRealIPFromRequest(r), GetClientSignature(r))
 
+}
+
+func RefreshNewRequestSession(w http.ResponseWriter, r *http.Request) *WebSession {
+	session, _ := GetAndVerifySession(r)
+	return refreshNewRequestSession(w, GetRealIPFromRequest(r), GetClientSignature(r), session)
 }
 
 func (sess WebSession) GetAge() time.Duration {
