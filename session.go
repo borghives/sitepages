@@ -23,9 +23,11 @@ type WebSession struct {
 	GenerateFrom primitive.ObjectID `xml:"-" json:"-" bson:"gen_frm"`
 	FirstID      primitive.ObjectID `xml:"-" json:"-" bson:"frst_id"`
 	FirstTime    time.Time          `xml:"-" json:"-" bson:"frst_tm"`
+	UserId       primitive.ObjectID `xml:"-" json:"-" bson:"user_id,omitempty"`
+	UserName     string             `xml:"-" json:"-" bson:"user_name,omitempty"`
 	SecretToken  string             `xml:"-" json:"-" bson:"secret_token"`
 	ClientHash   string             `xml:"-" json:"-" bson:"client_hash"`
-	ClientSig    string             `xml:"-" json:"-" bson:"client_sig,omitempty"`
+	ClientSig    string             `xml:"-" json:"-" bson:"-"`
 }
 
 func newWebSession(realIP string, clientSignature string) *WebSession {
