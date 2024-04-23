@@ -145,7 +145,7 @@ func setNewRequestSession(w http.ResponseWriter, realIP string, clientSignature 
 
 	// Create a new session
 	session := newWebSession(realIP, clientSignature)
-	setSessionCookie(w, session)
+	SetSessionCookie(w, session)
 	return session
 }
 
@@ -156,11 +156,11 @@ func refreshNewRequestSession(w http.ResponseWriter, realIP string, clientSignat
 	}
 
 	session := refreshWebSession(realIP, clientSignature, oldSession)
-	setSessionCookie(w, session)
+	SetSessionCookie(w, session)
 	return session
 }
 
-func setSessionCookie(w http.ResponseWriter, session *WebSession) error {
+func SetSessionCookie(w http.ResponseWriter, session *WebSession) error {
 	domain := getDomain()
 
 	// Create a new session
