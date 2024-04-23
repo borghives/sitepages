@@ -225,7 +225,7 @@ func RefreshRequestSession(w http.ResponseWriter, r *http.Request) *WebSession {
 		return refreshNewRequestSession(w, GetRealIPFromRequest(r), GetClientSignature(r), session)
 	}
 
-	return setNewRequestSession(w, GetRealIPFromRequest(r), GetClientSignature(r))
+	return session
 
 }
 
