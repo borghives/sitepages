@@ -65,10 +65,12 @@ type RelationType int
 
 const (
 	Saved RelationType = iota
+	Endorsed
+	Objected
 )
 
 type UserToPage struct {
-	UserId   primitive.ObjectID `xml:"userid" json:"UserId" bson:"user_id"`
+	UserId   primitive.ObjectID `xml:"-" json:"-" bson:"user_id"`
 	PageId   primitive.ObjectID `xml:"pageid" json:"PageId" bson:"page_id"`
 	Relation RelationType       `xml:"relation" json:"Relation" bson:"relation"`
 	Rank     float32            `xml:"rank" json:"Rank" bson:"rank"`
