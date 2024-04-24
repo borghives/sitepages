@@ -61,6 +61,20 @@ type Stanza struct {
 	ChunkOffset     uint16             `xml:"chunkoffset" json:"ChunkOffset" bson:"-"` //only for control and not for persist in state
 }
 
+type RelationType int
+
+const (
+	Saved RelationType = iota
+)
+
+type UserToPage struct {
+	UserId   primitive.ObjectID `xml:"userid" json:"UserId" bson:"user_id"`
+	PageId   primitive.ObjectID `xml:"pageid" json:"PageId" bson:"page_id"`
+	Relation RelationType       `xml:"relation" json:"Relation" bson:"relation"`
+	Rank     float32            `xml:"rank" json:"Rank" bson:"rank"`
+	EventAt  time.Time          `xml:"eventat" json:"EventAt" bson:"event_at"`
+}
+
 type Synapse struct {
 	FromPageId  primitive.ObjectID `json:"PageId" bson:"page_id"`
 	FromStanza  primitive.ObjectID `json:"Stanza" bson:"stanza"`
