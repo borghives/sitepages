@@ -61,12 +61,13 @@ type Stanza struct {
 	ChunkOffset     uint16             `xml:"chunkoffset" json:"ChunkOffset" bson:"-"` //only for control and not for persist in state
 }
 
-type RelationType int
+type RelationType string
 
 const (
-	Saved RelationType = iota
-	Endorsed
-	Objected
+	Saved    RelationType = "saved"
+	Endorsed RelationType = "endorsed"
+	Objected RelationType = "objected"
+	Ignored  RelationType = "ignored"
 )
 
 type UserToPage struct {
