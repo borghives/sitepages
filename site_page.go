@@ -64,10 +64,10 @@ type Stanza struct {
 type RelationType string
 
 const (
-	Saved    RelationType = "saved"
-	Endorsed RelationType = "endorsed"
-	Objected RelationType = "objected"
-	Ignored  RelationType = "ignored"
+	Bookmarked RelationType = "bookmarked"
+	Endorsed   RelationType = "endorsed"
+	Objected   RelationType = "objected"
+	Ignored    RelationType = "ignored"
 )
 
 type UserToPage struct {
@@ -75,7 +75,7 @@ type UserToPage struct {
 	PageId   primitive.ObjectID `xml:"pageid" json:"PageId" bson:"page_id"`
 	Relation RelationType       `xml:"relation" json:"Relation" bson:"relation"`
 	Rank     float32            `xml:"rank" json:"Rank" bson:"rank"`
-	EventAt  time.Time          `xml:"eventat" json:"EventAt" bson:"event_at"`
+	EventAt  time.Time          `xml:"-" json:"-" bson:"event_at"`
 }
 
 type Synapse struct {
