@@ -21,7 +21,7 @@ var MAX_CHUNK_INDEX = 100
 var MAX_ABSTRACT_LENGTH = 255
 
 type SitePage struct {
-	XMLName          xml.Name             `xml:"page" json:"type" bson:"-"`
+	XMLName          xml.Name             `xml:"page" json:"-" bson:"-"`
 	ID               primitive.ObjectID   `xml:"id,attr" json:"ID" bson:"_id,omitempty"`
 	Root             primitive.ObjectID   `xml:"root" json:"Root" bson:"root"`
 	LinkName         string               `xml:"linkname,omitempty" json:"LinkName" bson:"link"`
@@ -39,7 +39,7 @@ type SitePage struct {
 }
 
 type Bundle struct {
-	XMLName          xml.Name             `xml:"bundle" json:"type" bson:"-"`
+	XMLName          xml.Name             `xml:"bundle" json:"-" bson:"-"`
 	ID               primitive.ObjectID   `xml:"id,attr" json:"ID" bson:"_id,omitempty"`
 	Contents         []primitive.ObjectID `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
 	EventAt          time.Time            `xml:"eventat" json:"EventAt" bson:"event_at"`
@@ -48,7 +48,7 @@ type Bundle struct {
 }
 
 type Stanza struct {
-	XMLName         xml.Name           `xml:"stanza" json:"type" bson:"-"`
+	XMLName         xml.Name           `xml:"stanza" json:"-" bson:"-"`
 	ID              primitive.ObjectID `xml:"id,attr" json:"ID" bson:"_id,omitempty"`
 	Content         string             `xml:"content" json:"Content" bson:"content"`
 	UpdatedTime     time.Time          `xml:"-" json:"UpdatedTime" bson:"updated_time"`
@@ -69,7 +69,7 @@ const (
 )
 
 type UserToPage struct {
-	XMLName  xml.Name           `xml:"pagerel" json:"type" bson:"-"`
+	XMLName  xml.Name           `xml:"pagerelation" json:"-" bson:"-"`
 	UserId   primitive.ObjectID `xml:"-" json:"-" bson:"user_id"`
 	PageId   primitive.ObjectID `xml:"pageid" json:"PageId" bson:"page_id"`
 	Relation RelationType       `xml:"relation" json:"Relation" bson:"relation"`
