@@ -75,6 +75,7 @@ type UserToPage struct {
 	Relation RelationType       `xml:"relation" json:"Relation" bson:"relation"`
 	Rank     float32            `xml:"rank" json:"Rank" bson:"rank"`
 	EventAt  time.Time          `xml:"-" json:"-" bson:"event_at"`
+	Type     string             `xml:"-" json:"Type,omitempty" bson:"-"` //hint for xml model mashaling on client end 'pagerelation'
 }
 
 type Synapse struct {
