@@ -133,7 +133,7 @@ func GetClientSignature(r *http.Request) string {
 	return r.Header.Get("User-Agent")
 }
 
-func getDomain() string {
+func GetDomain() string {
 	domain := os.Getenv("SITE_DOMAIN")
 	if domain == "" {
 		domain = "localhost"
@@ -161,7 +161,7 @@ func refreshNewRequestSession(w http.ResponseWriter, realIP string, clientSignat
 }
 
 func SetSessionCookie(w http.ResponseWriter, session *WebSession) error {
-	domain := getDomain()
+	domain := GetDomain()
 
 	// Create a new session
 	encodedSess, err := EncodeSession(*session)
