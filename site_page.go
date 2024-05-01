@@ -68,6 +68,19 @@ const (
 	Ignored    RelationType = "ignored"
 )
 
+func (r RelationType) String() string {
+	return string(r)
+}
+
+func CastRelationType(s string) RelationType {
+	switch s {
+	case "bookmarked", "endorsed", "objected", "ignored":
+		return RelationType(s)
+	default:
+		return RelationType("")
+	}
+}
+
 type UserToPage struct {
 	XMLName  xml.Name           `xml:"pagerelation" json:"-" bson:"-"`
 	UserId   primitive.ObjectID `xml:"-" json:"-" bson:"user_id"`
