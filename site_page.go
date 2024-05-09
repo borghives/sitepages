@@ -149,6 +149,10 @@ func GenerateStanzaToken(session WebSession, pageId string, referenceStanza stri
 	return session.GenerateHexID("stanza" + pageId + referenceStanza + strconv.Itoa(int(index)))
 }
 
+func GenerateCommentToken(session WebSession, pageId string, salt string) string {
+	return session.GenerateHexID("comment" + pageId + salt)
+}
+
 func LoadSitePages(site string) []SitePage {
 	file, err := os.Open(site)
 	if err != nil {
