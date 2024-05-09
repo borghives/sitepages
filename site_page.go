@@ -91,6 +91,18 @@ type UserToPage struct {
 	Type     string             `xml:"-" json:"Type,omitempty" bson:"-"` //hint for xml model mashaling on client end 'pagerelation'
 }
 
+type Comment struct {
+	XMLName     xml.Name           `xml:"comment" json:"-" bson:"-"`
+	ID          primitive.ObjectID `xml:"id,attr" json:"ID" bson:"_id,omitempty"`
+	Root        primitive.ObjectID `xml:"root" json:"Root" bson:"root"`
+	Parent      primitive.ObjectID `xml:"parent" json:"Parent" bson:"parent"`
+	UserName    string             `xml:"username" json:"UserName" bson:"user_name"`
+	Moment      string             `xml:"moment" json:"Moment" bson:"moment"`
+	Content     string             `xml:"content" json:"Content" bson:"content"`
+	EventAt     time.Time          `xml:"eventat" json:"EventAt" bson:"event_at"`
+	CreatedTime time.Time          `xml:"-" json:"-" bson:"created_time"`
+}
+
 type Synapse struct {
 	FromPageId  primitive.ObjectID `json:"PageId" bson:"page_id"`
 	FromStanza  primitive.ObjectID `json:"Stanza" bson:"stanza"`
