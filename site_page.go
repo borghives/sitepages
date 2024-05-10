@@ -88,8 +88,8 @@ type UserToPage struct {
 	Relation RelationType       `xml:"relation" json:"Relation" bson:"relation"`
 	Rank     float32            `xml:"rank" json:"Rank" bson:"rank"`
 	EventAt  time.Time          `xml:"-" json:"-" bson:"event_at"`
-	Type     string             `xml:"-" json:"Type,omitempty" bson:"-"`                           //hint for xml model mashaling on client end 'pagerelation'
-	Page     *SitePage          `xml:"page,omitempty" json:"Page,omitempty" bson:"page,omitempty"` //for aggregate querying and not for storing
+	Type     string             `xml:"-" json:"Type,omitempty" bson:"-"`                                 //hint for xml model mashaling on client end 'pagerelation'
+	PageData []SitePage         `xml:"-,omitempty" json:"PageData,omitempty" bson:"page_data,omitempty"` //for aggregate querying and not for storing
 }
 
 type Comment struct {
