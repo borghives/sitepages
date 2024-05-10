@@ -97,7 +97,7 @@ type Comment struct {
 	ID          primitive.ObjectID `xml:"id,attr" json:"ID" bson:"_id,omitempty"`
 	Root        primitive.ObjectID `xml:"root" json:"Root" bson:"root"`
 	Parent      primitive.ObjectID `xml:"parent" json:"Parent" bson:"parent"`
-	UserName    string             `xml:"username" json:"UserName" bson:"user_name"`
+	UserName    string             `xml:"username,omitempty" json:"UserName,omitempty" bson:"user_name,omitempty"`
 	Moment      string             `xml:"moment" json:"Moment" bson:"moment"`
 	Content     string             `xml:"content" json:"Content" bson:"content"`
 	EventAt     time.Time          `xml:"eventat" json:"EventAt" bson:"event_at"`
