@@ -44,7 +44,7 @@ type Bundle struct {
 	Contents         []primitive.ObjectID `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
 	EventAt          time.Time            `xml:"eventat" json:"EventAt" bson:"event_at"`
 	PreviousBundleId primitive.ObjectID   `xml:"previousbundleid" json:"PreviousBundleId" bson:"previous_bundle_id"`
-	PageData         []SitePage           `xml:"-" json:"PageData,omitempty" bson:"page_data,omitempty"` //mainly for aggregate querying and not for storing into database or display as xml model
+	PageData         []SitePage           `xml:"-" json:"PageData,omitempty" bson:"page_data,omitempty"` //for aggregate querying and not for storing into database or display as xml model
 }
 
 type Stanza struct {
@@ -88,7 +88,8 @@ type UserToPage struct {
 	Relation RelationType       `xml:"relation" json:"Relation" bson:"relation"`
 	Rank     float32            `xml:"rank" json:"Rank" bson:"rank"`
 	EventAt  time.Time          `xml:"-" json:"-" bson:"event_at"`
-	Type     string             `xml:"-" json:"Type,omitempty" bson:"-"` //hint for xml model mashaling on client end 'pagerelation'
+	Type     string             `xml:"-" json:"Type,omitempty" bson:"-"`                 //hint for xml model mashaling on client end 'pagerelation'
+	Page     SitePage           `xml:"page,omitempty" json:"Page,omitempty" bson:"page"` //for aggregate querying and not for storing
 }
 
 type Comment struct {
