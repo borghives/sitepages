@@ -62,10 +62,10 @@ type Stanza struct {
 type RelationType string
 
 const (
-	Bookmarked RelationType = "bookmarked"
-	Endorsed   RelationType = "endorsed"
-	Objected   RelationType = "objected"
-	Ignored    RelationType = "ignored"
+	RelationType_Bookmarked RelationType = "bookmarked"
+	RelationType_Endorsed   RelationType = "endorsed"
+	RelationType_Objected   RelationType = "objected"
+	RelationType_Ignored    RelationType = "ignored"
 )
 
 func (r RelationType) String() string {
@@ -81,14 +81,24 @@ func CastRelationType(s string) RelationType {
 	}
 }
 
-type UserToPage struct {
-	XMLName  xml.Name           `xml:"pagerelation" json:"-" bson:"-"`
-	UserId   primitive.ObjectID `xml:"-" json:"-" bson:"user_id"`
-	PageId   primitive.ObjectID `xml:"pageid" json:"PageId" bson:"page_id"`
+type RelationGraphType string
+
+const (
+	RelationGraphType_UserPage RelationGraphType = "pagerelation"
+)
+
+func (r RelationGraphType) String() string {
+	return string(r)
+}
+
+type Relationship struct {
+	XMLName  xml.Name           `xml:"relationship" json:"-" bson:"-"`
+	SourceId primitive.ObjectID `xml:"-" json:"-" bson:"source_id"`
+	TargetId primitive.ObjectID `xml:"targetid" json:"TargetId" bson:"target_id"`
 	Relation RelationType       `xml:"relation" json:"Relation" bson:"relation"`
 	Rank     float32            `xml:"rank" json:"Rank" bson:"rank"`
 	EventAt  time.Time          `xml:"-" json:"-" bson:"event_at"`
-	Type     string             `xml:"-" json:"Type,omitempty" bson:"-"`                                 //hint for xml model mashaling on client end 'pagerelation'
+	Type     RelationGraphType  `xml:"type,omitempty" json:"Type,omitempty" bson:"type,omitempty"`
 	PageData []SitePage         `xml:"-,omitempty" json:"PageData,omitempty" bson:"page_data,omitempty"` //for aggregate querying and not for storing
 }
 
