@@ -85,6 +85,7 @@ type RelationGraphType string
 
 const (
 	RelationGraphType_UserPage RelationGraphType = "pagerelation"
+	RelationGraphType_Opaque   RelationGraphType = "opaque"
 )
 
 func (r RelationGraphType) String() string {
