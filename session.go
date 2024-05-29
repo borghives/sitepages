@@ -234,6 +234,10 @@ func RefreshNewRequestSession(w http.ResponseWriter, r *http.Request) *WebSessio
 	return refreshNewRequestSession(w, GetRealIPFromRequest(r), GetClientSignature(r), session)
 }
 
+func ClearRequestSession(w http.ResponseWriter, r *http.Request) *WebSession {
+	return refreshNewRequestSession(w, GetRealIPFromRequest(r), GetClientSignature(r), nil)
+}
+
 func (sess WebSession) GetAge() time.Duration {
 	return time.Since(sess.GenerateTime)
 }
