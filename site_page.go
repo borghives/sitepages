@@ -62,6 +62,7 @@ type Stanza struct {
 type RelationType string
 
 const (
+	RelationType_Generic    RelationType = "generic"
 	RelationType_Bookmarked RelationType = "bookmarked"
 	RelationType_Endorsed   RelationType = "endorsed"
 	RelationType_Objected   RelationType = "objected"
@@ -77,16 +78,26 @@ func CastRelationType(s string) RelationType {
 	case "bookmarked", "endorsed", "objected", "ignored":
 		return RelationType(s)
 	default:
-		return RelationType("")
+		return RelationType("generic")
 	}
 }
 
 type RelationGraphType string
 
 const (
-	RelationGraphType_UserPage RelationGraphType = "pagerelation"
-	RelationGraphType_Opaque   RelationGraphType = "opaque"
+	RelationGraphType_Opaque      RelationGraphType = "opaque"
+	RelationGraphType_UserPage    RelationGraphType = "pagerelation"
+	RelationGraphType_UserComment RelationGraphType = "comment"
 )
+
+func CastRelationGraphType(s string) RelationGraphType {
+	switch s {
+	case "pagerelation", "comment":
+		return CastRelationGraphType(s)
+	default:
+		return CastRelationGraphType("opaque")
+	}
+}
 
 func (r RelationGraphType) String() string {
 	return string(r)
