@@ -93,9 +93,9 @@ const (
 func CastRelationGraphType(s string) RelationGraphType {
 	switch s {
 	case "pagerelation", "comment":
-		return CastRelationGraphType(s)
+		return RelationGraphType(s)
 	default:
-		return CastRelationGraphType("opaque")
+		return RelationGraphType("opaque")
 	}
 }
 
