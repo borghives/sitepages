@@ -107,6 +107,7 @@ type Relationship struct {
 	XMLName  xml.Name           `xml:"relationship" json:"-" bson:"-"`
 	SourceId primitive.ObjectID `xml:"-" json:"-" bson:"source_id"`
 	TargetId primitive.ObjectID `xml:"targetid" json:"TargetId" bson:"target_id"`
+	Root     primitive.ObjectID `xml:"root" json:"Root" bson:"root"`
 	Relation RelationType       `xml:"relation" json:"Relation" bson:"relation"`
 	Rank     float32            `xml:"rank" json:"Rank" bson:"rank"`
 	EventAt  time.Time          `xml:"-" json:"-" bson:"event_at"`
