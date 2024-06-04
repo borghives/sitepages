@@ -193,8 +193,12 @@ func ParseMomementString(moment string) (time.Time, error) {
 	return time.Parse("2006-01-02 15:04", moment)
 }
 
-func GenerateCommentToken(session WebSession, pageId string, salt string) string {
-	return session.GenerateHexID("comment" + pageId + salt)
+func GenerateCommentToken(session WebSession, rootId string, salt string) string {
+	return session.GenerateHexID("comment" + rootId + salt)
+}
+
+func GenerateRelationToken(session WebSession, rootId string, salt string) string {
+	return session.GenerateHexID("relation" + rootId + salt)
 }
 
 func LoadSitePages(site string) []SitePage {
