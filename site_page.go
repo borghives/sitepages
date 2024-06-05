@@ -85,9 +85,9 @@ func CastRelationType(s string) RelationType {
 type RelationGraphType string
 
 const (
-	RelationGraphType_Opaque      RelationGraphType = "opaque"
+	RelationGraphType_Opaque      RelationGraphType = "opaquerelation"
 	RelationGraphType_UserPage    RelationGraphType = "pagerelation"
-	RelationGraphType_UserComment RelationGraphType = "comment"
+	RelationGraphType_UserComment RelationGraphType = "commentrelation"
 )
 
 func CastRelationGraphType(s string) RelationGraphType {
