@@ -92,10 +92,12 @@ const (
 
 func CastRelationGraphType(s string) RelationGraphType {
 	switch s {
-	case "pagerelation", "comment":
-		return RelationGraphType(s)
+	case RelationGraphType_UserPage.String():
+		return RelationGraphType_UserPage
+	case RelationGraphType_UserComment.String():
+		return RelationGraphType_UserComment
 	default:
-		return RelationGraphType("opaque")
+		return RelationGraphType_Opaque
 	}
 }
 
