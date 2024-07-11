@@ -56,8 +56,9 @@ type Stanza struct {
 	Context         primitive.ObjectID `xml:"context,omitempty" json:"Context,omitempty" bson:"context,omitempty"`
 	BasePage        primitive.ObjectID `xml:"basepage" json:"BasePage" bson:"base_page"`
 	PreviousVersion primitive.ObjectID `xml:"previousversion" json:"PreviousVersion" bson:"previous_version"`
-	ChunkIndex      uint16             `xml:"chunkidx" json:"ChunkIdx" bson:"-"`       //only for control and not for persist in state
-	ChunkOffset     uint16             `xml:"chunkoffset" json:"ChunkOffset" bson:"-"` //only for control and not for persist in state
+	ChunkIndex      uint16             `xml:"chunkidx" json:"ChunkIdx" bson:"-"`           //only for control and not for persist in state
+	ChunkOffset     uint16             `xml:"chunkoffset" json:"ChunkOffset" bson:"-"`     //only for control and not for persist in state
+	Chunkings       []uint16           `xml:"chunkings>content" json:"chunkings" bson:"-"` //only for control and not for persist in state
 }
 
 type RelationType string
