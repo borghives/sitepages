@@ -146,8 +146,10 @@ type LinkInfo struct {
 }
 
 type MetaInfo struct {
-	Source string     `xml:"source,omitempty" json:"Source,omitempty" bson:"source,omitempty"`
-	Deeper []LinkInfo `xml:"deeper,omitempty" json:"Deeper,omitempty" bson:"deeper,omitempty"`
+	Source          string     `xml:"source,omitempty" json:"Source,omitempty" bson:"source,omitempty"`
+	Category        string     `xml:"category,omitempty" json:"Category,omitempty" bson:"category,omitempty"`
+	HasMarketImpact bool       `xml:"hasmarketimpact,omitempty" json:"HasMarketImpact,omitempty" bson:"has_market_impact,omitempty"`
+	Deeper          []LinkInfo `xml:"deeper,omitempty" json:"Deeper,omitempty" bson:"deeper,omitempty"`
 }
 
 type Princigo struct { //a deeper private self: an entity that mediates between our instincts and the social word.  It caries multiple persona, the social mask we wear.
