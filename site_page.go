@@ -149,7 +149,7 @@ type MetaInfo struct {
 	Source          string     `xml:"source,omitempty" json:"Source,omitempty" bson:"source,omitempty"`
 	Category        string     `xml:"category,omitempty" json:"Category,omitempty" bson:"category,omitempty"`
 	HasMarketImpact bool       `xml:"hasmarketimpact,omitempty" json:"HasMarketImpact,omitempty" bson:"has_market_impact,omitempty"`
-	ScrapeType      string     `xml:"-" json:"ScrapeType,omitempty" bson:"scrape_type,omitempty"`
+	GenType         string     `xml:"-" json:"GenType,omitempty" bson:"gen_type,omitempty"`
 	Tags            []string   `xml:"tags,omitempty" json:"Tags,omitempty" bson:"tags,omitempty"`
 	Deeper          []LinkInfo `xml:"deeper,omitempty" json:"Deeper,omitempty" bson:"deeper,omitempty"`
 }
