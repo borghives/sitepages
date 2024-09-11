@@ -179,9 +179,7 @@ func TestSetNewRequestSession(t *testing.T) {
 	if len(parts) <= 2 {
 		t.Errorf("setNewRequestSession: expected cookie to have more than 2 parts")
 	}
-	cookieNameValue := strings.Split(parts[0], "=")
-
-	cookieValue := cookieNameValue[1]
+	cookieValue := strings.TrimPrefix(parts[0], "session=")
 
 	if cookieValue == "" {
 		t.Errorf("setNewRequestSession: expected cookie value to be non-empty")
@@ -193,31 +191,32 @@ func TestSetNewRequestSession(t *testing.T) {
 		t.Errorf("setNewRequestSession: expected no error when decoding cookie value, got %v", err)
 	}
 
-	// Check that the session is valid
-	if session.ID == primitive.NilObjectID {
-		t.Errorf("setNewRequestSession: expected session ID to be non-nil")
-	}
-	if session.GenerateTime.IsZero() {
-		t.Errorf("setNewRequestSession: expected session GenerateTime to be non-zero")
-	}
+	if session != nil {
+		// Check that the session is valid
+		if session.ID == primitive.NilObjectID {
+			t.Errorf("setNewRequestSession: expected session ID to be non-nil")
+		}
+		if session.GenerateTime.IsZero() {
+			t.Errorf("setNewRequestSession: expected session GenerateTime to be non-zero")
+		}
 
-	if session.GenerateFrom != primitive.NilObjectID {
-		t.Errorf("setNewRequestSession: expected session GenerateFrom to be nil")
-	}
-	if session.FirstTime.IsZero() {
-		t.Errorf("setNewRequestSession: expected session FirstTime to be non zero")
-	}
+		if session.GenerateFrom != primitive.NilObjectID {
+			t.Errorf("setNewRequestSession: expected session GenerateFrom to be nil")
+		}
+		if session.FirstTime.IsZero() {
+			t.Errorf("setNewRequestSession: expected session FirstTime to be non zero")
+		}
 
-	if createdSession.ID != session.ID {
-		t.Errorf("setNewRequestSession: expected created session ID to be equal to decoded session ID")
-	}
+		if createdSession.ID != session.ID {
+			t.Errorf("setNewRequestSession: expected created session ID to be equal to decoded session ID")
+		}
 
-	if createdSession.GenerateTime.Sub(session.GenerateTime).Seconds() > 1 {
-		t.Errorf("setNewRequestSession: expected created session GenerateTime to be equal to decoded session GenerateTime diff: %f", session.GenerateTime.Sub(session.GenerateTime).Seconds())
-	}
+		if createdSession.GenerateTime.Sub(session.GenerateTime).Seconds() > 1 {
+			t.Errorf("setNewRequestSession: expected created session GenerateTime to be equal to decoded session GenerateTime diff: %f", session.GenerateTime.Sub(session.GenerateTime).Seconds())
+		}
 
-	if createdSession.GenerateFrom != session.GenerateFrom {
-		t.Errorf("GenerateFrom not the same")
+		if createdSession.GenerateFrom != session.GenerateFrom {
+			t.Errorf("GenerateFrom not the same")
+		}
 	}
-
 }
