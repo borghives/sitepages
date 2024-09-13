@@ -56,6 +56,7 @@ type Stanza struct {
 	Context         primitive.ObjectID `xml:"context,omitempty" json:"Context,omitempty" bson:"context,omitempty"`
 	BasePage        primitive.ObjectID `xml:"basepage" json:"BasePage" bson:"base_page"`
 	PreviousVersion primitive.ObjectID `xml:"previousversion" json:"PreviousVersion" bson:"previous_version"`
+	TtlStart        time.Time          `xml:"-" json:"-" bson:"ttl_start,omitempty"`
 	ChunkIndex      uint16             `xml:"chunkidx" json:"ChunkIdx" bson:"-"`                               //only for control and not for persist in state
 	ChunkOffset     uint16             `xml:"chunkoffset" json:"ChunkOffset" bson:"-"`                         //only for control and not for persist in state
 	Chunkings       []uint16           `xml:"chunkings>content,omitempty" json:"chunkings,omitempty" bson:"-"` //only for control and not for persist in state
@@ -129,6 +130,7 @@ type Comment struct {
 	Content  string             `xml:"content" json:"Content" bson:"content"`
 	Score    float32            `xml:"-" json:"-" bson:"score"`
 	EventAt  time.Time          `xml:"eventat" json:"EventAt" bson:"event_at"`
+	TtlStart time.Time          `xml:"-" json:"-" bson:"ttl_start,omitempty"`
 }
 
 type Synapse struct {
