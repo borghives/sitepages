@@ -128,7 +128,7 @@ type Comment struct {
 	UserName string             `xml:"username,omitempty" json:"UserName,omitempty" bson:"user_name,omitempty"`
 	Moment   string             `xml:"moment" json:"Moment" bson:"moment"`
 	Content  string             `xml:"content" json:"Content" bson:"content"`
-	Score    float32            `xml:"-" json:"-" bson:"score"`
+	Score    float64            `xml:"-" json:"-" bson:"score"`
 	EventAt  time.Time          `xml:"eventat" json:"EventAt" bson:"event_at"`
 	TtlStart time.Time          `xml:"-" json:"-" bson:"ttl_start,omitempty"`
 }
