@@ -195,8 +195,9 @@ func GenerateStanzaToken(session WebSession, pageId string, referenceStanza stri
 	return session.GenerateHexID("stanza" + pageId + referenceStanza + strconv.Itoa(int(index)))
 }
 
-func GenerateMomentString() string {
-	return time.Now().UTC().Format("2006-01-02 15:04")
+func GenerateMomentString(coolDown time.Duration) string {
+	now := time.Now().UTC()
+	return now.Add(coolDown).Format("2006-01-02 15:04")
 }
 
 func ParseMomementString(moment string) (time.Time, error) {
