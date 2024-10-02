@@ -148,7 +148,7 @@ type LinkInfo struct {
 }
 
 type MetaInfo struct {
-	SourceId        primitive.ObjectID `xml:"source_id,omitempty" json:"SourceId,omitempty" bson:"source_id,omitempty"`
+	SourceId        primitive.ObjectID `xml:"sourceid,omitempty" json:"SourceId,omitempty" bson:"sourceid,omitempty"`
 	Source          string             `xml:"source,omitempty" json:"Source,omitempty" bson:"source,omitempty"`
 	Category        string             `xml:"category,omitempty" json:"Category,omitempty" bson:"category,omitempty"`
 	HasMarketImpact bool               `xml:"hasmarketimpact,omitempty" json:"HasMarketImpact,omitempty" bson:"has_market_impact,omitempty"`
