@@ -24,7 +24,7 @@ type SitePage struct {
 	XMLName          xml.Name             `xml:"page" json:"-" bson:"-"`
 	ID               primitive.ObjectID   `xml:"id,attr" json:"ID" bson:"_id,omitempty"`
 	Root             primitive.ObjectID   `xml:"root" json:"Root" bson:"root"`
-	LinkName         string               `xml:"linkname,omitempty" json:"LinkName" bson:"link"`
+	Link             string               `xml:"link,omitempty" json:"Link" bson:"link"`
 	Title            string               `xml:"title" json:"Title" bson:"title"`
 	Abstract         string               `xml:"abstract,omitempty" json:"Abstract,omitempty" bson:"abstract,omitempty"`
 	Image            string               `xml:"image,omitempty" json:"Image,omitempty" bson:"image,omitempty"`
