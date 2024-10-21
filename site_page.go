@@ -130,6 +130,7 @@ type Comment struct {
 	Content  string             `xml:"content" json:"Content" bson:"content"`
 	Infos    MetaInfo           `xml:"infos,omitempty" json:"Infos,omitempty" bson:"infos,omitempty"`
 	Score    float64            `xml:"-" json:"-" bson:"score"`
+	BestBy   time.Time          `xml:"-" json:"-" bson:"best_by"`
 	EventAt  time.Time          `xml:"eventat" json:"EventAt" bson:"event_at"`
 	TtlStart time.Time          `xml:"-" json:"-" bson:"ttl_start,omitempty"`
 }
