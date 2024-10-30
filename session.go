@@ -253,6 +253,10 @@ func HashToIdHexString(message string) string {
 	return string(hex.EncodeToString(idbytes[:12]))
 }
 
+func GenerateToken(key string, message string) string {
+	return HashToIdHexString(key + "_-_" + message)
+}
+
 func (sess *WebSession) GenerateHashBytes(message string) [32]byte {
 	if message == "" {
 		message = "0"
