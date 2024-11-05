@@ -253,10 +253,6 @@ func HashToIdHexString(message string) string {
 	return string(hex.EncodeToString(idbytes[:12]))
 }
 
-func GenerateToken(key string, message string) string {
-	return HashToIdHexString(key + "_-_" + message)
-}
-
 func (sess *WebSession) GenerateHashBytes(message string) [32]byte {
 	if message == "" {
 		message = "0"
@@ -272,4 +268,27 @@ func (sess *WebSession) GenerateHexID(message string) string {
 	}
 	idbytes := sess.GenerateHashBytes(message)
 	return string(hex.EncodeToString(idbytes[:12]))
+}
+
+func (sess *WebSession) GenerateSessionToken() string {
+	return sess.GenerateHexID("session_token")
+}
+
+func (sess *WebSession) GenerateTokenFromSalt(salt string) string {
+	sessToken := sess.GenerateSessionToken()
+	return GenerateTokenFromSalt(sessToken, salt)
+
+}
+
+func GenerateSalt(saltSeed string, message string) string {
+	return HashToIdHexString(saltSeed + "_-_" + message)
+}
+
+func GenerateTokenFromSeed(sessToken string, saltSeed string, message string) string {
+	salt := GenerateSalt(saltSeed, message)
+	return GenerateTokenFromSalt(sessToken, salt)
+}
+
+func GenerateTokenFromSalt(sessToken string, salt string) string {
+	return HashToIdHexString(sessToken + "-_" + salt)
 }
