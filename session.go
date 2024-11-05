@@ -277,7 +277,6 @@ func (sess *WebSession) GenerateSessionToken() string {
 func (sess *WebSession) GenerateTokenFromSalt(salt string) string {
 	sessToken := sess.GenerateSessionToken()
 	return GenerateTokenFromSalt(sessToken, salt)
-
 }
 
 func GenerateSalt(saltSeed string, message string) string {
