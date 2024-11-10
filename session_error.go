@@ -70,11 +70,11 @@ func GetAndVerifySession(r *http.Request) (*WebSession, error) {
 		sessionError.Code |= SESSION_ERROR_SESSION_EXPIRED
 	}
 
-	realip := GetRealIPFromRequest(r)
-	if realip != string(session.FromIp) {
-		sessionError.Message += "IP mismatch; "
-		sessionError.Code |= SESSION_ERROR_IP_MISMATCH
-	}
+	// realip := GetRealIPFromRequest(r)
+	// if realip != string(session.FromIp) {
+	// 	sessionError.Message += "IP mismatch; "
+	// 	sessionError.Code |= SESSION_ERROR_IP_MISMATCH
+	// }
 
 	client := GetClientSignature(r)
 	clientHash := HashToIdHexString(client)
