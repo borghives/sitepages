@@ -41,7 +41,7 @@ func (t *TemplateServerMux) HandlePage(pattern string, page string, requireAuth 
 func (t *TemplateServerMux) HandlePageByLinkAndId(pattern string, page string, mapping LinkAndIdPageMap) {
 	template, exists := t.templates[page]
 	if !exists {
-		log.Fatal("Page Template doesn't exists", page)
+		log.Fatal("Page Template doesn't exists ", page)
 	}
 	t.Mux.Handle(pattern, PageByIdTemplateHandler{template, mapping})
 }
@@ -49,7 +49,7 @@ func (t *TemplateServerMux) HandlePageByLinkAndId(pattern string, page string, m
 func (t *TemplateServerMux) HandlePageByLink(pattern string, page string, mapping LinkPageMap) {
 	template, exists := t.templates[page]
 	if !exists {
-		log.Fatal("Page Template doesn't exists", page)
+		log.Fatal("Page Template doesn't exists ", page)
 	}
 	t.Mux.Handle(pattern, PageLinksTemplateHandler{template, mapping})
 }
