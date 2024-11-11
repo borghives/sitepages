@@ -14,50 +14,6 @@ import (
 type LinkAndIdPageMap map[string]map[string]*SitePage
 type LinkPageMap map[string]*SitePage
 
-type TemplateServerMux struct {
-	Mux       *http.ServeMux
-	templates map[string]*template.Template
-}
-
-func NewTemplateServerMux(frontPagesFolder string, templateComponentFolder string) *TemplateServerMux {
-	return &TemplateServerMux{
-		Mux:       http.NewServeMux(),
-		templates: LoadAllTemplatePages(frontPagesFolder, templateComponentFolder),
-	}
-}
-
-func (t *TemplateServerMux) Handle(pattern string, handler http.Handler) {
-	t.Mux.Handle(pattern, handler)
-}
-
-func (t *TemplateServerMux) HandlePage(pattern string, page string, requireAuth bool) {
-	template, exists := t.templates[page]
-	if !exists {
-		log.Fatal("Page Template doesn't exists", page)
-	}
-	t.Mux.Handle(pattern, TemplateHandler{template, requireAuth})
-}
-
-func (t *TemplateServerMux) HandlePageByLinkAndId(pattern string, page string, mapping LinkAndIdPageMap) {
-	template, exists := t.templates[page]
-	if !exists {
-		log.Fatal("Page Template doesn't exists ", page)
-	}
-	t.Mux.Handle(pattern, PageByIdTemplateHandler{template, mapping})
-}
-
-func (t *TemplateServerMux) HandlePageByLink(pattern string, page string, mapping LinkPageMap) {
-	template, exists := t.templates[page]
-	if !exists {
-		log.Fatal("Page Template doesn't exists ", page)
-	}
-	t.Mux.Handle(pattern, PageLinksTemplateHandler{template, mapping})
-}
-
-func (t *TemplateServerMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	t.Mux.ServeHTTP(w, r)
-}
-
 type TemplateHandler struct {
 	WebTemplates *template.Template
 	RequireAuth  bool
@@ -129,7 +85,7 @@ func (h PageListTemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 
 type PageLinksTemplateHandler struct {
 	WebTemplates *template.Template
-	Page         map[string]*SitePage
+	Page         LinkPageMap
 }
 
 // ServeHTTP implements the http.Handler interface
@@ -209,7 +165,7 @@ func SetupToken(webSession *WebSession, tData *TemplateData, rootId primitive.Ob
 
 type PageByIdTemplateHandler struct {
 	WebTemplates    *template.Template
-	PageByLinkAndId map[string]map[string]*SitePage
+	PageByLinkAndId LinkAndIdPageMap
 }
 
 // ServeHTTP implements the http.Handler interface
