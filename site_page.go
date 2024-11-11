@@ -62,6 +62,13 @@ type Stanza struct {
 	Chunkings       []uint16           `xml:"chunkings>content,omitempty" json:"chunkings,omitempty" bson:"-"` //only for control and not for persist in state
 }
 
+type PageList struct {
+	XMLName  xml.Name             `xml:"pagelist" json:"-" bson:"-"`
+	ID       primitive.ObjectID   `xml:"id,attr" json:"ID" bson:"_id,omitempty"`
+	Contents []primitive.ObjectID `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
+	PageData []SitePage           `xml:"-" json:"PageData,omitempty" bson:"page_data,omitempty"`
+}
+
 type RelationType string
 
 const (
