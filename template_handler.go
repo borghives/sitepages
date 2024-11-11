@@ -26,7 +26,11 @@ func NewTemplateServerMux(frontPagesFolder string, templateComponentFolder strin
 	}
 }
 
-func (t *TemplateServerMux) Handle(pattern string, page string, requireAuth bool) {
+func (t *TemplateServerMux) Handle(pattern string, handler http.Handler) {
+	t.Mux.Handle(pattern, handler)
+}
+
+func (t *TemplateServerMux) HandlePage(pattern string, page string, requireAuth bool) {
 	template, exists := t.templates[page]
 	if !exists {
 		log.Fatal("Page Template doesn't exists", page)
