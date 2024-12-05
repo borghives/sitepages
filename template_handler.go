@@ -250,6 +250,14 @@ type TemplateData struct {
 	Models               []template.HTML
 }
 
+func (d TemplateData) MakeTemplateFunc() template.FuncMap {
+	return template.FuncMap{
+		"getTopicId": func() string {
+			return d.ID
+		},
+	}
+}
+
 func getPageParamFromRequest(r *http.Request) (string, string, error) {
 	// Get the last path segment from the request URL
 
@@ -272,7 +280,7 @@ func getPageParamFromRequest(r *http.Request) (string, string, error) {
 }
 
 func executeTemplateToHttpResponse(w http.ResponseWriter, webTemplates *template.Template, tData TemplateData) {
-	err := webTemplates.Execute(w, tData)
+	err := webTemplates.Funcs(tData.MakeTemplateFunc()).Execute(w, tData)
 	if err != nil {
 		log.Printf("instance@%s ERROR executing template:  %s", GetHostInfo().Id, err)
 		http.Error(w, "Error", http.StatusInternalServerError)
