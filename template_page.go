@@ -13,6 +13,14 @@ func LoadAllTemplatePages(frontFolder string, templateFolder string) map[string]
 		"split":    split,
 		"gentoken": GenerateTokenFromSeed,
 		"gensalt":  GenerateSalt,
+		"getType": func(object any) string {
+			_, ok := object.(TemplateData)
+			if ok {
+				return "is TemplateData"
+			} else {
+				return "is not TemplateData"
+			}
+		},
 	}
 
 	pagefiles, err := os.ReadDir(frontFolder)
