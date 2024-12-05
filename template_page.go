@@ -10,18 +10,12 @@ import (
 func LoadAllTemplatePages(frontFolder string, templateFolder string) map[string]*template.Template {
 	retval := make(map[string]*template.Template)
 	funcMap := template.FuncMap{
-		"split":    split,
-		"gentoken": GenerateTokenFromSeed,
-		"gensalt": func(object any, name string) string {
-			data, ok := object.(TemplateData)
-			if ok {
-				return GenerateSalt(data.Nonce, name)
-			}
-			return ""
+		"split": split,
+		"gentoken": func(data TemplateData, name string) string {
+			return GenerateTokenFromSeed(data.SessionToken, data.Nonce, name)
 		},
-
-		"getType": func(object TemplateData) string {
-			return "is TemplateData" + object.Nonce
+		"gensalt": func(data TemplateData, name string) string {
+			return GenerateSalt(data.Nonce, name)
 		},
 	}
 
