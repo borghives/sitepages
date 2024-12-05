@@ -252,8 +252,8 @@ type TemplateData struct {
 
 func (d TemplateData) MakeTemplateFunc() template.FuncMap {
 	return template.FuncMap{
-		"getTopicId": func() string {
-			return d.ID
+		"gettopic": func() string {
+			return "hello"
 		},
 	}
 }
