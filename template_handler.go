@@ -36,7 +36,7 @@ func (h TemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	tData := TemplateData{
 		ID:           r.PathValue("id"),
 		SessionToken: webSession.GenerateSessionToken(),
-		SaltSeed:     GetRandomHexString(),
+		Nonce:        GetRandomHexString(),
 		RootId:       r.PathValue("rid"),
 		RelType:      CastRelationType(r.PathValue("relationtype")),
 		Username:     webSession.UserName,
@@ -74,7 +74,7 @@ func (h PageListTemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 		Title:        "",
 		Username:     webSession.UserName,
 		SessionToken: webSession.GenerateSessionToken(),
-		SaltSeed:     GetRandomHexString(),
+		Nonce:        GetRandomHexString(),
 		Models: []template.HTML{
 			template.HTML(pagelistmarshal),
 			template.HTML(datamarshal),
@@ -124,7 +124,7 @@ func (h PageLinksTemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 		RootId:       pageRoot,
 		Username:     webSession.UserName,
 		SessionToken: webSession.GenerateSessionToken(),
-		SaltSeed:     GetRandomHexString(),
+		Nonce:        GetRandomHexString(),
 		Models: []template.HTML{
 			template.HTML(pagemarshal),
 			template.HTML(pagedatamarshal),
@@ -208,7 +208,7 @@ func (h PageByIdTemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 		RootId:       pageRoot,
 		Username:     webSession.UserName,
 		SessionToken: webSession.GenerateSessionToken(),
-		SaltSeed:     GetRandomHexString(),
+		Nonce:        GetRandomHexString(),
 		Models: []template.HTML{
 			template.HTML(pagemarshal),
 			template.HTML(pagedatamarshal),
@@ -243,7 +243,7 @@ type TemplateData struct {
 	Username             string
 	RelType              RelationType
 	SessionToken         string
-	SaltSeed             string
+	Nonce                string
 	CommentToken         string
 	CommentRelationToken string
 	PageRelationToken    string
