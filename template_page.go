@@ -12,7 +12,8 @@ func LoadAllTemplatePages(frontFolder string, templateFolder string) map[string]
 	funcMap := template.FuncMap{
 		"split": split,
 		"gentoken": func(data TemplateData, name string) string {
-			return GenerateTokenFromSeed(data.SessionToken, data.Nonce, name)
+			salt := GenerateSalt(data.Nonce, name)
+			return GenerateTokenFromSalt(data.SessionToken, salt)
 		},
 		"gensalt": func(data TemplateData, name string) string {
 			return GenerateSalt(data.Nonce, name)
