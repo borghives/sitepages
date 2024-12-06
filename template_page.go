@@ -11,12 +11,9 @@ func LoadAllTemplatePages(frontFolder string, templateFolder string) map[string]
 	retval := make(map[string]*template.Template)
 	funcMap := template.FuncMap{
 		"split": split,
-		"gentoken": func(data TemplateData, name string) string {
-			salt := GenerateSalt(data.Nonce, name)
+		"gentoken": func(data TemplateData, purpose string) string {
+			salt := GenerateSalt(data.Nonce, purpose)
 			return GenerateTokenFromSalt(data.SessionToken, salt)
-		},
-		"gensalt": func(data TemplateData, name string) string {
-			return GenerateSalt(data.Nonce, name)
 		},
 	}
 
