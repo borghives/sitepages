@@ -209,6 +209,7 @@ func (h PageByIdTemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 		Username:     webSession.UserName,
 		SessionToken: webSession.GenerateSessionToken(),
 		Nonce:        GetRandomHexString(),
+		LinkName:     link,
 		Models: []template.HTML{
 			template.HTML(pagemarshal),
 			template.HTML(pagedatamarshal),
@@ -247,6 +248,7 @@ type TemplateData struct {
 	CommentToken         string
 	CommentRelationToken string
 	PageRelationToken    string
+	LinkName             string
 	Models               []template.HTML
 }
 
