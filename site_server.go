@@ -4,9 +4,21 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/borghives/websession"
 )
+
+func GetAllowedHosts() map[string]bool {
+	// Determine allowed hosts for HTTP service.
+	var allowedHosts = map[string]bool{}
+	envAllowHosts := os.Getenv("ALLOW_HOSTS")
+	for _, host := range strings.Split(envAllowHosts, " ") {
+		allowedHosts[host] = true
+		log.Printf("Has allow host: %s", host)
+	}
+	return allowedHosts
+}
 
 func RunListenAndServer(handler http.Handler) {
 	log.Print("starting server...")
