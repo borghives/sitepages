@@ -5,7 +5,6 @@ import (
 	"encoding/xml"
 	"log"
 	"os"
-	"strconv"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -197,14 +196,6 @@ func SaveSitePages(file string, pages []SitePage) error {
 	return json.NewEncoder(f).Encode(pages)
 }
 
-func GeneratePageToken(session WebSession, refPageId string, pageRootId string) string {
-	return session.GenerateHexID("page" + refPageId + pageRootId)
-}
-
-func GenerateStanzaToken(session WebSession, pageId string, referenceStanza string, index uint16) string {
-	return session.GenerateHexID("stanza" + pageId + referenceStanza + strconv.Itoa(int(index)))
-}
-
 func GenerateMomentString(coolDown time.Duration) string {
 	now := time.Now().UTC()
 	return now.Add(coolDown).Format("2006-01-02 15:04")
@@ -212,14 +203,6 @@ func GenerateMomentString(coolDown time.Duration) string {
 
 func ParseMomementString(moment string) (time.Time, error) {
 	return time.Parse("2006-01-02 15:04", moment)
-}
-
-func GenerateCommentToken(session WebSession, rootId string, salt string) string {
-	return session.GenerateHexID("comment" + rootId + salt)
-}
-
-func GenerateRelationToken(session WebSession, rootId string, salt string) string {
-	return session.GenerateHexID("relation" + rootId + salt)
 }
 
 func LoadSitePages(site string) []SitePage {

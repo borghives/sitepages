@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/borghives/websession"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -27,7 +28,7 @@ func (h TemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	webSession := RefreshRequestSession(w, r)
+	webSession := websession.RefreshRequestSession(w, r)
 	if h.RequireAuth && (webSession.UserName == "" || webSession.UserId.IsZero()) {
 		http.Redirect(w, r, getAuthLoginUrl(r.URL.Path), http.StatusFound)
 		return
@@ -36,7 +37,7 @@ func (h TemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	tData := TemplateData{
 		ID:           r.PathValue("id"),
 		SessionToken: webSession.GenerateSessionToken(),
-		Nonce:        GetRandomHexString(),
+		Nonce:        websession.GetRandomHexString(),
 		RootId:       r.PathValue("rid"),
 		RelType:      CastRelationType(r.PathValue("relationtype")),
 		Username:     webSession.UserName,
@@ -67,14 +68,14 @@ func (h PageListTemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 		log.Printf("instance@%s ERROR marshalling page content data to xml", GetHostInfo().Id)
 	}
 
-	webSession := RefreshRequestSession(w, r)
+	webSession := websession.RefreshRequestSession(w, r)
 
 	tData := TemplateData{
 		ID:           h.SelectedPages.ID.Hex(),
 		Title:        "",
 		Username:     webSession.UserName,
 		SessionToken: webSession.GenerateSessionToken(),
-		Nonce:        GetRandomHexString(),
+		Nonce:        websession.GetRandomHexString(),
 		Models: []template.HTML{
 			template.HTML(pagelistmarshal),
 			template.HTML(datamarshal),
@@ -116,7 +117,7 @@ func (h PageLinksTemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 		log.Printf("host instance@%s ERROR marshalling page content data to xml", GetHostInfo().Id.Hex())
 	}
 
-	webSession := RefreshRequestSession(w, r)
+	webSession := websession.RefreshRequestSession(w, r)
 
 	tData := TemplateData{
 		Title:        title,
@@ -124,43 +125,14 @@ func (h PageLinksTemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 		RootId:       pageRoot,
 		Username:     webSession.UserName,
 		SessionToken: webSession.GenerateSessionToken(),
-		Nonce:        GetRandomHexString(),
+		Nonce:        websession.GetRandomHexString(),
 		Models: []template.HTML{
 			template.HTML(pagemarshal),
 			template.HTML(pagedatamarshal),
 		},
 	}
 
-	SetupToken(webSession, &tData, page.Root)
 	executeTemplateToHttpResponse(w, h.WebTemplates, tData)
-}
-
-func SetupToken(webSession *WebSession, tData *TemplateData, rootId primitive.ObjectID) {
-	if webSession == nil || tData == nil {
-		return
-	}
-
-	var comment Comment
-
-	comment.Moment = GenerateMomentString(0)
-	comment.Root = rootId
-	commentToken := GenerateCommentToken(*webSession, rootId.Hex(), comment.Moment)
-	comment.ID, _ = primitive.ObjectIDFromHex(commentToken)
-
-	commentmarshal, err := xml.MarshalIndent(comment, "", "  ")
-	if err != nil {
-		log.Printf("host instance@%s ERROR marshalling comment content data to xml", GetHostInfo().Id.Hex())
-
-	}
-
-	if tData.Models == nil {
-		tData.Models = []template.HTML{}
-	}
-
-	tData.Models = append(tData.Models, template.HTML(commentmarshal))
-	tData.CommentToken = commentToken
-	tData.CommentRelationToken = GenerateRelationToken(*webSession, rootId.Hex(), "comment")
-	tData.PageRelationToken = GenerateRelationToken(*webSession, rootId.Hex(), "page")
 }
 
 type PageByIdTemplateHandler struct {
@@ -200,7 +172,7 @@ func (h PageByIdTemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 		}
 	}
 
-	webSession := RefreshRequestSession(w, r)
+	webSession := websession.RefreshRequestSession(w, r)
 
 	tData := TemplateData{
 		Title:        title,
@@ -208,16 +180,12 @@ func (h PageByIdTemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 		RootId:       pageRoot,
 		Username:     webSession.UserName,
 		SessionToken: webSession.GenerateSessionToken(),
-		Nonce:        GetRandomHexString(),
+		Nonce:        websession.GetRandomHexString(),
 		LinkName:     link,
 		Models: []template.HTML{
 			template.HTML(pagemarshal),
 			template.HTML(pagedatamarshal),
 		},
-	}
-
-	if page != nil {
-		SetupToken(webSession, &tData, page.Root)
 	}
 
 	executeTemplateToHttpResponse(w, h.WebTemplates, tData)
@@ -291,7 +259,7 @@ func executeTemplateToHttpResponse(w http.ResponseWriter, webTemplates *template
 }
 
 func getAuthLoginUrl(redirectPath string) string {
-	domain := GetDomain()
+	domain := websession.GetDomain()
 	var retval string
 
 	if (domain == "localhost") || (domain == "127.0.0.1") {

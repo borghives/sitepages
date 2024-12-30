@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/borghives/websession"
 )
 
 func RunListenAndServer(handler http.Handler) {
@@ -13,7 +15,7 @@ func RunListenAndServer(handler http.Handler) {
 	log.Printf("START New Host Instance@%s Build:%s Image:%s ", hostInfo.Id, hostInfo.BuildId, hostInfo.ImageId)
 
 	// Initialize the session logic.  Will exit with fatal if cannot securely generate session
-	SessionInitCheck()
+	websession.SessionInitCheck()
 
 	// Determine port for HTTP service.
 	port := os.Getenv("PORT")

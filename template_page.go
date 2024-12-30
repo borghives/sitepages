@@ -13,10 +13,6 @@ func LoadAllTemplatePages(frontFolder string, templateFolder string, setupT Setu
 	retval := make(map[string]*template.Template)
 	funcMap := template.FuncMap{
 		"split": split,
-		"gentoken": func(data TemplateData, purpose string) string {
-			salt := GenerateSalt(data.Nonce, purpose)
-			return GenerateTokenFromSalt(data.SessionToken, salt)
-		},
 	}
 
 	pagefiles, err := os.ReadDir(frontFolder)
