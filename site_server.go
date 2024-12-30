@@ -23,7 +23,7 @@ func GetAllowedHosts() map[string]bool {
 func RunListenAndServer(handler http.Handler) {
 	log.Print("starting server...")
 
-	hostInfo := GetHostInfo()
+	hostInfo := websession.GetHostInfo()
 	log.Printf("START New Host Instance@%s Build:%s Image:%s ", hostInfo.Id, hostInfo.BuildId, hostInfo.ImageId)
 
 	// Initialize the session logic.  Will exit with fatal if cannot securely generate session

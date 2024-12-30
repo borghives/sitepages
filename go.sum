@@ -1,7 +1,5 @@
-github.com/borghives/websession v0.0.1 h1:s5VK1XPbwIy8EZ7uE20gUTKt7zgh0S86gJVTcjZo1vo=
-github.com/borghives/websession v0.0.1/go.mod h1:vomiWVEspbKr4zBtSZIBH/T0RtesFxiQr/4STNGH2iw=
-github.com/borghives/websession v0.0.2 h1:BLzox+vFsBhkqRtm+8sbt++CkJ49XwOFytjDM6xu4G8=
-github.com/borghives/websession v0.0.2/go.mod h1:vomiWVEspbKr4zBtSZIBH/T0RtesFxiQr/4STNGH2iw=
+github.com/borghives/websession v0.0.3 h1:xDDhoGYwZmIjyBf909zCVnD6ZvxXxuIP+/pk3FUMwnY=
+github.com/borghives/websession v0.0.3/go.mod h1:vomiWVEspbKr4zBtSZIBH/T0RtesFxiQr/4STNGH2iw=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=

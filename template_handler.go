@@ -23,7 +23,7 @@ type TemplateHandler struct {
 // ServeHTTP implements the http.Handler interface
 func (h TemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h.WebTemplates == nil {
-		log.Printf("instance@%s ERROR page template is nil", GetHostInfo().Id)
+		log.Printf("instance@%s ERROR page template is nil", websession.GetHostInfo().Id)
 		http.Error(w, "Page not found", http.StatusNotFound)
 		return
 	}
@@ -53,19 +53,19 @@ type PageListTemplateHandler struct {
 // ServeHTTP implements the http.Handler interface
 func (h PageListTemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h.WebTemplates == nil {
-		log.Printf("instance@%s ERROR page template is nil", GetHostInfo().Id)
+		log.Printf("instance@%s ERROR page template is nil", websession.GetHostInfo().Id)
 		http.Error(w, "Page not found", http.StatusNotFound)
 		return
 	}
 
 	pagelistmarshal, err := xml.MarshalIndent(h.SelectedPages, "", "  ")
 	if err != nil {
-		log.Printf("instance@%s ERROR marshalling page to xml", GetHostInfo().Id)
+		log.Printf("instance@%s ERROR marshalling page to xml", websession.GetHostInfo().Id)
 	}
 
 	datamarshal, err := xml.MarshalIndent(h.SelectedPages.PageData, "", "  ")
 	if err != nil {
-		log.Printf("instance@%s ERROR marshalling page content data to xml", GetHostInfo().Id)
+		log.Printf("instance@%s ERROR marshalling page content data to xml", websession.GetHostInfo().Id)
 	}
 
 	webSession := websession.RefreshRequestSession(w, r)
@@ -99,7 +99,7 @@ func (h PageLinksTemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 	pathKey := r.URL.Path[1:]
 	page, exists := h.Page[pathKey]
 	if !exists {
-		log.Printf("host instance@%s ERROR getting path key from request", GetHostInfo().Id.Hex())
+		log.Printf("host instance@%s ERROR getting path key from request", websession.GetHostInfo().Id.Hex())
 		http.Error(w, "Page not found", http.StatusNotFound)
 		return
 	}
@@ -109,12 +109,12 @@ func (h PageLinksTemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 	pageRoot = page.Root.Hex()
 	pagemarshal, err := xml.MarshalIndent(page, "", "  ")
 	if err != nil {
-		log.Printf("host instance@%s ERROR marshalling page to xml", GetHostInfo().Id.Hex())
+		log.Printf("host instance@%s ERROR marshalling page to xml", websession.GetHostInfo().Id.Hex())
 	}
 
 	pagedatamarshal, err := xml.MarshalIndent(page.StanzaData, "", "  ")
 	if err != nil {
-		log.Printf("host instance@%s ERROR marshalling page content data to xml", GetHostInfo().Id.Hex())
+		log.Printf("host instance@%s ERROR marshalling page content data to xml", websession.GetHostInfo().Id.Hex())
 	}
 
 	webSession := websession.RefreshRequestSession(w, r)
@@ -145,7 +145,7 @@ func (h PageByIdTemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 
 	link, pageid, err := getPageParamFromRequest(r)
 	if err != nil {
-		log.Printf("instance@%s ERROR getting pageid from request: %s", GetHostInfo().Id, err)
+		log.Printf("instance@%s ERROR getting pageid from request: %s", websession.GetHostInfo().Id, err)
 		http.Error(w, "Page not found", http.StatusNotFound)
 		return
 	}
@@ -163,12 +163,12 @@ func (h PageByIdTemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 		pageRoot = page.Root.Hex()
 		pagemarshal, err = xml.MarshalIndent(page, "", "  ")
 		if err != nil {
-			log.Printf("instance@%s ERROR marshalling page to xml", GetHostInfo().Id)
+			log.Printf("instance@%s ERROR marshalling page to xml", websession.GetHostInfo().Id)
 		}
 
 		pagedatamarshal, err = xml.MarshalIndent(page.StanzaData, "", "  ")
 		if err != nil {
-			log.Printf("instance@%s ERROR marshalling page content data to xml", GetHostInfo().Id)
+			log.Printf("instance@%s ERROR marshalling page content data to xml", websession.GetHostInfo().Id)
 		}
 	}
 
@@ -252,7 +252,7 @@ func getPageParamFromRequest(r *http.Request) (string, string, error) {
 func executeTemplateToHttpResponse(w http.ResponseWriter, webTemplates *template.Template, tData TemplateData) {
 	err := webTemplates.Funcs(tData.MakeTemplateFunc()).Execute(w, tData)
 	if err != nil {
-		log.Printf("instance@%s ERROR executing template:  %s", GetHostInfo().Id, err)
+		log.Printf("instance@%s ERROR executing template:  %s", websession.GetHostInfo().Id, err)
 		http.Error(w, "Error", http.StatusInternalServerError)
 		return
 	}
