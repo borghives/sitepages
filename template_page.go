@@ -7,7 +7,9 @@ import (
 	"strings"
 )
 
-func LoadAllTemplatePages(frontFolder string, templateFolder string) map[string]*template.Template {
+type SetupTemplate func(templ *template.Template) *template.Template
+
+func LoadAllTemplatePages(frontFolder string, templateFolder string, setupT SetupTemplate) map[string]*template.Template {
 	retval := make(map[string]*template.Template)
 	funcMap := template.FuncMap{
 		"split": split,
@@ -23,7 +25,7 @@ func LoadAllTemplatePages(frontFolder string, templateFolder string) map[string]
 	}
 
 	for _, filename := range pagefiles {
-		tmpl, err := template.New(filename.Name()).Funcs(funcMap).ParseFiles(frontFolder + filename.Name())
+		tmpl, err := setupT(template.New(filename.Name())).Funcs(funcMap).ParseFiles(frontFolder + filename.Name())
 		if err != nil {
 			log.Fatal(err)
 		}

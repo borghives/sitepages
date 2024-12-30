@@ -11,10 +11,10 @@ type TemplateServerMux struct {
 	templates map[string]*template.Template
 }
 
-func NewTemplateServerMux(frontPagesFolder string, templateComponentFolder string) *TemplateServerMux {
+func NewTemplateServerMux(frontPagesFolder string, templateComponentFolder string, setupT SetupTemplate) *TemplateServerMux {
 	return &TemplateServerMux{
 		Mux:       http.NewServeMux(),
-		templates: LoadAllTemplatePages(frontPagesFolder, templateComponentFolder),
+		templates: LoadAllTemplatePages(frontPagesFolder, templateComponentFolder, setupT),
 	}
 }
 
