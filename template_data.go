@@ -9,7 +9,7 @@ import (
 
 func CreateTemplateData(id string, rid string, session *websession.Session) TemplateData {
 	entangle := concept.Entanglement{
-		SystemSession: session,
+		SystemSession: *session,
 		Token:         session.GenerateSessionToken(),
 		Nonce:         websession.GetRandomHexString(),
 	}
