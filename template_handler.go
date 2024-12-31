@@ -34,14 +34,8 @@ func (h TemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tData := TemplateData{
-		ID:           r.PathValue("id"),
-		SessionToken: webSession.GenerateSessionToken(),
-		Nonce:        websession.GetRandomHexString(),
-		RootId:       r.PathValue("rid"),
-		RelType:      CastRelationType(r.PathValue("relationtype")),
-		Username:     webSession.UserName,
-	}
+	tData := CreateTemplateData(r.PathValue("id"), r.PathValue("rid"), webSession)
+
 	executeTemplateToHttpResponse(w, h.WebTemplates, tData)
 }
 
@@ -69,18 +63,12 @@ func (h PageListTemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	}
 
 	webSession := websession.RefreshRequestSession(w, r)
-
-	tData := TemplateData{
-		ID:           h.SelectedPages.ID.Hex(),
-		Title:        "",
-		Username:     webSession.UserName,
-		SessionToken: webSession.GenerateSessionToken(),
-		Nonce:        websession.GetRandomHexString(),
-		Models: []template.HTML{
-			template.HTML(pagelistmarshal),
-			template.HTML(datamarshal),
-		},
+	tData := CreateTemplateData(r.PathValue("id"), r.PathValue("rid"), webSession)
+	tData.Models = []template.HTML{
+		template.HTML(pagelistmarshal),
+		template.HTML(datamarshal),
 	}
+
 	executeTemplateToHttpResponse(w, h.WebTemplates, tData)
 }
 
@@ -118,19 +106,14 @@ func (h PageLinksTemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 	}
 
 	webSession := websession.RefreshRequestSession(w, r)
-
-	tData := TemplateData{
-		Title:        title,
-		ID:           id,
-		RootId:       pageRoot,
-		Username:     webSession.UserName,
-		SessionToken: webSession.GenerateSessionToken(),
-		Nonce:        websession.GetRandomHexString(),
-		Models: []template.HTML{
-			template.HTML(pagemarshal),
-			template.HTML(pagedatamarshal),
-		},
+	tData := CreateTemplateData(r.PathValue("id"), r.PathValue("rid"), webSession)
+	tData.Models = []template.HTML{
+		template.HTML(pagemarshal),
+		template.HTML(pagedatamarshal),
 	}
+	tData.Title = title
+	tData.ID = id
+	tData.RootId = pageRoot
 
 	executeTemplateToHttpResponse(w, h.WebTemplates, tData)
 }
@@ -173,20 +156,15 @@ func (h PageByIdTemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	}
 
 	webSession := websession.RefreshRequestSession(w, r)
-
-	tData := TemplateData{
-		Title:        title,
-		ID:           id,
-		RootId:       pageRoot,
-		Username:     webSession.UserName,
-		SessionToken: webSession.GenerateSessionToken(),
-		Nonce:        websession.GetRandomHexString(),
-		LinkName:     link,
-		Models: []template.HTML{
-			template.HTML(pagemarshal),
-			template.HTML(pagedatamarshal),
-		},
+	tData := CreateTemplateData(r.PathValue("id"), r.PathValue("rid"), webSession)
+	tData.Models = []template.HTML{
+		template.HTML(pagemarshal),
+		template.HTML(pagedatamarshal),
 	}
+	tData.Title = title
+	tData.ID = id
+	tData.RootId = pageRoot
+	tData.LinkName = link
 
 	executeTemplateToHttpResponse(w, h.WebTemplates, tData)
 }
@@ -202,30 +180,6 @@ func (h PageByIdTemplateHandler) GetPage(link string, pageid string) (*SitePage,
 
 	// Page not found
 	return nil, false
-}
-
-// TemplateData is the data passed to the template
-type TemplateData struct {
-	ID                   string
-	RootId               string
-	Title                string
-	Username             string
-	RelType              RelationType
-	SessionToken         string
-	Nonce                string
-	CommentToken         string
-	CommentRelationToken string
-	PageRelationToken    string
-	LinkName             string
-	Models               []template.HTML
-}
-
-func (d TemplateData) MakeTemplateFunc() template.FuncMap {
-	return template.FuncMap{
-		"gettopic": func() string {
-			return "hello"
-		},
-	}
 }
 
 func getPageParamFromRequest(r *http.Request) (string, string, error) {
