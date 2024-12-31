@@ -1,11 +1,7 @@
-github.com/borghives/entanglement v0.1.0 h1:6YarXHEoPUid2RK/2dppK2jdhTGQxMbYENz8jD4GeXY=
-github.com/borghives/entanglement v0.1.0/go.mod h1:gWtbzqX3EgvlvcAhkLzaHvWkBFtdhHGwxpHMRpT6Tnk=
 github.com/borghives/entanglement v0.1.1 h1:h221iEFp/DtzBo60KWVw/1M7BI6VMuApmaotUMBXlrE=
 github.com/borghives/entanglement v0.1.1/go.mod h1:XYB35MkHUpCl/HX3jEfWMgbxcdqm/U4x9TtjK7x2M7g=
-github.com/borghives/websession v0.0.3 h1:xDDhoGYwZmIjyBf909zCVnD6ZvxXxuIP+/pk3FUMwnY=
-github.com/borghives/websession v0.0.3/go.mod h1:vomiWVEspbKr4zBtSZIBH/T0RtesFxiQr/4STNGH2iw=
-github.com/borghives/websession v0.1.0 h1:pahe++z5+05vd+nZN7wDcbwatQyyOJnGbej3Nf3uyC0=
-github.com/borghives/websession v0.1.0/go.mod h1:r3XR8yYSZMCYzCTnaeagoJyeCt5V6pgaIZ2q+WVNHS8=
+github.com/borghives/websession v0.1.1 h1:OdjlibqHUZ1TvuT8A4pPiIhBwFIDGvqBAIBKLVRAOik=
+github.com/borghives/websession v0.1.1/go.mod h1:r3XR8yYSZMCYzCTnaeagoJyeCt5V6pgaIZ2q+WVNHS8=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
