@@ -6,4 +6,4 @@ require go.mongodb.org/mongo-driver v1.17.1
 
 require github.com/borghives/websession v0.0.3
 
-require github.com/borghives/entanglement v0.0.12
+require github.com/borghives/entanglement v0.0.15
