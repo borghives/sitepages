@@ -84,7 +84,7 @@ func (h PageLinksTemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 	id := ""
 	pageRoot := ""
 
-	pathKey := r.URL.Path[1:]
+	pathKey := r.PathValue("linkname")
 	page, exists := h.Page[pathKey]
 	if !exists {
 		log.Printf("host instance@%s ERROR getting path key from request", websession.GetHostInfo().Id.Hex())
