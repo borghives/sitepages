@@ -3,21 +3,16 @@ package sitepages
 import (
 	"html/template"
 
+	"github.com/borghives/entanglement"
 	"github.com/borghives/entanglement/concept"
 	"github.com/borghives/websession"
 )
 
 func CreateTemplateData(id string, rid string, session *websession.Session) TemplateData {
-	entangle := concept.Entanglement{
-		SystemSession: *session,
-		Token:         session.GenerateSessionToken(),
-		Nonce:         websession.GetRandomHexString(),
-	}
-
 	return TemplateData{
 		ID:           id,
 		RootId:       rid,
-		Entanglement: entangle,
+		Entanglement: entanglement.CreateEntanglement(*session),
 		Username:     session.UserName,
 	}
 }

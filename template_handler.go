@@ -62,8 +62,8 @@ func (h PageListTemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 		log.Printf("instance@%s ERROR marshalling page content data to xml", websession.GetHostInfo().Id)
 	}
 
-	webSession := websession.RefreshRequestSession(w, r)
-	tData := CreateTemplateData(r.PathValue("id"), r.PathValue("rid"), webSession)
+	session := websession.RefreshRequestSession(w, r)
+	tData := CreateTemplateData(r.PathValue("id"), r.PathValue("rid"), session)
 	tData.Models = []template.HTML{
 		template.HTML(pagelistmarshal),
 		template.HTML(datamarshal),
