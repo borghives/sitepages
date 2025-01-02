@@ -12,7 +12,7 @@ func CreateTemplateData(id string, rid string, session *websession.Session) Temp
 	return TemplateData{
 		ID:           id,
 		RootId:       rid,
-		Entanglement: entanglement.CreateEntanglement(*session),
+		Entanglement: entanglement.CreateEntanglement(session),
 		Username:     session.UserName,
 	}
 }
@@ -24,7 +24,7 @@ type TemplateData struct {
 	Title        string
 	Username     string
 	LinkName     string
-	Entanglement concept.Entanglement
+	Entanglement *concept.Entanglement
 	Models       []template.HTML
 }
 
