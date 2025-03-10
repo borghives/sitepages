@@ -30,6 +30,7 @@ type SitePage struct {
 	Synapses         []Synapse            `xml:"synapse,omitempty" json:"Synapses,omitempty" bson:"synapses,omitempty"`
 	Contents         []primitive.ObjectID `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
 	Infos            MetaInfo             `xml:"infos,omitempty" json:"Infos,omitempty" bson:"infos,omitempty"`
+	Authg            string               `xml:"authg,omitempty" json:"Authg,omitempty" bson:"authg,omitempty"`
 	CommentCount     uint32               `xml:"commentcount" json:"CommentCount" bson:"comment_count"`
 	EventAt          time.Time            `xml:"eventat" json:"EventAt" bson:"event_at"`
 	UpdatedTime      time.Time            `xml:"updated" json:"updated" bson:"updated_time"`
