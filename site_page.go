@@ -42,6 +42,7 @@ type SitePage struct {
 type Bundle struct {
 	XMLName          xml.Name             `xml:"bundle" json:"-" bson:"-"`
 	ID               primitive.ObjectID   `xml:"id,attr" json:"ID" bson:"_id,omitempty"`
+	Name             string               `xml:"name,omitempty" json:"name,omitempty" bson:"name,omitempty"`
 	Contents         []primitive.ObjectID `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
 	EventAt          time.Time            `xml:"eventat" json:"EventAt" bson:"event_at"`
 	PreviousBundleId primitive.ObjectID   `xml:"previousbundleid" json:"PreviousBundleId" bson:"previous_bundle_id"`
