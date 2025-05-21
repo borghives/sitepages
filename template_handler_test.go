@@ -9,8 +9,9 @@ import (
 	"testing"
 
 	"html/template" // Added
+
+	"github.com/borghives/websession"            // Added
 	"go.mongodb.org/mongo-driver/bson/primitive" // Added
-	"github.com/borghives/websession" // Added
 )
 
 // TestGetPageParamFromRequest tests the getPageParamFromRequest function
@@ -121,7 +122,7 @@ func TestGetAuthLoginUrl(t *testing.T) {
 			// the test environment for websession.GetDomain() is different.
 
 			// The mockDomain in tt (tt.mockDomain) is used to categorize the test case,
-            // but the actual assertions will be based on what websession.GetDomain() returns.
+			// but the actual assertions will be based on what websession.GetDomain() returns.
 			loginURLStr := getAuthLoginUrl(tt.redirectPath) // This will use actual websession.GetDomain()
 
 			// The assertions below are now more of a check on the structure of getAuthLoginUrl's output
@@ -146,15 +147,15 @@ func TestGetAuthLoginUrl(t *testing.T) {
 
 			redirectQueryParam := parsedURL.Query().Get("redirect")
 			// url.Query().Get() already unescapes the value. So compare with original.
-			if redirectQueryParam != tt.redirectPath { 
+			if redirectQueryParam != tt.redirectPath {
 				t.Errorf("Expected 'redirect' query param %q, got %q", tt.redirectPath, redirectQueryParam)
 			}
-			
+
 			// To make the test more concrete, let's assume websession.GetDomain() returns "example.com"
 			// when not localhost. If it's "localhost", it's "localhost".
 			// This is an assumption about the test environment.
 			actualDomainReturnedByWebsession := websession.GetDomain() // Call it once to see
-			
+
 			var expectedFullHost string
 			var expectedFullScheme string
 
@@ -166,13 +167,13 @@ func TestGetAuthLoginUrl(t *testing.T) {
 				// If actualDomainReturnedByWebsession is empty, this might lead to "login." which is not ideal.
 				// The original getAuthLoginUrl function doesn't handle empty domain from websession.GetDomain() gracefully for the "else" case.
 				if actualDomainReturnedByWebsession == "" {
-                    // This case is problematic in the original function.
-                    // Let's assume websession.GetDomain() won't return empty for non-localhost.
-                    // If it does, "https://login./?redirect=..." would be produced.
-                    expectedFullHost = "login." 
-                } else {
-				    expectedFullHost = "login." + actualDomainReturnedByWebsession
-                }
+					// This case is problematic in the original function.
+					// Let's assume websession.GetDomain() won't return empty for non-localhost.
+					// If it does, "https://login./?redirect=..." would be produced.
+					expectedFullHost = "login."
+				} else {
+					expectedFullHost = "login." + actualDomainReturnedByWebsession
+				}
 			}
 
 			if parsedURL.Scheme != expectedFullScheme {
@@ -237,7 +238,6 @@ func TestTemplateHandler_ServeHTTP(t *testing.T) {
 		expectedRedirectHost = "login." + actualDomain
 	}
 
-
 	// Prepare a simple template for testing execution
 	tmpl, err := template.New("test").Parse("ID={{.ID}}, RootID={{.RootId}}, User={{.Username}}")
 	if err != nil {
@@ -287,11 +287,11 @@ func TestTemplateHandler_ServeHTTP(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/test_auth_not_required", nil)
 		req.SetPathValue("id", "pathID1")
 		req.SetPathValue("rid", "pathRID1")
-		
+
 		// If websession.RefreshRequestSession returns a session with UserName "actualUser"
 		// then {{.Username}} will be "actualUser".
 		// We cannot easily mock this here. The test checks template execution.
-		
+
 		rr := httptest.NewRecorder()
 		handler.ServeHTTP(rr, req)
 
@@ -310,7 +310,7 @@ func TestTemplateHandler_ServeHTTP(t *testing.T) {
 			t.Errorf("Expected body to contain 'RootID=pathRID1', got %q", body)
 		}
 	})
-	
+
 	// Scenario 3: Auth required, assuming unauthenticated session from RefreshRequestSession
 	// This test is highly dependent on RefreshRequestSession returning an "empty" session.
 	t.Run("auth_required_unauthenticated_redirects", func(t *testing.T) {
@@ -318,7 +318,7 @@ func TestTemplateHandler_ServeHTTP(t *testing.T) {
 		reqPath := "/test_auth_required"
 		req, _ := http.NewRequest("GET", reqPath, nil)
 		// No path values needed for id/rid if it redirects before CreateTemplateData
-		
+
 		rr := httptest.NewRecorder()
 		handler.ServeHTTP(rr, req)
 
@@ -336,7 +336,7 @@ func TestTemplateHandler_ServeHTTP(t *testing.T) {
 		if location == "" {
 			t.Errorf("Expected 'Location' header for redirect, but it was empty")
 		}
-		
+
 		parsedRedirectURL, err := url.Parse(location)
 		if err != nil {
 			t.Fatalf("Redirect URL %q could not be parsed: %v", location, err)
@@ -417,16 +417,16 @@ func TestPageListTemplateHandler_ServeHTTP(t *testing.T) {
 	t.Run("valid_template_and_data", func(t *testing.T) {
 		handler := PageListTemplateHandler{WebTemplates: tmpl, SelectedPages: samplePageList}
 		req, _ := http.NewRequest("GET", "/test_pagelist", nil)
-		req.SetPathValue("id", "listID") // For CreateTemplateData
+		req.SetPathValue("id", "listID")   // For CreateTemplateData
 		req.SetPathValue("rid", "listRID") // For CreateTemplateData
-		
+
 		rr := httptest.NewRecorder()
 		handler.ServeHTTP(rr, req)
 
 		if rr.Code != http.StatusOK {
 			t.Errorf("Expected status %d, got %d", http.StatusOK, rr.Code)
 		}
-		
+
 		body := rr.Body.String()
 		// Check if XML marshalling of PageList happened (look for PageList ID attribute)
 		// The content of Models is template.HTML, so XML tags are not escaped further.
@@ -435,7 +435,7 @@ func TestPageListTemplateHandler_ServeHTTP(t *testing.T) {
 		}
 		// Check if XML marshalling of PageData happened (look for SitePage title)
 		expectedTitleXML := "<title>Test Page In List</title>"
-		if !strings.Contains(body, expectedTitleXML) { 
+		if !strings.Contains(body, expectedTitleXML) {
 			t.Errorf("Expected body to contain PageData XML %q, got %q", expectedTitleXML, body)
 		}
 		// Check for Username (depends on actual session)
@@ -443,7 +443,7 @@ func TestPageListTemplateHandler_ServeHTTP(t *testing.T) {
 		// 	t.Errorf("Expected body to contain user from session, got %q", body)
 		// }
 	})
-	
+
 	// Scenario 3: SelectedPages is nil (should not panic, but how does it behave?)
 	// The handler code doesn't explicitly check if SelectedPages or SelectedPages.PageData is nil
 	// before marshalling. This could lead to a panic if xml.MarshalIndent receives nil.
@@ -520,11 +520,10 @@ func TestPageLinksTemplateHandler_ServeHTTP(t *testing.T) {
 		LinkName:   "test-link-page", // Path key will be based on this if used directly
 		StanzaData: []Stanza{{ID: primitive.NewObjectID(), Content: "Sample Stanza"}},
 	}
-	
+
 	linkMap := make(LinkPageMap)
 	pathKey := "test-link-key" // The key used in the request URL
 	linkMap[pathKey] = samplePage
-
 
 	// Scenario 1: Page not found
 	t.Run("page_not_found", func(t *testing.T) {
@@ -542,11 +541,11 @@ func TestPageLinksTemplateHandler_ServeHTTP(t *testing.T) {
 	t.Run("page_found_executes_template", func(t *testing.T) {
 		handler := PageLinksTemplateHandler{WebTemplates: tmpl, Page: linkMap}
 		// Request URL path should be "/"+pathKey for r.URL.Path[1:] to work
-		req, _ := http.NewRequest("GET", "/"+pathKey, nil) 
+		req, _ := http.NewRequest("GET", "/"+pathKey, nil)
 		// Set path values for CreateTemplateData, though PageLinksTemplateHandler also sets some tData fields itself
-		req.SetPathValue("id", "reqPathID") 
+		req.SetPathValue("id", "reqPathID")
 		req.SetPathValue("rid", "reqPathRID")
-		
+
 		rr := httptest.NewRecorder()
 		handler.ServeHTTP(rr, req)
 
@@ -567,14 +566,14 @@ func TestPageLinksTemplateHandler_ServeHTTP(t *testing.T) {
 		}
 
 		// Check for XML content.
-		if !strings.Contains(body, `PageXML=<page id="`) { 
+		if !strings.Contains(body, `PageXML=<page id="`) {
 			t.Errorf("Expected body to contain `PageXML=<page id=\"`, got %q", body)
 		}
-		if !strings.Contains(body, `StanzaXML=<stanza id="`) { 
+		if !strings.Contains(body, `StanzaXML=<stanza id="`) {
 			t.Errorf("Expected body to contain `StanzaXML=<stanza id=\"`, got %q", body)
 		}
 	})
-	
+
 	// Scenario 3: Nil WebTemplates
 	t.Run("nil_web_templates", func(t *testing.T) {
 		// The handler code for PageLinksTemplateHandler does not have an explicit nil check
@@ -582,13 +581,13 @@ func TestPageLinksTemplateHandler_ServeHTTP(t *testing.T) {
 		// executeTemplateToHttpResponse *does* check, but it's good practice for handlers to check too.
 		// This test will rely on executeTemplateToHttpResponse's check.
 		// If h.Page is nil or page not found, it returns early, so template nil check might not be hit.
-		
+
 		// To test nil template, we must ensure a page IS found.
 		handler := PageLinksTemplateHandler{WebTemplates: nil, Page: linkMap}
 		req, _ := http.NewRequest("GET", "/"+pathKey, nil)
 		rr := httptest.NewRecorder()
 		handler.ServeHTTP(rr, req)
-		
+
 		// Expecting 500 because executeTemplateToHttpResponse will log and set InternalServerError
 		// if the template execution fails (which includes nil template if Execute is called).
 		// However, the current `executeTemplateToHttpResponse` calls `webTemplates.Funcs().Execute()`.
@@ -601,15 +600,11 @@ func TestPageLinksTemplateHandler_ServeHTTP(t *testing.T) {
 		// The current `executeTemplateToHttpResponse` will panic if `webTemplates` is nil due to `webTemplates.Funcs`.
 		// This test highlights this. For now, assume we want to see this potential panic/error.
 		// A more robust handler would check `h.WebTemplates == nil` at the start.
-		
-		defer func() {
-			if r := recover(); r == nil {
-				t.Errorf("Expected a panic when WebTemplates is nil and page is found, but did not get one")
-			} else {
-				// Optionally, check the panic message if it's specific enough
-				// t.Logf("Recovered from expected panic: %v", r)
-			}
-		}()
+
+		if rr.Code != http.StatusInternalServerError {
+			t.Errorf("Expected status %d, got %d", http.StatusInternalServerError, rr.Code)
+		}
+
 		// This call is expected to panic
 		handler.ServeHTTP(rr, req)
 	})
@@ -634,13 +629,13 @@ func TestPageByIdTemplateHandler_ServeHTTP(t *testing.T) {
 		ID:         pageID,
 		Root:       rootID,
 		Title:      "Test Page By ID",
-		LinkName:   linkKey, 
+		LinkName:   linkKey,
 		StanzaData: []Stanza{{ID: primitive.NewObjectID(), Content: "Stanza for Page By ID"}},
 	}
 
 	pageMap := make(map[string]*SitePage)
 	pageMap[pageKey] = samplePage
-	
+
 	linkAndIdMap := make(LinkAndIdPageMap)
 	linkAndIdMap[linkKey] = pageMap
 
@@ -650,7 +645,7 @@ func TestPageByIdTemplateHandler_ServeHTTP(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/some_url", nil)
 		req.SetPathValue("link", linkKey)
 		req.SetPathValue("id", "invalid-object-id-hex") // This will cause getPageParamFromRequest to error
-		
+
 		rr := httptest.NewRecorder()
 		handler.ServeHTTP(rr, req)
 
@@ -665,7 +660,7 @@ func TestPageByIdTemplateHandler_ServeHTTP(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/some_url", nil)
 		req.SetPathValue("link", "nonexistent-link") // Link not in map
 		req.SetPathValue("id", pageKey)
-		
+
 		rr := httptest.NewRecorder()
 		handler.ServeHTTP(rr, req)
 
@@ -725,7 +720,7 @@ func TestPageByIdTemplateHandler_ServeHTTP(t *testing.T) {
 			t.Errorf("Expected body to contain `StanzaXML=<stanza id=\"`, got %q", body)
 		}
 	})
-	
+
 	// Scenario 4: Nil WebTemplates (potential panic)
 	t.Run("nil_web_templates", func(t *testing.T) {
 		// Similar to PageLinksTemplateHandler, this handler doesn't have its own nil template check
@@ -736,17 +731,13 @@ func TestPageByIdTemplateHandler_ServeHTTP(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/some_url", nil)
 		req.SetPathValue("link", linkKey)
 		req.SetPathValue("id", pageKey) // Ensure page is found
-		
+
 		rr := httptest.NewRecorder()
 		handler.ServeHTTP(rr, req)
 
-		defer func() {
-			if r := recover(); r == nil {
-				t.Errorf("Expected a panic when WebTemplates is nil and page is found, but did not get one")
-			} else {
-				// t.Logf("Recovered from expected panic: %v", r)
-			}
-		}()
+		if rr.Code != http.StatusInternalServerError {
+			t.Errorf("Expected status %d, got %d", http.StatusInternalServerError, rr.Code)
+		}
 		// This call is expected to panic
 		handler.ServeHTTP(rr, req)
 	})

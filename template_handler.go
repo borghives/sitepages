@@ -204,6 +204,12 @@ func getPageParamFromRequest(r *http.Request) (string, string, error) {
 }
 
 func executeTemplateToHttpResponse(w http.ResponseWriter, webTemplates *template.Template, tData TemplateData) {
+	if webTemplates == nil {
+		log.Printf("instance@%s ERROR executing template:  webTemplate is nil", websession.GetHostInfo().Id)
+		http.Error(w, "Error", http.StatusInternalServerError)
+		return
+	}
+
 	err := webTemplates.Funcs(tData.MakeTemplateFunc()).Execute(w, tData)
 	if err != nil {
 		log.Printf("instance@%s ERROR executing template:  %s", websession.GetHostInfo().Id, err)
