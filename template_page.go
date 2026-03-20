@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -21,12 +22,12 @@ func LoadAllTemplatePages(frontFolder string, templateFolder string, setupT Setu
 	}
 
 	for _, filename := range pagefiles {
-		tmpl, err := setupT(template.New(filename.Name())).Funcs(funcMap).ParseFiles(frontFolder + filename.Name())
+		tmpl, err := setupT(template.New(filename.Name())).Funcs(funcMap).ParseFiles(filepath.Join(frontFolder, filename.Name()))
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		tmpl, err = tmpl.ParseGlob(templateFolder + "*.html")
+		tmpl, err = tmpl.ParseGlob(filepath.Join(templateFolder, "*.html"))
 		if err != nil {
 			log.Fatal(err)
 		}

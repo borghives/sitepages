@@ -9,7 +9,7 @@ import (
 	"net/url"
 
 	"github.com/borghives/websession"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type LinkAndIdPageMap map[string]map[string]*SitePage
@@ -195,7 +195,7 @@ func getPageParamFromRequest(r *http.Request) (string, string, error) {
 		return pagelink, "", nil
 	}
 
-	objId, err := primitive.ObjectIDFromHex(pageid)
+	objId, err := bson.ObjectIDFromHex(pageid)
 	if err != nil {
 		return "", "", err
 	}

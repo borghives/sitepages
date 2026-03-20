@@ -11,7 +11,7 @@ import (
 	"html/template" // Added
 
 	"github.com/borghives/websession"            // Added
-	"go.mongodb.org/mongo-driver/bson/primitive" // Added
+	"go.mongodb.org/mongo-driver/v2/bson" // Added
 )
 
 // TestGetPageParamFromRequest tests the getPageParamFromRequest function
@@ -393,10 +393,10 @@ func TestPageListTemplateHandler_ServeHTTP(t *testing.T) {
 	}
 
 	// Sample PageList and SitePage data
-	samplePage := SitePage{ID: primitive.NewObjectID(), Title: "Test Page In List"}
+	samplePage := SitePage{ID: bson.NewObjectID(), Title: "Test Page In List"}
 	samplePageList := &PageList{
-		ID:       primitive.NewObjectID(),
-		Contents: []primitive.ObjectID{samplePage.ID},
+		ID:       bson.NewObjectID(),
+		Contents: []bson.ObjectID{samplePage.ID},
 		PageData: []SitePage{samplePage},
 	}
 
@@ -452,7 +452,7 @@ func TestPageListTemplateHandler_ServeHTTP(t *testing.T) {
 	// So, it should not panic but produce "<nil/>" in the output.
 	t.Run("nil_selected_pages_data", func(t *testing.T) {
 		// Create a PageList with nil PageData to test that part specifically
-		nilPageDataList := &PageList{ID: primitive.NewObjectID(), PageData: nil}
+		nilPageDataList := &PageList{ID: bson.NewObjectID(), PageData: nil}
 
 		handler := PageListTemplateHandler{WebTemplates: tmpl, SelectedPages: nilPageDataList}
 		req, _ := http.NewRequest("GET", "/test_pagelist_nil_data", nil)
@@ -511,14 +511,14 @@ func TestPageLinksTemplateHandler_ServeHTTP(t *testing.T) {
 		t.Fatalf("Failed to parse test template: %v", err)
 	}
 
-	pageID := primitive.NewObjectID()
-	rootID := primitive.NewObjectID()
+	pageID := bson.NewObjectID()
+	rootID := bson.NewObjectID()
 	samplePage := &SitePage{
 		ID:         pageID,
 		Root:       rootID,
 		Title:      "Test Link Page",
 		LinkName:   "test-link-page", // Path key will be based on this if used directly
-		StanzaData: []Stanza{{ID: primitive.NewObjectID(), Content: "Sample Stanza"}},
+		StanzaData: []Stanza{{ID: bson.NewObjectID(), Content: "Sample Stanza"}},
 	}
 
 	linkMap := make(LinkPageMap)
@@ -620,8 +620,8 @@ func TestPageByIdTemplateHandler_ServeHTTP(t *testing.T) {
 		t.Fatalf("Failed to parse test template: %v", err)
 	}
 
-	pageID := primitive.NewObjectID()
-	rootID := primitive.NewObjectID()
+	pageID := bson.NewObjectID()
+	rootID := bson.NewObjectID()
 	linkKey := "test-link"
 	pageKey := pageID.Hex()
 
@@ -630,7 +630,7 @@ func TestPageByIdTemplateHandler_ServeHTTP(t *testing.T) {
 		Root:       rootID,
 		Title:      "Test Page By ID",
 		LinkName:   linkKey,
-		StanzaData: []Stanza{{ID: primitive.NewObjectID(), Content: "Stanza for Page By ID"}},
+		StanzaData: []Stanza{{ID: bson.NewObjectID(), Content: "Stanza for Page By ID"}},
 	}
 
 	pageMap := make(map[string]*SitePage)
