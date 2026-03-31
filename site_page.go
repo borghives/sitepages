@@ -22,7 +22,7 @@ var MAX_ABSTRACT_LENGTH = 255
 
 type SitePage struct {
 	kosmos.BaseModel
-	KMMeta           kosmos.ModelMeta `xml:"-" json:"-" bson:"-" db:"pieriansea" collection:"page"`
+	KMMeta           kosmos.ModelMeta `xml:"-" json:"-" bson:"-" kdb:"pieriansea" kcol:"page"`
 	XMLName          xml.Name         `xml:"page" json:"-" bson:"-"`
 	Root             bson.ObjectID    `xml:"root" json:"Root" bson:"root"`
 	LinkName         string           `xml:"linkname,omitempty" json:"LinkName" bson:"linkname"`
@@ -42,7 +42,7 @@ type SitePage struct {
 
 type Bundle struct {
 	kosmos.BaseModel
-	KMMeta           kosmos.ModelMeta `xml:"-" json:"-" bson:"-" db:"pieriansea" collection:"bundle"`
+	KMMeta           kosmos.ModelMeta `xml:"-" json:"-" bson:"-" kdb:"pieriansea" kcol:"bundle"`
 	XMLName          xml.Name         `xml:"bundle" json:"-" bson:"-"`
 	Name             string           `xml:"name,omitempty" json:"name,omitempty" bson:"name,omitempty"`
 	Contents         []bson.ObjectID  `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
@@ -53,7 +53,7 @@ type Bundle struct {
 
 type Stanza struct {
 	kosmos.BaseModel
-	KMMeta          kosmos.ModelMeta `xml:"-" json:"-" bson:"-" db:"pieriansea" collection:"stanza"`
+	KMMeta          kosmos.ModelMeta `xml:"-" json:"-" bson:"-" kdb:"pieriansea" kcol:"stanza"`
 	XMLName         xml.Name         `xml:"stanza" json:"-" bson:"-"`
 	Content         string           `xml:"content" json:"Content" bson:"content"`
 	UpdatedTime     time.Time        `xml:"-" json:"UpdatedTime" bson:"updated_time"`
@@ -68,7 +68,7 @@ type Stanza struct {
 
 type PageList struct {
 	kosmos.BaseModel
-	KMMeta   kosmos.ModelMeta `xml:"-" json:"-" bson:"-" db:"pieriansea" collection:"pagelist"`
+	KMMeta   kosmos.ModelMeta `xml:"-" json:"-" bson:"-" kdb:"pieriansea" kcol:"pagelist"`
 	XMLName  xml.Name         `xml:"pagelist" json:"-" bson:"-"`
 	Contents []bson.ObjectID  `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
 	PageData []SitePage       `xml:"-" json:"PageData,omitempty" bson:"page_data,omitempty"`
@@ -134,7 +134,7 @@ type Relationship struct {
 
 type Comment struct {
 	kosmos.BaseModel
-	KMMeta   kosmos.ModelMeta `xml:"-" json:"-" bson:"-" db:"pieriansea" collection:"rel_commentrelation"`
+	KMMeta   kosmos.ModelMeta `xml:"-" json:"-" bson:"-" kdb:"pieriansea" kcol:"rel_commentrelation"`
 	XMLName  xml.Name         `xml:"comment" json:"-" bson:"-"`
 	Root     bson.ObjectID    `xml:"root" json:"Root" bson:"root"`
 	Parent   bson.ObjectID    `xml:"parent" json:"Parent" bson:"parent"`
