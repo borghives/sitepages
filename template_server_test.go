@@ -8,24 +8,25 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+
 	// "reflect" // May not be needed if not DeepEqual on maps from handlers
 	"strings"
 	"testing"
 	// SitePage, LinkPageMap, LinkAndIdPageMap types are from site_page.go
 	// SetupTemplate is from template_page.go
-	"go.mongodb.org/mongo-driver/v2/bson" // Added for SitePage ID
+	// Added for SitePage ID
 )
 
 // TestNewTemplateServerMux tests the NewTemplateServerMux function
 func TestNewTemplateServerMux(t *testing.T) {
 	frontEndDirName := "frontend_pages_for_newmux"
 	templateCompDirName := "template_components_for_newmux"
-	
+
 	setupFn := func(templ *template.Template) *template.Template {
 		return templ.Funcs(template.FuncMap{"testfunc": func() string { return "hello" }})
 	}
-	
-	baseDir := t.TempDir() 
+
+	baseDir := t.TempDir()
 	actualFrontEndDir := filepath.Join(baseDir, frontEndDirName)
 	actualTemplateCompDir := filepath.Join(baseDir, templateCompDirName)
 	if err := os.Mkdir(actualFrontEndDir, 0755); err != nil {
@@ -48,10 +49,10 @@ func TestNewTemplateServerMux(t *testing.T) {
 	if tsm == nil {
 		t.Fatal("NewTemplateServerMux returned nil")
 	}
-	if tsm.Mux == nil { 
+	if tsm.Mux == nil {
 		t.Error("TemplateServerMux.Mux (the http.ServeMux) is nil")
 	}
-	if tsm.templates == nil { 
+	if tsm.templates == nil {
 		t.Error("TemplateServerMux.templates is nil, expected templates to be loaded")
 	} else {
 		if _, ok := tsm.templates[dummyPageName]; !ok {
@@ -67,8 +68,8 @@ func createTsmForHandlerTest(t *testing.T, templateName string, templateContent 
 		t.Fatalf("Failed to parse test template %s: %v", templateName, err)
 	}
 	return &TemplateServerMux{
-		Mux: http.NewServeMux(),      
-		templates: map[string]*template.Template{ 
+		Mux: http.NewServeMux(),
+		templates: map[string]*template.Template{
 			templateName: tmpl,
 		},
 	}
@@ -81,23 +82,23 @@ func TestTemplateServerMux_HandlePage(t *testing.T) {
 	// This template should be executed by TemplateHandler
 	// It uses fields from TemplateData: ID, RootId, Username (Username might be empty depending on session)
 	tsm := createTsmForHandlerTest(t, dummyTemplateName, `PathID={{.ID}} RootID={{.RootId}} User={{.Username}} Auth={{.RequireAuth}}`)
-	
+
 	requireAuth := true
-	patternPath := "/testpage_handle/" 
-	
+	patternPath := "/testpage_handle/"
+
 	// Note: HandlePage calls log.Fatal if template not found.
 	// Test for non-existent template is skipped as it's hard to assert log.Fatal.
 	t.Run("template_not_found_fatal_skipped", func(t *testing.T) {
 		t.Log("Skipping direct test for HandlePage with non-existent template as it causes log.Fatal.")
 	})
 
-	tsm.HandlePage(patternPath, dummyTemplateName, requireAuth) 
+	tsm.HandlePage(patternPath, dummyTemplateName, requireAuth)
 
-	server := httptest.NewServer(tsm) 
+	server := httptest.NewServer(tsm)
 	defer server.Close()
-	
+
 	// reqURL := server.URL + patternPath // This was unused in the simplified test path below.
-	
+
 	// This test previously had complex logic for auth.
 	// For HandlePage, the main thing is that a TemplateHandler is registered.
 	// We simplify by testing with requireAuth = false to avoid session complexities here,
@@ -124,17 +125,17 @@ func TestTemplateServerMux_HandlePage(t *testing.T) {
 	}
 }
 
-
 // TestTemplateServerMux_HandlePageByLink tests the HandlePageByLink method
 func TestTemplateServerMux_HandlePageByLink(t *testing.T) {
 	t.Setenv("SECRET_SESSION", "test_secret_for_server_test")
 	dummyTemplateName := "linkPage.html"
 	tsm := createTsmForHandlerTest(t, dummyTemplateName, `PageLinkTitle={{.Title}} PageID={{.ID}}`)
-	
+
 	testPageMap := make(LinkPageMap)
 	pageKey := "my-test-link"
 	// Use bson.NewObjectID() for SitePage IDs
-	samplePage := &SitePage{ID: bson.NewObjectID(), LinkName: pageKey, Title: "Linked Page Title"} 
+	samplePage := &SitePage{LinkName: pageKey, Title: "Linked Page Title"}
+	samplePage.CollapseID()
 	testPageMap[pageKey] = samplePage
 
 	patternPath := "/"
@@ -145,7 +146,7 @@ func TestTemplateServerMux_HandlePageByLink(t *testing.T) {
 
 	// PageLinksTemplateHandler uses r.URL.Path[1:] as key
 	reqURL := server.URL + patternPath + pageKey
-	
+
 	resp, err := http.Get(reqURL)
 	if err != nil {
 		t.Fatalf("Failed to make request: %v", err)
@@ -170,17 +171,18 @@ func TestTemplateServerMux_HandlePageByLinkAndId(t *testing.T) {
 
 	testLinkAndIdMap := make(LinkAndIdPageMap)
 	linkKey := "my-link-for-id"
-	objID := bson.NewObjectID()
-	idKey := objID.Hex() 
-	samplePage := &SitePage{ID: objID, LinkName: linkKey, Title: "Page By ID Title"} 
+
+	samplePage := &SitePage{LinkName: linkKey, Title: "Page By ID Title"}
+	samplePage.CollapseID()
+	idKey := samplePage.ID.Hex()
 
 	testLinkAndIdMap[linkKey] = map[string]*SitePage{
 		idKey: samplePage,
 	}
-	
-	patternPath := "/id_handle/" 
+
+	patternPath := "/id_handle/"
 	tsm.HandlePageByLinkAndId(patternPath, dummyTemplateName, testLinkAndIdMap)
-	
+
 	server := httptest.NewServer(tsm)
 	defer server.Close()
 
@@ -193,16 +195,15 @@ func TestTemplateServerMux_HandlePageByLinkAndId(t *testing.T) {
 		t.Fatalf("Failed to make request: %v", err)
 	}
 	defer resp.Body.Close()
-	
+
 	// Expect 200 OK because getPageParamFromRequest will return empty values without error
 	// and the handler will render the template with empty page data.
-	if resp.StatusCode != http.StatusOK { 
+	if resp.StatusCode != http.StatusOK {
 		bodyBytes, _ := io.ReadAll(resp.Body)
 		t.Errorf("Expected status OK, got %d. Body: %s", resp.StatusCode, string(bodyBytes))
 	}
 	t.Logf("HandlePageByLinkAndId registered. Handler received request. Status: %d", resp.StatusCode)
 }
-
 
 // TestTemplateServerMux_Handle tests the Handle method
 func TestTemplateServerMux_Handle(t *testing.T) {
@@ -212,11 +213,11 @@ func TestTemplateServerMux_Handle(t *testing.T) {
 	var handlerCalled bool
 	dummyHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		handlerCalled = true
-		w.WriteHeader(http.StatusAccepted) 
+		w.WriteHeader(http.StatusAccepted)
 	})
 
 	tsm.Handle(pattern, dummyHandler)
-	
+
 	server := httptest.NewServer(tsm)
 	defer server.Close()
 
@@ -225,7 +226,7 @@ func TestTemplateServerMux_Handle(t *testing.T) {
 		t.Fatalf("Failed to make request: %v", err)
 	}
 	defer resp.Body.Close()
-	
+
 	if !handlerCalled {
 		t.Error("Handler registered via tsm.Handle was not called")
 	}
@@ -245,15 +246,15 @@ func TestTemplateServerMux_ServeHTTP(t *testing.T) {
 	var testHandlerCalled bool
 	tsm.Mux.Handle(reqPath, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		testHandlerCalled = true
-		w.WriteHeader(http.StatusOK) 
+		w.WriteHeader(http.StatusOK)
 	}))
 
-	tsm.ServeHTTP(rr, req) 
+	tsm.ServeHTTP(rr, req)
 
 	if !testHandlerCalled {
 		t.Error("Expected inner Mux.ServeHTTP to be called and route to the test handler, but it wasn't")
 	}
-	if rr.Code != http.StatusOK { 
+	if rr.Code != http.StatusOK {
 		t.Errorf("Expected status OK from inner handler via ServeHTTP, got %d", rr.Code)
 	}
 }

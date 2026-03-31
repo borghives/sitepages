@@ -10,7 +10,7 @@ import (
 
 	"html/template" // Added
 
-	"github.com/borghives/websession"            // Added
+	"github.com/borghives/websession"     // Added
 	"go.mongodb.org/mongo-driver/v2/bson" // Added
 )
 
@@ -227,13 +227,14 @@ func TestTemplateHandler_ServeHTTP(t *testing.T) {
 	// Determine expected redirect host based on actual websession.GetDomain()
 	// This makes the test adapt to the environment.
 	actualDomain := websession.GetDomain()
-	if actualDomain == "localhost" || actualDomain == "127.0.0.1" {
+	switch actualDomain {
+	case "localhost", "127.0.0.1":
 		expectedRedirectScheme = "http"
 		expectedRedirectHost = actualDomain + ":8000"
-	} else if actualDomain == "" { // Handle case where GetDomain might return empty
+	case "": // Handle case where GetDomain might return empty
 		expectedRedirectScheme = "https"
 		expectedRedirectHost = "login." // Results in "https://login./..."
-	} else {
+	default:
 		expectedRedirectScheme = "https"
 		expectedRedirectHost = "login." + actualDomain
 	}
@@ -393,12 +394,13 @@ func TestPageListTemplateHandler_ServeHTTP(t *testing.T) {
 	}
 
 	// Sample PageList and SitePage data
-	samplePage := SitePage{ID: bson.NewObjectID(), Title: "Test Page In List"}
-	samplePageList := &PageList{
-		ID:       bson.NewObjectID(),
-		Contents: []bson.ObjectID{samplePage.ID},
-		PageData: []SitePage{samplePage},
-	}
+	samplePage := SitePage{Title: "Test Page In List"}
+	samplePage.CollapseID()
+
+	samplePageList := &PageList{}
+	samplePageList.CollapseID()
+	samplePageList.Contents = []bson.ObjectID{samplePage.ID}
+	samplePageList.PageData = []SitePage{samplePage}
 
 	// Scenario 1: Nil WebTemplates
 	t.Run("nil_web_templates", func(t *testing.T) {
@@ -452,7 +454,9 @@ func TestPageListTemplateHandler_ServeHTTP(t *testing.T) {
 	// So, it should not panic but produce "<nil/>" in the output.
 	t.Run("nil_selected_pages_data", func(t *testing.T) {
 		// Create a PageList with nil PageData to test that part specifically
-		nilPageDataList := &PageList{ID: bson.NewObjectID(), PageData: nil}
+		pageList := &PageList{}
+		pageList.CollapseID()
+		nilPageDataList := pageList
 
 		handler := PageListTemplateHandler{WebTemplates: tmpl, SelectedPages: nilPageDataList}
 		req, _ := http.NewRequest("GET", "/test_pagelist_nil_data", nil)
@@ -511,15 +515,16 @@ func TestPageLinksTemplateHandler_ServeHTTP(t *testing.T) {
 		t.Fatalf("Failed to parse test template: %v", err)
 	}
 
-	pageID := bson.NewObjectID()
 	rootID := bson.NewObjectID()
+	stanza := Stanza{Content: "Stanza for Page By ID"}
+	stanza.CollapseID()
 	samplePage := &SitePage{
-		ID:         pageID,
 		Root:       rootID,
 		Title:      "Test Link Page",
 		LinkName:   "test-link-page", // Path key will be based on this if used directly
-		StanzaData: []Stanza{{ID: bson.NewObjectID(), Content: "Sample Stanza"}},
+		StanzaData: []Stanza{stanza},
 	}
+	samplePage.CollapseID()
 
 	linkMap := make(LinkPageMap)
 	pathKey := "test-link-key" // The key used in the request URL
@@ -625,13 +630,15 @@ func TestPageByIdTemplateHandler_ServeHTTP(t *testing.T) {
 	linkKey := "test-link"
 	pageKey := pageID.Hex()
 
+	stanza := Stanza{Content: "Stanza for Page By ID"}
+	stanza.CollapseID()
 	samplePage := &SitePage{
-		ID:         pageID,
 		Root:       rootID,
 		Title:      "Test Page By ID",
 		LinkName:   linkKey,
-		StanzaData: []Stanza{{ID: bson.NewObjectID(), Content: "Stanza for Page By ID"}},
+		StanzaData: []Stanza{stanza},
 	}
+	samplePage.CollapseID()
 
 	pageMap := make(map[string]*SitePage)
 	pageMap[pageKey] = samplePage
