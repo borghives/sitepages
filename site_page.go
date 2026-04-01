@@ -21,57 +21,53 @@ var MAX_CHUNK_INDEX = 100
 var MAX_ABSTRACT_LENGTH = 255
 
 type SitePage struct {
-	kosmos.BaseModel
-	KMMeta           kosmos.ModelMeta `xml:"-" json:"-" bson:"-" kdb:"pieriansea" kcol:"page"`
-	XMLName          xml.Name         `xml:"page" json:"-" bson:"-"`
-	Root             bson.ObjectID    `xml:"root" json:"Root" bson:"root"`
-	LinkName         string           `xml:"linkname,omitempty" json:"LinkName" bson:"linkname"`
-	Title            string           `xml:"title" json:"Title" bson:"title"`
-	Abstract         string           `xml:"abstract,omitempty" json:"Abstract,omitempty" bson:"abstract,omitempty"`
-	Image            string           `xml:"image,omitempty" json:"Image,omitempty" bson:"image,omitempty"`
-	Synapses         []Synapse        `xml:"synapse,omitempty" json:"Synapses,omitempty" bson:"synapses,omitempty"`
-	Contents         []bson.ObjectID  `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
-	Infos            MetaInfo         `xml:"infos,omitempty" json:"Infos,omitempty" bson:"infos,omitempty"`
-	Authg            string           `xml:"authg,omitempty" json:"Authg,omitempty" bson:"authg,omitempty"`
-	CommentCount     uint32           `xml:"commentcount" json:"CommentCount" bson:"comment_count"`
-	EventAt          time.Time        `xml:"eventat" json:"EventAt" bson:"event_at"`
-	PreviousVersion  bson.ObjectID    `xml:"previousversion" json:"PreviousVersion" bson:"previous_version"`
-	CreatorSessionId bson.ObjectID    `xml:"-" json:"-" bson:"session_id"`
-	StanzaData       []Stanza         `xml:"-" json:"StanzaData,omitempty" bson:"stanza_data,omitempty"` //mainly for aggregate querying and not for storing into database or display as xml model
+	kosmos.BaseModel `bson:",inline" kdb:"pieriansea" kcol:"page"`
+	XMLName          xml.Name        `xml:"page" json:"-" bson:"-"`
+	Root             bson.ObjectID   `xml:"root" json:"Root" bson:"root"`
+	LinkName         string          `xml:"linkname,omitempty" json:"LinkName" bson:"linkname"`
+	Title            string          `xml:"title" json:"Title" bson:"title"`
+	Abstract         string          `xml:"abstract,omitempty" json:"Abstract,omitempty" bson:"abstract,omitempty"`
+	Image            string          `xml:"image,omitempty" json:"Image,omitempty" bson:"image,omitempty"`
+	Synapses         []Synapse       `xml:"synapse,omitempty" json:"Synapses,omitempty" bson:"synapses,omitempty"`
+	Contents         []bson.ObjectID `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
+	Infos            MetaInfo        `xml:"infos,omitempty" json:"Infos,omitempty" bson:"infos,omitempty"`
+	Authg            string          `xml:"authg,omitempty" json:"Authg,omitempty" bson:"authg,omitempty"`
+	CommentCount     uint32          `xml:"commentcount" json:"CommentCount" bson:"comment_count"`
+	EventAt          time.Time       `xml:"eventat" json:"EventAt" bson:"event_at"`
+	PreviousVersion  bson.ObjectID   `xml:"previousversion" json:"PreviousVersion" bson:"previous_version"`
+	CreatorSessionId bson.ObjectID   `xml:"-" json:"-" bson:"session_id"`
+	StanzaData       []Stanza        `xml:"-" json:"StanzaData,omitempty" bson:"stanza_data,omitempty"` //mainly for aggregate querying and not for storing into database or display as xml model
 }
 
 type Bundle struct {
-	kosmos.BaseModel
-	KMMeta           kosmos.ModelMeta `xml:"-" json:"-" bson:"-" kdb:"pieriansea" kcol:"bundle"`
-	XMLName          xml.Name         `xml:"bundle" json:"-" bson:"-"`
-	Name             string           `xml:"name,omitempty" json:"name,omitempty" bson:"name,omitempty"`
-	Contents         []bson.ObjectID  `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
-	EventAt          time.Time        `xml:"eventat" json:"EventAt" bson:"event_at"`
-	PreviousBundleId bson.ObjectID    `xml:"previousbundleid" json:"PreviousBundleId" bson:"previous_bundle_id"`
-	PageData         []SitePage       `xml:"-" json:"PageData,omitempty" bson:"page_data,omitempty"` //for aggregate querying and not for storing into database or display as xml model
+	kosmos.BaseModel `bson:",inline" kdb:"pieriansea" kcol:"bundle"`
+	XMLName          xml.Name        `xml:"bundle" json:"-" bson:"-"`
+	Name             string          `xml:"name,omitempty" json:"name,omitempty" bson:"name,omitempty"`
+	Contents         []bson.ObjectID `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
+	EventAt          time.Time       `xml:"eventat" json:"EventAt" bson:"event_at"`
+	PreviousBundleId bson.ObjectID   `xml:"previousbundleid" json:"PreviousBundleId" bson:"previous_bundle_id"`
+	PageData         []SitePage      `xml:"-" json:"PageData,omitempty" bson:"page_data,omitempty"` //for aggregate querying and not for storing into database or display as xml model
 }
 
 type Stanza struct {
-	kosmos.BaseModel
-	KMMeta          kosmos.ModelMeta `xml:"-" json:"-" bson:"-" kdb:"pieriansea" kcol:"stanza"`
-	XMLName         xml.Name         `xml:"stanza" json:"-" bson:"-"`
-	Content         string           `xml:"content" json:"Content" bson:"content"`
-	UpdatedTime     time.Time        `xml:"-" json:"UpdatedTime" bson:"updated_time"`
-	Context         bson.ObjectID    `xml:"context,omitempty" json:"Context,omitempty" bson:"context,omitempty"`
-	BasePage        bson.ObjectID    `xml:"basepage" json:"BasePage" bson:"base_page"`
-	PreviousVersion bson.ObjectID    `xml:"previousversion" json:"PreviousVersion" bson:"previous_version"`
-	TtlStart        time.Time        `xml:"-" json:"-" bson:"ttl_start,omitempty"`
-	ChunkIndex      uint16           `xml:"chunkidx" json:"ChunkIdx" bson:"-"`                               //only for control and not for persist in state
-	ChunkOffset     uint16           `xml:"chunkoffset" json:"ChunkOffset" bson:"-"`                         //only for control and not for persist in state
-	Chunkings       []uint16         `xml:"chunkings>content,omitempty" json:"chunkings,omitempty" bson:"-"` //only for control and not for persist in state
+	kosmos.BaseModel `bson:",inline" kdb:"pieriansea" kcol:"stanza"`
+	XMLName          xml.Name      `xml:"stanza" json:"-" bson:"-"`
+	Content          string        `xml:"content" json:"Content" bson:"content"`
+	UpdatedTime      time.Time     `xml:"-" json:"UpdatedTime" bson:"updated_time"`
+	Context          bson.ObjectID `xml:"context,omitempty" json:"Context,omitempty" bson:"context,omitempty"`
+	BasePage         bson.ObjectID `xml:"basepage" json:"BasePage" bson:"base_page"`
+	PreviousVersion  bson.ObjectID `xml:"previousversion" json:"PreviousVersion" bson:"previous_version"`
+	TtlStart         time.Time     `xml:"-" json:"-" bson:"ttl_start,omitempty"`
+	ChunkIndex       uint16        `xml:"chunkidx" json:"ChunkIdx" bson:"-"`                               //only for control and not for persist in state
+	ChunkOffset      uint16        `xml:"chunkoffset" json:"ChunkOffset" bson:"-"`                         //only for control and not for persist in state
+	Chunkings        []uint16      `xml:"chunkings>content,omitempty" json:"chunkings,omitempty" bson:"-"` //only for control and not for persist in state
 }
 
 type PageList struct {
-	kosmos.BaseModel
-	KMMeta   kosmos.ModelMeta `xml:"-" json:"-" bson:"-" kdb:"pieriansea" kcol:"pagelist"`
-	XMLName  xml.Name         `xml:"pagelist" json:"-" bson:"-"`
-	Contents []bson.ObjectID  `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
-	PageData []SitePage       `xml:"-" json:"PageData,omitempty" bson:"page_data,omitempty"`
+	kosmos.BaseModel `bson:",inline" kdb:"pieriansea" kcol:"pagelist"`
+	XMLName          xml.Name        `xml:"pagelist" json:"-" bson:"-"`
+	Contents         []bson.ObjectID `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
+	PageData         []SitePage      `xml:"-" json:"PageData,omitempty" bson:"page_data,omitempty"`
 }
 
 type RelationType string
@@ -133,19 +129,18 @@ type Relationship struct {
 }
 
 type Comment struct {
-	kosmos.BaseModel
-	KMMeta   kosmos.ModelMeta `xml:"-" json:"-" bson:"-" kdb:"pieriansea" kcol:"rel_commentrelation"`
-	XMLName  xml.Name         `xml:"comment" json:"-" bson:"-"`
-	Root     bson.ObjectID    `xml:"root" json:"Root" bson:"root"`
-	Parent   bson.ObjectID    `xml:"parent" json:"Parent" bson:"parent"`
-	UserName string           `xml:"username,omitempty" json:"UserName,omitempty" bson:"user_name,omitempty"`
-	Moment   string           `xml:"moment" json:"Moment" bson:"moment"`
-	Content  string           `xml:"content" json:"Content" bson:"content"`
-	Infos    MetaInfo         `xml:"infos,omitempty" json:"Infos,omitempty" bson:"infos,omitempty"`
-	Score    float64          `xml:"-" json:"-" bson:"score"`
-	BestBy   time.Time        `xml:"-" json:"-" bson:"best_by"`
-	EventAt  time.Time        `xml:"eventat" json:"EventAt" bson:"event_at"`
-	TtlStart time.Time        `xml:"-" json:"-" bson:"ttl_start,omitempty"`
+	kosmos.BaseModel `bson:",inline" kdb:"pieriansea" kcol:"rel_commentrelation"`
+	XMLName          xml.Name      `xml:"comment" json:"-" bson:"-"`
+	Root             bson.ObjectID `xml:"root" json:"Root" bson:"root"`
+	Parent           bson.ObjectID `xml:"parent" json:"Parent" bson:"parent"`
+	UserName         string        `xml:"username,omitempty" json:"UserName,omitempty" bson:"user_name,omitempty"`
+	Moment           string        `xml:"moment" json:"Moment" bson:"moment"`
+	Content          string        `xml:"content" json:"Content" bson:"content"`
+	Infos            MetaInfo      `xml:"infos,omitempty" json:"Infos" bson:"infos,omitempty"`
+	Score            float64       `xml:"-" json:"-" bson:"score"`
+	BestBy           time.Time     `xml:"-" json:"-" bson:"best_by"`
+	EventAt          time.Time     `xml:"eventat" json:"EventAt" bson:"event_at"`
+	TtlStart         time.Time     `xml:"-" json:"-" bson:"ttl_start,omitempty"`
 }
 
 type Synapse struct {
