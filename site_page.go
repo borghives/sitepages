@@ -129,7 +129,7 @@ type Relationship struct {
 }
 
 type Comment struct {
-	kosmos.BaseModel `bson:",inline" kosmos:"rel_commentrelation"`
+	kosmos.BaseModel `bson:",inline" kosmos:"comment"`
 	XMLName          xml.Name      `xml:"comment" json:"-" bson:"-"`
 	Root             bson.ObjectID `xml:"root" json:"Root" bson:"root"`
 	Parent           bson.ObjectID `xml:"parent" json:"Parent" bson:"parent"`
