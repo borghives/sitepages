@@ -154,7 +154,7 @@ func TestGetAuthLoginUrl(t *testing.T) {
 			// To make the test more concrete, let's assume websession.GetDomain() returns "example.com"
 			// when not localhost. If it's "localhost", it's "localhost".
 			// This is an assumption about the test environment.
-			actualDomainReturnedByWebsession := websession.GetDomain() // Call it once to see
+			actualDomainReturnedByWebsession := websession.Manager().Domain // Call it once to see
 
 			var expectedFullHost string
 			var expectedFullScheme string
@@ -226,7 +226,7 @@ func TestTemplateHandler_ServeHTTP(t *testing.T) {
 
 	// Determine expected redirect host based on actual websession.GetDomain()
 	// This makes the test adapt to the environment.
-	actualDomain := websession.GetDomain()
+	actualDomain := websession.Manager().Domain
 	switch actualDomain {
 	case "localhost", "127.0.0.1":
 		expectedRedirectScheme = "http"

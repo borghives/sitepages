@@ -12,10 +12,9 @@ func RunListenAndServer(handler http.Handler) {
 	log.Print("starting server...")
 
 	hostInfo := websession.GetHostInfo()
-	log.Printf("START New Host Instance@%s Build:%s Image:%s ", hostInfo.Id, hostInfo.BuildId, hostInfo.ImageId)
+	log.Printf("START New Host Instance@%s Build:%s Image:%s ", hostInfo.ID, hostInfo.BuildId, hostInfo.ImageId)
 
-	// Initialize the session logic.  Will exit with fatal if cannot securely generate session
-	websession.SessionInitCheck()
+	websession.Manager() // initialize session manager fatal if secret not found
 
 	// Determine port for HTTP service.
 	port := os.Getenv("PORT")
