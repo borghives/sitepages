@@ -14,8 +14,8 @@ github.com/borghives/entanglement v0.2.0 h1:05/0fjRs2B19968xdzu34DB6+2yY5TBqZsrg
 github.com/borghives/entanglement v0.2.0/go.mod h1:M5Lo5bt78ydhKl9Ifn9EDxfG6ZSyx28b5UiQ8y6yga4=
 github.com/borghives/kosmos-go v1.1.0 h1:WzQUS1rC88Xf1dG0iesYMDYsYOFQpvz9War6/HWLabA=
 github.com/borghives/kosmos-go v1.1.0/go.mod h1:CtrCCbDRh6UvGwcpAW8L0x/inmV+ro7PD+EYEGeJVrQ=
-github.com/borghives/websession v1.0.0 h1:qOKLsYAiAre7ddpESLqrOhOrLQeOCKqT0rLOkveJLGo=
-github.com/borghives/websession v1.0.0/go.mod h1:SR2vQKRtAANE/1jiz6uZFC6ToADDqvgxhLeY4lldC6w=
+github.com/borghives/websession v1.1.0 h1:63uM8pHNu5lZkmnZJn3oPa2ZEx3GYospvvNLTuBbndE=
+github.com/borghives/websession v1.1.0/go.mod h1:RYs4i7qZvKAC6tCMAliet/Q1bLmJPDVy6rtwcW6exkc=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
 github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/cncf/xds/go v0.0.0-20251210132809-ee656c7534f5 h1:6xNmx7iTtyBRev0+D/Tv1FZd4SCg8axKApyNyRsAt/w=
