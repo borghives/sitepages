@@ -10,13 +10,13 @@ type List struct {
 }
 
 type ListTopicResponse struct {
-	BaseTopicResponse
+	BaseResponse
 	ListData []List `xml:"-" json:"ListData,omitempty" bson:"listdata,omitempty" `
 }
 
 func (t *ListTopicResponse) Append(data any) bson.ObjectID {
 
-	id := t.BaseTopicResponse.Append(data)
+	id := t.BaseResponse.Append(data)
 	if !id.IsZero() {
 		if len(t.ListData) > 0 {
 			t.ListData[0].Contents = append(t.ListData[0].Contents, id)
@@ -25,6 +25,6 @@ func (t *ListTopicResponse) Append(data any) bson.ObjectID {
 	return id
 }
 
-func (t *ListTopicResponse) New() TopicResponse {
+func (t *ListTopicResponse) New() Response {
 	return &ListTopicResponse{}
 }

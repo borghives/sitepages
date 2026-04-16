@@ -8,8 +8,8 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-type TopicResponse interface {
-	New() TopicResponse
+type Response interface {
+	New() Response
 	SetOnError(err error, code int) error
 	HasError() bool
 	GetStatus() StatusResponse
@@ -50,7 +50,7 @@ func (e *StatusResponse) HasError() bool {
 	return e.StatusCode >= 400
 }
 
-type BaseTopicResponse struct {
+type BaseResponse struct {
 	StatusResponse
 	TargetId    *bson.ObjectID       `xml:"-" json:"TargetId,omitempty" bson:"targetid,omitempty" `
 	PageData    []sitepages.SitePage `xml:"-" json:"PageData,omitempty" bson:"pagedata,omitempty" `
@@ -58,19 +58,19 @@ type BaseTopicResponse struct {
 	CommentData []sitepages.Comment  `xml:"-" json:"CommentData,omitempty" bson:"commentdata,omitempty" `
 }
 
-func (t *BaseTopicResponse) New() TopicResponse {
-	return &BaseTopicResponse{}
+func (t *BaseResponse) New() Response {
+	return &BaseResponse{}
 }
 
-func (t *BaseTopicResponse) SetTargetId(id bson.ObjectID) {
+func (t *BaseResponse) SetTargetId(id bson.ObjectID) {
 	t.TargetId = &id
 }
 
-func (t *BaseTopicResponse) GetTargetId() *bson.ObjectID {
+func (t *BaseResponse) GetTargetId() *bson.ObjectID {
 	return t.TargetId
 }
 
-func (t *BaseTopicResponse) Append(data any) bson.ObjectID {
+func (t *BaseResponse) Append(data any) bson.ObjectID {
 	var id bson.ObjectID
 	switch response := data.(type) {
 	case *sitepages.SitePage:

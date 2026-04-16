@@ -6,7 +6,7 @@ import (
 )
 
 type RelationTopicResponse struct {
-	BaseTopicResponse
+	BaseResponse
 	LinkDescs []sitepages.LinkDescription `xml:"-" json:"LinkDescs,omitempty" bson:"-" `
 }
 
@@ -26,9 +26,9 @@ func (t *RelationTopicResponse) Append(data any) bson.ObjectID {
 		return response.ObjectId
 	}
 
-	return t.BaseTopicResponse.Append(data)
+	return t.BaseResponse.Append(data)
 }
 
-func (t *RelationTopicResponse) New() TopicResponse {
+func (t *RelationTopicResponse) New() Response {
 	return &RelationTopicResponse{}
 }
