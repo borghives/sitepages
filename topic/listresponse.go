@@ -14,6 +14,10 @@ type ListTopicResponse struct {
 	ListData []List `xml:"-" json:"ListData,omitempty" bson:"listdata,omitempty" `
 }
 
+func NewListTopicResponse() Response {
+	return &ListTopicResponse{}
+}
+
 func (t *ListTopicResponse) Append(data any) bson.ObjectID {
 
 	id := t.BaseResponse.Append(data)
@@ -23,8 +27,4 @@ func (t *ListTopicResponse) Append(data any) bson.ObjectID {
 		}
 	}
 	return id
-}
-
-func (t *ListTopicResponse) New() Response {
-	return &ListTopicResponse{}
 }

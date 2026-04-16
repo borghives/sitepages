@@ -1,21 +1,27 @@
 package topic
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/borghives/sitepages"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type Response interface {
-	New() Response
 	SetOnError(err error, code int) error
-	HasError() bool
 	GetStatus() StatusResponse
+	HasError() bool
 	SetTargetId(id bson.ObjectID)
 	GetTargetId() *bson.ObjectID
 	Append(data any) bson.ObjectID
+}
+
+type ErrorResponse interface {
+	Error() string
+	ErrorCode() int
 }
 
 type StatusResponse struct {
@@ -23,8 +29,19 @@ type StatusResponse struct {
 	StatusMsg  string `xml:"-" json:"error,omitempty" bson:"-" `
 }
 
+func NewStatusError(err error, code int) ErrorResponse {
+	return &StatusResponse{StatusCode: code, StatusMsg: err.Error()}
+}
+
 func (e StatusResponse) GetStatus() StatusResponse {
 	return e
+}
+
+func (e StatusResponse) ErrorCode() int {
+	if e.StatusCode == 0 {
+		return 500
+	}
+	return e.StatusCode
 }
 
 func (e StatusResponse) Error() string {
@@ -58,7 +75,7 @@ type BaseResponse struct {
 	CommentData []sitepages.Comment  `xml:"-" json:"CommentData,omitempty" bson:"commentdata,omitempty" `
 }
 
-func (t *BaseResponse) New() Response {
+func NewBaseResponse() Response {
 	return &BaseResponse{}
 }
 
@@ -94,4 +111,17 @@ func (t *BaseResponse) Append(data any) bson.ObjectID {
 	}
 
 	return id
+}
+
+func MarshalResponse[T Response](topic T, w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json")
+	if topic.HasError() {
+		status := topic.GetStatus()
+		w.WriteHeader(status.StatusCode)
+		json.NewEncoder(w).Encode(status)
+		return
+	}
+
+	json.NewEncoder(w).Encode(topic)
+
 }

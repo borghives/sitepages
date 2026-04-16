@@ -10,6 +10,10 @@ type RelationTopicResponse struct {
 	LinkDescs []sitepages.LinkDescription `xml:"-" json:"LinkDescs,omitempty" bson:"-" `
 }
 
+func NewRelationTopicResponse() Response {
+	return &RelationTopicResponse{}
+}
+
 func (t *RelationTopicResponse) Append(data any) bson.ObjectID {
 	switch response := data.(type) {
 	case sitepages.UserToPageLink:
@@ -27,8 +31,4 @@ func (t *RelationTopicResponse) Append(data any) bson.ObjectID {
 	}
 
 	return t.BaseResponse.Append(data)
-}
-
-func (t *RelationTopicResponse) New() Response {
-	return &RelationTopicResponse{}
 }
