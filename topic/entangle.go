@@ -26,16 +26,16 @@ func (e *EntangleProperties) SetCorrelationProperties(typeName string, propertie
 
 type EntangledResponse struct {
 	BaseResponse
-	Entanglement *EntangleProperties `xml:"-" json:"EntangleProperties,omitempty" bson:"-" `
+	EntanglementState *EntangleProperties `xml:"-" json:"EntangleProperties,omitempty" bson:"-" `
 }
 
 func (e *EntangledResponse) Append(data any) bson.ObjectID {
 	switch data := data.(type) {
 	case *concept.Entanglement:
-		if e.Entanglement == nil {
-			e.Entanglement = &EntangleProperties{}
+		if e.EntanglementState == nil {
+			e.EntanglementState = &EntangleProperties{}
 		}
-		e.Entanglement.Token = data.GenerateToken()
+		e.EntanglementState.Token = data.GenerateToken()
 		e.EntangleFrame(data)
 		return bson.ObjectID{}
 	default:
@@ -53,30 +53,36 @@ func (e *EntangledResponse) EntangleFrame(entanglement *concept.Entanglement) {
 				break
 			}
 		}
-		if page != nil {
-			entanglement.SetProperty("pageid", page.ID.Hex())
-			entanglement.SetProperty("rootid", page.Root.Hex())
-
-			pageId := entanglement.GenerateCorrelation(page.ID.Hex())
-			e.Entanglement.SetCorrelationProperties("page", CorrelationMap{
-				page.ID.Hex(): pageId,
-			})
-
-			stanzaEntanglement := entanglement.CreatSubFrame("stanza_system")
-			stanzaEntanglement.SetProperty("baseid", pageId)
-
-			if page.Contents != nil {
-				stanzaCorrelation := CorrelationMap{}
-				for _, content := range page.Contents {
-					stanzaCorrelation[content.Hex()] = stanzaEntanglement.GenerateCorrelation(content.Hex())
-				}
-
-				e.Entanglement.Correlations["stanza"] = stanzaCorrelation
-			}
-
-			e.Entanglement.SetCorrelationProperties("comment", EntangleCommentProperties(entanglement, page.ID, page.Root, 0))
-		}
+		e.EntanglementState = EntanglePage(e.EntanglementState, entanglement, page)
 	}
+}
+
+func EntanglePage(state *EntangleProperties, entanglement *concept.Entanglement, page *sitepages.SitePage) *EntangleProperties {
+	if page == nil || state == nil {
+		return state
+	}
+
+	entanglement.SetProperty("pageid", page.ID.Hex())
+	entanglement.SetProperty("rootid", page.Root.Hex())
+
+	pageId := entanglement.GenerateCorrelation(page.ID.Hex())
+	state.SetCorrelationProperties("page", CorrelationMap{
+		page.ID.Hex(): pageId,
+	})
+
+	stanzaEntanglement := entanglement.CreatSubFrame("stanza_system")
+	stanzaEntanglement.SetProperty("baseid", pageId)
+
+	if len(page.Contents) > 0 {
+		stanzaCorrelation := CorrelationMap{}
+		for _, content := range page.Contents {
+			stanzaCorrelation[content.Hex()] = stanzaEntanglement.GenerateCorrelation(content.Hex())
+		}
+
+		state.Correlations["stanza"] = stanzaCorrelation
+	}
+
+	return state
 }
 
 func EntangleCommentProperties(entanglement *concept.Entanglement, sourceId bson.ObjectID, rootId bson.ObjectID, coolDown time.Duration) CorrelationMap {
