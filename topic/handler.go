@@ -16,6 +16,7 @@ type ServePipe struct {
 	Chains         []Handler
 	CreateResponse ResponseFactory
 	Initialize     InitializeResponse
+	BodyLimit      int64
 }
 
 func NewServePipe(createResponse ResponseFactory) *ServePipe {
@@ -28,6 +29,11 @@ func NewServePipeInitializer(initialize InitializeResponse) *ServePipe {
 	return &ServePipe{
 		Initialize: initialize,
 	}
+}
+
+func (h *ServePipe) SetBodyLimit(limit int64) *ServePipe {
+	h.BodyLimit = limit
+	return h
 }
 
 func (h *ServePipe) Chain(chains ...Handler) *ServePipe {
@@ -52,16 +58,20 @@ func (h ServePipe) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		topicResponse = h.CreateResponse()
 	}
 
+	if r.Body != nil {
+		r.Body = http.MaxBytesReader(w, r.Body, h.BodyLimit)
+	}
+
 	h.ServeTopic(topicResponse, r)
 	MarshalResponse(topicResponse, w)
 }
 
 func Handle(chain ...Handler) *ServePipe {
-	return NewServePipe(NewBaseResponse).Chain(chain...)
+	return NewServePipe(NewBaseResponse).SetBodyLimit(1048576).Chain(chain...)
 }
 
 func HandleRelation(chain ...Handler) *ServePipe {
-	return NewServePipe(NewRelationTopicResponse).Chain(chain...)
+	return NewServePipe(NewRelationTopicResponse).SetBodyLimit(1048576).Chain(chain...)
 }
 
 func HandleList(name string, servers ...Handler) *ServePipe {
@@ -80,5 +90,5 @@ func HandleList(name string, servers ...Handler) *ServePipe {
 		return &ListTopicResponse{
 			ListData: listData,
 		}
-	}).Chain(servers...)
+	}).SetBodyLimit(1048576).Chain(servers...)
 }
