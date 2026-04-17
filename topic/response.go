@@ -69,22 +69,22 @@ func (e *StatusResponse) HasError() bool {
 
 type BaseResponse struct {
 	StatusResponse
-	TargetId    *bson.ObjectID       `xml:"-" json:"TargetId,omitempty" bson:"targetid,omitempty" `
+	TargetID    *bson.ObjectID       `xml:"-" json:"TargetId,omitempty" bson:"targetid,omitempty" `
 	PageData    []sitepages.SitePage `xml:"-" json:"PageData,omitempty" bson:"pagedata,omitempty" `
 	StanzaData  []sitepages.Stanza   `xml:"-" json:"StanzaData,omitempty" bson:"stanzadata,omitempty" `
 	CommentData []sitepages.Comment  `xml:"-" json:"CommentData,omitempty" bson:"commentdata,omitempty" `
 }
 
 func NewBaseResponse() Response {
-	return &BaseResponse{}
+	return &EntangledResponse{}
 }
 
 func (t *BaseResponse) SetTargetID(id bson.ObjectID) {
-	t.TargetId = &id
+	t.TargetID = &id
 }
 
 func (t *BaseResponse) GetTargetID() *bson.ObjectID {
-	return t.TargetId
+	return t.TargetID
 }
 
 func (t *BaseResponse) Append(data any) bson.ObjectID {
