@@ -14,8 +14,8 @@ type Response interface {
 	SetOnError(err error, code int) error
 	GetStatus() StatusResponse
 	HasError() bool
-	SetTargetId(id bson.ObjectID)
-	GetTargetId() *bson.ObjectID
+	SetTargetID(id bson.ObjectID)
+	GetTargetID() *bson.ObjectID
 	Append(data any) bson.ObjectID
 }
 
@@ -79,11 +79,11 @@ func NewBaseResponse() Response {
 	return &BaseResponse{}
 }
 
-func (t *BaseResponse) SetTargetId(id bson.ObjectID) {
+func (t *BaseResponse) SetTargetID(id bson.ObjectID) {
 	t.TargetId = &id
 }
 
-func (t *BaseResponse) GetTargetId() *bson.ObjectID {
+func (t *BaseResponse) GetTargetID() *bson.ObjectID {
 	return t.TargetId
 }
 
