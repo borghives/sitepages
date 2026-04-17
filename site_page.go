@@ -109,6 +109,18 @@ type MetaInfo struct {
 	Deeper          []LinkInfo    `xml:"deeper,omitempty" json:"Deeper,omitempty" bson:"deeper,omitempty"`
 }
 
+func (t SitePage) GetRootID() bson.ObjectID {
+	return t.Root
+}
+
+func (t Stanza) GetRootID() bson.ObjectID {
+	return t.BasePage
+}
+
+func (t Comment) GetRootID() bson.ObjectID {
+	return t.Root
+}
+
 func SaveSitePages(file string, pages []SitePage) error {
 	// Open the file for writing
 	f, err := os.Create(file)

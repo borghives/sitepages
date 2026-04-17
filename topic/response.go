@@ -75,10 +75,6 @@ type BaseResponse struct {
 	CommentData []sitepages.Comment  `xml:"-" json:"CommentData,omitempty" bson:"commentdata,omitempty" `
 }
 
-func NewBaseResponse() Response {
-	return &EntangledResponse{}
-}
-
 func (t *BaseResponse) SetTargetID(id bson.ObjectID) {
 	t.TargetID = &id
 }

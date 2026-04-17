@@ -67,7 +67,7 @@ func (h ServePipe) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func Handle(chain ...Handler) *ServePipe {
-	return NewServePipe(NewBaseResponse).SetBodyLimit(1048576).Chain(chain...)
+	return NewServePipe(NewResponse).SetBodyLimit(1048576).Chain(chain...)
 }
 
 func HandleRelation(chain ...Handler) *ServePipe {

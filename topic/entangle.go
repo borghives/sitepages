@@ -16,6 +16,10 @@ type EntangleProperties struct {
 	Correlations map[string]CorrelationMap `xml:"-" json:"Correlations,omitempty" bson:"-" `
 }
 
+func NewResponse() Response {
+	return &EntangledResponse{}
+}
+
 func (e *EntangleProperties) SetCorrelationProperties(typeName string, properties CorrelationMap) {
 	if e.Correlations == nil {
 		e.Correlations = make(map[string]CorrelationMap)
