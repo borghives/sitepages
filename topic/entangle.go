@@ -2,10 +2,13 @@ package topic
 
 import (
 	"log"
+	"net/http"
 	"time"
 
+	"github.com/borghives/entanglement"
 	"github.com/borghives/entanglement/concept"
 	"github.com/borghives/sitepages"
+	"github.com/borghives/websession"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
@@ -26,6 +29,10 @@ func (e *EntangleProperties) SetCorrelationProperties(typeName string, propertie
 	}
 
 	e.Correlations[typeName] = properties
+}
+
+type Entangleable interface {
+	SystemFrame() string
 }
 
 type EntangledResponse struct {
@@ -89,6 +96,47 @@ func EntanglePage(state *EntangleProperties, entanglement *concept.Entanglement,
 	return state
 }
 
+type ServeEntangled struct {
+	ServePipe
+	DoCheck bool
+	Frame   string
+}
+
+func HandleEntangled(frame string, doCheck bool, chain ...Handler) *ServeEntangled {
+	pipe := &ServeEntangled{
+		ServePipe: *Handle(chain...),
+		DoCheck:   doCheck,
+		Frame:     frame,
+	}
+	return pipe
+}
+
+func (s *ServeEntangled) ServeTopic(response Response, r *http.Request) {
+	entanglement, err := SetupEntanglement(r)
+	if err != nil {
+		response.SetOnError(err, http.StatusExpectationFailed)
+		return
+	}
+
+	if s.Frame != "" {
+		entanglement.SetFrame(s.Frame)
+	}
+
+	if s.DoCheck {
+		if err := entanglement.CheckToken(); err != nil {
+			response.SetOnError(err, http.StatusExpectationFailed)
+			return
+		}
+	}
+
+	s.ServePipe.ServeTopic(response, r)
+
+	if entanglement != nil {
+		response.Append(entanglement)
+	}
+
+}
+
 func EntangleCommentProperties(entanglement *concept.Entanglement, sourceId bson.ObjectID, rootId bson.ObjectID, coolDown time.Duration) CorrelationMap {
 	moment := sitepages.GenerateMomentString(coolDown)
 	commentEntanglement := entanglement.CreatSubFrame("comment_system")
@@ -100,4 +148,16 @@ func EntangleCommentProperties(entanglement *concept.Entanglement, sourceId bson
 		"--page-comment-creator": commentEntanglement.GenerateCorrelation("--page-comment-creator"),
 		"moment":                 moment,
 	}
+}
+
+func SetupEntanglement(r *http.Request) (*concept.Entanglement, error) {
+	session, err := websession.Manager().GetAndVerifySession(r)
+	if err != nil {
+		return nil, err
+	}
+	return entanglement.CreateEntanglementWithNonceAndToken(
+		session,
+		r.Header.Get("x-entanglement-nonce"),
+		r.Header.Get("x-entanglement-token"),
+	), nil
 }

@@ -113,12 +113,24 @@ func (t SitePage) GetRootID() bson.ObjectID {
 	return t.Root
 }
 
+func (t SitePage) SystemFrame() string {
+	return "page_system"
+}
+
 func (t Stanza) GetRootID() bson.ObjectID {
 	return t.BasePage
 }
 
+func (t Stanza) SystemFrame() string {
+	return "stanza_system"
+}
+
 func (t Comment) GetRootID() bson.ObjectID {
 	return t.Root
+}
+
+func (t Comment) SystemFrame() string {
+	return "comment_system"
 }
 
 func SaveSitePages(file string, pages []SitePage) error {
