@@ -25,8 +25,8 @@ type ErrorResponse interface {
 }
 
 type StatusResponse struct {
-	StatusCode int    `xml:"-" json:"-" bson:"-" `
-	StatusMsg  string `xml:"-" json:"error,omitempty" bson:"-" `
+	StatusCode int    `json:"-" `
+	StatusMsg  string `json:"message,omitempty" `
 }
 
 func NewStatusError(err error, code int) ErrorResponse {
@@ -69,10 +69,11 @@ func (e *StatusResponse) HasError() bool {
 
 type BaseResponse struct {
 	StatusResponse
-	TargetID    *bson.ObjectID       `xml:"-" json:"TargetId,omitempty" bson:"targetid,omitempty" `
-	PageData    []sitepages.SitePage `xml:"-" json:"PageData,omitempty" bson:"pagedata,omitempty" `
-	StanzaData  []sitepages.Stanza   `xml:"-" json:"StanzaData,omitempty" bson:"stanzadata,omitempty" `
-	CommentData []sitepages.Comment  `xml:"-" json:"CommentData,omitempty" bson:"commentdata,omitempty" `
+	TargetID    *bson.ObjectID       `json:"TargetId,omitempty" `
+	PageData    []sitepages.SitePage `json:"PageData,omitempty" `
+	StanzaData  []sitepages.Stanza   `json:"StanzaData,omitempty" `
+	CommentData []sitepages.Comment  `json:"CommentData,omitempty" `
+	BundleData  []sitepages.Bundle   `json:"BundleData,omitempty" `
 }
 
 func (t *BaseResponse) SetTargetID(id bson.ObjectID) {
@@ -86,6 +87,18 @@ func (t *BaseResponse) GetTargetID() *bson.ObjectID {
 func (t *BaseResponse) Append(data any) bson.ObjectID {
 	var id bson.ObjectID
 	switch response := data.(type) {
+	case sitepages.SitePage:
+		t.PageData = append(t.PageData, response)
+		id = response.ID
+	case sitepages.Stanza:
+		t.StanzaData = append(t.StanzaData, response)
+		id = response.ID
+	case sitepages.Comment:
+		t.CommentData = append(t.CommentData, response)
+		id = response.ID
+	case sitepages.Bundle:
+		t.BundleData = append(t.BundleData, response)
+		id = response.ID
 	case *sitepages.SitePage:
 		t.PageData = append(t.PageData, *response)
 		id = response.ID
@@ -95,14 +108,8 @@ func (t *BaseResponse) Append(data any) bson.ObjectID {
 	case *sitepages.Comment:
 		t.CommentData = append(t.CommentData, *response)
 		id = response.ID
-	case sitepages.SitePage:
-		t.PageData = append(t.PageData, response)
-		id = response.ID
-	case sitepages.Stanza:
-		t.StanzaData = append(t.StanzaData, response)
-		id = response.ID
-	case sitepages.Comment:
-		t.CommentData = append(t.CommentData, response)
+	case *sitepages.Bundle:
+		t.BundleData = append(t.BundleData, *response)
 		id = response.ID
 	}
 
