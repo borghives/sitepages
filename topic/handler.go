@@ -15,7 +15,6 @@ type InitializeResponse func(r *http.Request) Response
 type ServePipe struct {
 	Chains         []Handler
 	CreateResponse ResponseFactory
-	Initialize     InitializeResponse
 	BodyLimit      int64
 }
 
@@ -26,9 +25,7 @@ func NewServePipe(createResponse ResponseFactory) *ServePipe {
 }
 
 func NewServePipeInitializer(initialize InitializeResponse) *ServePipe {
-	return &ServePipe{
-		Initialize: initialize,
-	}
+	return &ServePipe{}
 }
 
 func (h *ServePipe) SetBodyLimit(limit int64) *ServePipe {
@@ -51,12 +48,7 @@ func (h ServePipe) ServeTopic(response Response, r *http.Request) {
 }
 
 func (h ServePipe) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var topicResponse Response
-	if h.Initialize != nil {
-		topicResponse = h.Initialize(r)
-	} else {
-		topicResponse = h.CreateResponse()
-	}
+	topicResponse := h.CreateResponse()
 
 	if r.Body != nil {
 		r.Body = http.MaxBytesReader(w, r.Body, h.BodyLimit)

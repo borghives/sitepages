@@ -97,21 +97,29 @@ func EntanglePage(state *EntangleProperties, entanglement *concept.Entanglement,
 }
 
 type ServeEntangled struct {
-	ServePipe
-	DoCheck bool
-	Frame   string
+	Handler        Handler
+	CreateResponse ResponseFactory
+	BodyLimit      int64
+	DoCheck        bool
+	Frame          string
 }
 
-func HandleEntangled(frame string, doCheck bool, chain ...Handler) *ServeEntangled {
+func (s *ServeEntangled) SetBodyLimit(limit int64) *ServeEntangled {
+	s.BodyLimit = limit
+	return s
+}
+
+func HandleEntangled(frame string, doCheck bool, handler Handler) *ServeEntangled {
 	pipe := &ServeEntangled{
-		ServePipe: *Handle(chain...),
-		DoCheck:   doCheck,
-		Frame:     frame,
+		Handler:        handler,
+		CreateResponse: NewResponse,
+		DoCheck:        doCheck,
+		Frame:          frame,
 	}
-	return pipe
+	return pipe.SetBodyLimit(1048576)
 }
 
-func (s *ServeEntangled) ServeTopic(response Response, r *http.Request) {
+func (s ServeEntangled) ServeTopic(response Response, r *http.Request) {
 	entanglement, err := SetupEntanglement(r)
 	if err != nil {
 		response.SetOnError(err, http.StatusExpectationFailed)
@@ -129,12 +137,23 @@ func (s *ServeEntangled) ServeTopic(response Response, r *http.Request) {
 		}
 	}
 
-	s.ServePipe.ServeTopic(response, r)
+	s.Handler.ServeTopic(response, r)
 
 	if entanglement != nil {
 		response.Append(entanglement)
 	}
 
+}
+
+func (h ServeEntangled) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	topicResponse := h.CreateResponse()
+
+	if r.Body != nil {
+		r.Body = http.MaxBytesReader(w, r.Body, h.BodyLimit)
+	}
+
+	h.ServeTopic(topicResponse, r)
+	MarshalResponse(topicResponse, w)
 }
 
 func EntangleCommentProperties(entanglement *concept.Entanglement, sourceId bson.ObjectID, rootId bson.ObjectID, coolDown time.Duration) CorrelationMap {
