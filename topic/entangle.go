@@ -1,12 +1,9 @@
 package topic
 
 import (
-	"log"
 	"net/http"
-	"time"
 
 	"github.com/borghives/entanglement"
-	"github.com/borghives/entanglement/concept"
 	"github.com/borghives/sitepages"
 	"github.com/borghives/websession"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -42,11 +39,10 @@ type EntangledResponse struct {
 
 func (e *EntangledResponse) Append(data any) bson.ObjectID {
 	switch data := data.(type) {
-	case *concept.Entanglement:
-		if e.EntanglementState == nil {
-			e.EntanglementState = &EntangleProperties{}
-		}
-		e.EntanglementState.Token = data.GenerateToken()
+	case *entanglement.Session:
+		e.EntangleFrame(*data)
+		return bson.ObjectID{}
+	case entanglement.Session:
 		e.EntangleFrame(data)
 		return bson.ObjectID{}
 	default:
@@ -54,8 +50,13 @@ func (e *EntangledResponse) Append(data any) bson.ObjectID {
 	}
 }
 
-func (e *EntangledResponse) EntangleFrame(entanglement *concept.Entanglement) {
-	switch entanglement.Frame {
+func (e *EntangledResponse) EntangleFrame(frameSession entanglement.Session) {
+	if e.EntanglementState == nil {
+		e.EntanglementState = &EntangleProperties{}
+	}
+
+	e.EntanglementState.Token = frameSession.GenerateToken()
+	switch frameSession.Frame {
 	case "page_system":
 		var page *sitepages.SitePage
 		for _, data := range e.PageData {
@@ -64,30 +65,30 @@ func (e *EntangledResponse) EntangleFrame(entanglement *concept.Entanglement) {
 				break
 			}
 		}
-		e.EntanglementState = EntanglePage(e.EntanglementState, entanglement, page)
+		e.EntanglementState = EntanglePage(e.EntanglementState, frameSession, page)
 	}
 }
 
-func EntanglePage(state *EntangleProperties, entanglement *concept.Entanglement, page *sitepages.SitePage) *EntangleProperties {
+func EntanglePage(state *EntangleProperties, sessionframe entanglement.Session, page *sitepages.SitePage) *EntangleProperties {
 	if page == nil || state == nil {
 		return state
 	}
 
-	entanglement.SetProperty("pageid", page.ID.Hex())
-	entanglement.SetProperty("rootid", page.Root.Hex())
+	sessionframe.SetProperty("pageid", page.ID.Hex())
+	sessionframe.SetProperty("rootid", page.Root.Hex())
 
-	pageId := entanglement.GenerateCorrelation(page.ID.Hex())
+	pageId := sessionframe.GenerateCorrelation(page.ID.Hex())
 	state.SetCorrelationProperties("page", CorrelationMap{
 		page.ID.Hex(): pageId,
 	})
 
-	stanzaEntanglement := entanglement.CreatSubFrame("stanza_system")
-	stanzaEntanglement.SetProperty("baseid", pageId)
+	stanzaWeb := sessionframe.CreateSubFrame("stanza_system")
+	stanzaWeb.SetProperty("baseid", pageId)
 
 	if len(page.Contents) > 0 {
 		stanzaCorrelation := CorrelationMap{}
 		for _, content := range page.Contents {
-			stanzaCorrelation[content.Hex()] = stanzaEntanglement.GenerateCorrelation(content.Hex())
+			stanzaCorrelation[content.Hex()] = stanzaWeb.GenerateCorrelation(content.Hex())
 		}
 
 		state.Correlations["stanza"] = stanzaCorrelation
@@ -120,18 +121,22 @@ func HandleEntangled(frame string, doCheck bool, handler Handler) *ServeEntangle
 }
 
 func (s ServeEntangled) ServeTopic(response Response, r *http.Request) {
-	entanglement, err := SetupEntanglement(r)
-	if err != nil {
-		response.SetOnError(err, http.StatusExpectationFailed)
-		return
-	}
+	web := SetupEntanglement(r)
 
 	if s.Frame != "" {
-		entanglement.SetFrame(s.Frame)
+		web.SetFrame(s.Frame)
 	}
 
+	var session *websession.Session
+	var err error
 	if s.DoCheck {
-		if err := entanglement.CheckToken(); err != nil {
+		session, err = websession.Manager().GetAndVerifySession(r)
+		if err != nil {
+			response.SetOnError(err, http.StatusExpectationFailed)
+			return
+		}
+
+		if err := web.VerifyTokenAlignment(*session); err != nil {
 			response.SetOnError(err, http.StatusExpectationFailed)
 			return
 		}
@@ -139,9 +144,7 @@ func (s ServeEntangled) ServeTopic(response Response, r *http.Request) {
 
 	s.Handler.ServeTopic(response, r)
 
-	if entanglement != nil {
-		response.Append(entanglement)
-	}
+	response.Append(entanglement.EntangleSession(web, *session))
 
 }
 
@@ -156,27 +159,19 @@ func (h ServeEntangled) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	MarshalResponse(topicResponse, w)
 }
 
-func EntangleCommentProperties(entanglement *concept.Entanglement, sourceId bson.ObjectID, rootId bson.ObjectID, coolDown time.Duration) CorrelationMap {
-	moment := sitepages.GenerateMomentString(coolDown)
-	commentEntanglement := entanglement.CreatSubFrame("comment_system")
-	commentEntanglement.SetProperty("sourceid", sourceId.Hex())
-	commentEntanglement.SetProperty("rootid", rootId.Hex())
-	commentEntanglement.SetProperty("moment", moment)
-	log.Println("sourceid", sourceId.Hex(), "rootid", rootId.Hex(), "moment", moment)
-	return CorrelationMap{
-		"--page-comment-creator": commentEntanglement.GenerateCorrelation("--page-comment-creator"),
-		"moment":                 moment,
-	}
-}
+// func EntangleCommentProperties(web entanglement.Web, sourceId bson.ObjectID, rootId bson.ObjectID, coolDown time.Duration) CorrelationMap {
+// 	moment := sitepages.GenerateMomentString(coolDown)
+// 	commentEntanglement := web.CreateSubFrame("comment_system")
+// 	commentEntanglement.SetProperty("sourceid", sourceId.Hex())
+// 	commentEntanglement.SetProperty("rootid", rootId.Hex())
+// 	commentEntanglement.SetProperty("moment", moment)
+// 	log.Println("sourceid", sourceId.Hex(), "rootid", rootId.Hex(), "moment", moment)
+// 	return CorrelationMap{
+// 		"--page-comment-creator": commentEntanglement.GenerateCorrelation("--page-comment-creator"),
+// 		"moment":                 moment,
+// 	}
+// }
 
-func SetupEntanglement(r *http.Request) (*concept.Entanglement, error) {
-	session, err := websession.Manager().GetAndVerifySession(r)
-	if err != nil {
-		return nil, err
-	}
-	return entanglement.CreateEntanglementWithNonceAndToken(
-		session,
-		r.Header.Get("x-entanglement-nonce"),
-		r.Header.Get("x-entanglement-token"),
-	), nil
+func SetupEntanglement(r *http.Request) entanglement.WebFrame {
+	return entanglement.CreateWeb(r.Header.Get("x-entanglement-nonce"), r.Header.Get("x-entanglement-token"))
 }
