@@ -4,31 +4,29 @@ import (
 	"net/http"
 
 	"github.com/borghives/entanglement"
-	"github.com/borghives/sitepages"
 	"github.com/borghives/websession"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type EntangledResponse struct {
-	BaseResponse
+	Response
 	EntanglementState *entanglement.EntangleProperties `xml:"-" json:"EntangleProperties,omitempty" bson:"-" `
 }
 
 func NewResponse() Response {
-	return &EntangledResponse{}
+	return &EntangledResponse{Response: &BaseResponse{}}
 }
 
 func (e *EntangledResponse) Append(data any) bson.ObjectID {
 	switch data := data.(type) {
 	case *entanglement.Session:
 		e.EntangleFrame(*data)
-		return bson.ObjectID{}
 	case entanglement.Session:
 		e.EntangleFrame(data)
-		return bson.ObjectID{}
 	default:
-		return e.BaseResponse.Append(data)
+		return e.Append(data)
 	}
+	return bson.ObjectID{}
 }
 
 func (e *EntangledResponse) EntangleFrame(frameSession entanglement.Session) {
@@ -37,15 +35,10 @@ func (e *EntangledResponse) EntangleFrame(frameSession entanglement.Session) {
 	}
 
 	e.EntanglementState.Token = frameSession.GenerateToken()
-	switch frameSession.Frame {
-	case "page_system":
-		var page *sitepages.SitePage
-		for _, data := range e.PageData {
-			if data.ID.Hex() == e.TargetID.Hex() {
-				page = &data
-				break
-			}
-		}
+	topic := e.GetTarget()
+
+	page, ok := topic.(entanglement.Correlatable)
+	if ok {
 		pageCorrelation := page.TransitionStates(frameSession)
 		e.EntanglementState.UpdateCorrelationProperties(pageCorrelation)
 	}
@@ -75,10 +68,10 @@ func HandleEntangled(frame string, doCheck bool, handler Handler) *ServeEntangle
 }
 
 func (s ServeEntangled) ServeTopic(response Response, r *http.Request) {
-	web := SetupEntanglement(r)
+	frame := SetupEntanglement(r)
 
 	if s.Frame != "" {
-		web.SetFrame(s.Frame)
+		frame.SetFrame(s.Frame)
 	}
 
 	var session *websession.Session
@@ -90,7 +83,7 @@ func (s ServeEntangled) ServeTopic(response Response, r *http.Request) {
 			return
 		}
 
-		if err := web.VerifyTokenAlignment(*session); err != nil {
+		if err := frame.VerifyTokenAlignment(*session); err != nil {
 			response.SetOnError(err, http.StatusExpectationFailed)
 			return
 		}
@@ -98,7 +91,7 @@ func (s ServeEntangled) ServeTopic(response Response, r *http.Request) {
 
 	s.Handler.ServeTopic(response, r)
 
-	response.Append(entanglement.EntangleSession(web, *session))
+	response.Append(entanglement.EntangleSession(frame, *session))
 
 }
 

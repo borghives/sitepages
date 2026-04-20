@@ -41,8 +41,8 @@ func (h *ServePipe) Chain(chains ...Handler) *ServePipe {
 func (h ServePipe) ServeTopic(response Response, r *http.Request) {
 	for _, chain := range h.Chains {
 		chain.ServeTopic(response, r)
-		if response.HasError() {
-			break
+		if response.GetStatus().HasError() {
+			break //early exit on status error
 		}
 	}
 }

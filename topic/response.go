@@ -10,12 +10,16 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
+type Topic interface {
+	GetID() bson.ObjectID
+}
+
 type Response interface {
 	SetOnError(err error, code int) error
 	GetStatus() StatusResponse
-	HasError() bool
 	SetTargetID(id bson.ObjectID)
-	GetTargetID() *bson.ObjectID
+	GetTargetID() bson.ObjectID
+	GetTarget() Topic
 	Append(data any) bson.ObjectID
 }
 
@@ -63,13 +67,13 @@ func (e *StatusResponse) SetOnError(err error, code int) error {
 	return nil
 }
 
-func (e *StatusResponse) HasError() bool {
+func (e StatusResponse) HasError() bool {
 	return e.StatusCode >= 400
 }
 
 type BaseResponse struct {
 	StatusResponse
-	TargetID    *bson.ObjectID       `json:"TargetId,omitempty" `
+	TargetID    bson.ObjectID        `json:"TargetId,omitempty,omitzero" `
 	PageData    []sitepages.SitePage `json:"PageData,omitempty" `
 	StanzaData  []sitepages.Stanza   `json:"StanzaData,omitempty" `
 	CommentData []sitepages.Comment  `json:"CommentData,omitempty" `
@@ -77,11 +81,43 @@ type BaseResponse struct {
 }
 
 func (t *BaseResponse) SetTargetID(id bson.ObjectID) {
-	t.TargetID = &id
+	t.TargetID = id
 }
 
-func (t *BaseResponse) GetTargetID() *bson.ObjectID {
+func (t BaseResponse) GetTargetID() bson.ObjectID {
 	return t.TargetID
+}
+
+func (t BaseResponse) GetTarget() Topic {
+	if t.TargetID.IsZero() {
+		return nil
+	}
+
+	for _, entity := range t.PageData {
+		if entity.GetID() == t.TargetID {
+			return entity
+		}
+	}
+
+	for _, entity := range t.StanzaData {
+		if entity.GetID() == t.TargetID {
+			return entity
+		}
+	}
+
+	for _, entity := range t.CommentData {
+		if entity.GetID() == t.TargetID {
+			return entity
+		}
+	}
+
+	for _, entity := range t.BundleData {
+		if entity.GetID() == t.TargetID {
+			return entity
+		}
+	}
+
+	return nil
 }
 
 func (t *BaseResponse) Append(data any) bson.ObjectID {
@@ -116,15 +152,15 @@ func (t *BaseResponse) Append(data any) bson.ObjectID {
 	return id
 }
 
-func MarshalResponse[T Response](topic T, w http.ResponseWriter) {
+func MarshalResponse[T Response](entity T, w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
-	if topic.HasError() {
-		status := topic.GetStatus()
+	status := entity.GetStatus()
+	if status.HasError() {
 		w.WriteHeader(status.StatusCode)
 		json.NewEncoder(w).Encode(status)
 		return
 	}
 
-	json.NewEncoder(w).Encode(topic)
+	json.NewEncoder(w).Encode(entity)
 
 }
