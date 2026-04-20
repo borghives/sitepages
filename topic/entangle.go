@@ -2,7 +2,6 @@ package topic
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/borghives/entanglement"
 	"github.com/borghives/sitepages"
@@ -10,45 +9,41 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-type CorrelationMap map[string]string
+type StateCorrelation map[string]string               //From one state (ID) relating to the next state (ID)
+type TypeStateCorrelation map[string]StateCorrelation //Entity Type and its states correlation
+
+func (e TypeStateCorrelation) AddCorrelation(frameName string, originState string, nextState string) {
+	properties := e[frameName]
+	if properties == nil {
+		properties = make(StateCorrelation)
+	}
+
+	properties[originState] = nextState
+
+	e[frameName] = properties
+}
 
 type EntangleProperties struct {
-	Token        string                    `xml:"-" json:"Token" bson:"-" `
-	Correlations map[string]CorrelationMap `xml:"-" json:"Correlations,omitempty" bson:"-" `
+	Token        string               `xml:"-" json:"Token" bson:"-" `
+	Correlations TypeStateCorrelation `xml:"-" json:"Correlations,omitempty" bson:"-" `
 }
 
 func NewResponse() Response {
 	return &EntangledResponse{}
 }
 
-func (e *EntangleProperties) SetCorrelationProperties(name string, properties CorrelationMap) {
+func (e *EntangleProperties) SetCorrelationProperties(name string, properties StateCorrelation) {
 	if e.Correlations == nil {
-		e.Correlations = make(map[string]CorrelationMap)
+		e.Correlations = make(TypeStateCorrelation)
 	}
 
 	e.Correlations[name] = properties
 }
 
-func (e EntangleProperties) GetCorrelationProperties(name string) CorrelationMap {
-	if e.Correlations == nil {
-		return nil
+func (e *EntangleProperties) UpdateCorrelationProperties(typeCorrelation TypeStateCorrelation) {
+	for key, value := range typeCorrelation {
+		e.SetCorrelationProperties(key, value)
 	}
-	return e.Correlations[name]
-}
-
-func (e *EntangleProperties) AddCorrelation(frame entanglement.Session, origin string) {
-	frameName := frame.Frame
-	frameName = strings.TrimSuffix(frameName, "_system")
-	properties := e.GetCorrelationProperties(frameName)
-	if properties == nil {
-		properties = make(CorrelationMap)
-	}
-
-	derived := frame.GenerateCorrelation(origin)
-	properties[origin] = derived
-
-	e.SetCorrelationProperties(frameName, properties)
-
 }
 
 type Entangleable interface {
@@ -88,39 +83,32 @@ func (e *EntangledResponse) EntangleFrame(frameSession entanglement.Session) {
 				break
 			}
 		}
-		e.EntanglementState = EntanglePage(e.EntanglementState, frameSession, page)
+		pageCorrelation := EntanglePage(frameSession, page)
+		e.EntanglementState.UpdateCorrelationProperties(pageCorrelation)
 	}
 }
 
-func EntanglePage(state *EntangleProperties, pageframe entanglement.Session, page *sitepages.SitePage) *EntangleProperties {
-	if page == nil || state == nil {
-		return state
-	}
+func EntanglePage(pageframe entanglement.Session, page *sitepages.SitePage) TypeStateCorrelation {
+	correlation := make(TypeStateCorrelation)
 
 	pageframe.EntangleProperty("pageid", page.ID.Hex())
 	pageframe.EntangleProperty("rootid", page.Root.Hex())
 
-	pageId := pageframe.GenerateCorrelation(page.ID.Hex())
-	state.AddCorrelation(pageframe, page.ID.Hex())
-
-	// state.SetCorrelationProperties("page", CorrelationMap{
-	// 	page.ID.Hex(): pageId,
-	// })
+	nextPageId := pageframe.GenerateCorrelation(page.ID.Hex())
+	correlation.AddCorrelation("page", page.ID.Hex(), nextPageId)
 
 	stanzaframe := pageframe.CreateSubFrame("stanza_system")
-	stanzaframe.EntangleProperty("baseid", pageId)
+	stanzaframe.EntangleProperty("baseid", nextPageId)
 
 	if len(page.Contents) > 0 {
-		// stanzaCorrelation := CorrelationMap{}
 		for _, content := range page.Contents {
-			// stanzaCorrelation[content.Hex()] = stanzaframe.GenerateCorrelation(content.Hex())
-			state.AddCorrelation(stanzaframe, content.Hex())
+			stanzaID := content.Hex()
+			nextStanzaID := pageframe.GenerateCorrelation(stanzaID)
+			correlation.AddCorrelation("stanza", stanzaID, nextStanzaID)
 		}
-
-		// state.SetCorrelationProperties("stanza", stanzaCorrelation)
 	}
 
-	return state
+	return correlation
 }
 
 type ServeEntangled struct {
@@ -199,5 +187,5 @@ func (h ServeEntangled) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // }
 
 func SetupEntanglement(r *http.Request) entanglement.SystemFrame {
-	return entanglement.CreateWeb(r.Header.Get("x-entanglement-nonce"), r.Header.Get("x-entanglement-token"))
+	return entanglement.Create(r.Header.Get("x-entanglement-nonce"), r.Header.Get("x-entanglement-token"))
 }
