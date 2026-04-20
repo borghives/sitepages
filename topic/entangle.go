@@ -9,50 +9,13 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-type StateCorrelation map[string]string               //From one state (ID) relating to the next state (ID)
-type TypeStateCorrelation map[string]StateCorrelation //Entity Type and its states correlation
-
-func (e TypeStateCorrelation) AddCorrelation(frameName string, originState string, nextState string) {
-	properties := e[frameName]
-	if properties == nil {
-		properties = make(StateCorrelation)
-	}
-
-	properties[originState] = nextState
-
-	e[frameName] = properties
-}
-
-type EntangleProperties struct {
-	Token        string               `xml:"-" json:"Token" bson:"-" `
-	Correlations TypeStateCorrelation `xml:"-" json:"Correlations,omitempty" bson:"-" `
+type EntangledResponse struct {
+	BaseResponse
+	EntanglementState *entanglement.EntangleProperties `xml:"-" json:"EntangleProperties,omitempty" bson:"-" `
 }
 
 func NewResponse() Response {
 	return &EntangledResponse{}
-}
-
-func (e *EntangleProperties) SetCorrelationProperties(name string, properties StateCorrelation) {
-	if e.Correlations == nil {
-		e.Correlations = make(TypeStateCorrelation)
-	}
-
-	e.Correlations[name] = properties
-}
-
-func (e *EntangleProperties) UpdateCorrelationProperties(typeCorrelation TypeStateCorrelation) {
-	for key, value := range typeCorrelation {
-		e.SetCorrelationProperties(key, value)
-	}
-}
-
-type Entangleable interface {
-	SystemFrame() string
-}
-
-type EntangledResponse struct {
-	BaseResponse
-	EntanglementState *EntangleProperties `xml:"-" json:"EntangleProperties,omitempty" bson:"-" `
 }
 
 func (e *EntangledResponse) Append(data any) bson.ObjectID {
@@ -70,7 +33,7 @@ func (e *EntangledResponse) Append(data any) bson.ObjectID {
 
 func (e *EntangledResponse) EntangleFrame(frameSession entanglement.Session) {
 	if e.EntanglementState == nil {
-		e.EntanglementState = &EntangleProperties{}
+		e.EntanglementState = &entanglement.EntangleProperties{}
 	}
 
 	e.EntanglementState.Token = frameSession.GenerateToken()
@@ -83,32 +46,9 @@ func (e *EntangledResponse) EntangleFrame(frameSession entanglement.Session) {
 				break
 			}
 		}
-		pageCorrelation := EntanglePage(frameSession, page)
+		pageCorrelation := page.TransitionStates(frameSession)
 		e.EntanglementState.UpdateCorrelationProperties(pageCorrelation)
 	}
-}
-
-func EntanglePage(pageframe entanglement.Session, page *sitepages.SitePage) TypeStateCorrelation {
-	correlation := make(TypeStateCorrelation)
-
-	pageframe.EntangleProperty("pageid", page.ID.Hex())
-	pageframe.EntangleProperty("rootid", page.Root.Hex())
-
-	nextPageId := pageframe.GenerateCorrelation(page.ID.Hex())
-	correlation.AddCorrelation("page", page.ID.Hex(), nextPageId)
-
-	stanzaframe := pageframe.CreateSubFrame("stanza_system")
-	stanzaframe.EntangleProperty("baseid", nextPageId)
-
-	if len(page.Contents) > 0 {
-		for _, content := range page.Contents {
-			stanzaID := content.Hex()
-			nextStanzaID := pageframe.GenerateCorrelation(stanzaID)
-			correlation.AddCorrelation("stanza", stanzaID, nextStanzaID)
-		}
-	}
-
-	return correlation
 }
 
 type ServeEntangled struct {

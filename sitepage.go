@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/borghives/entanglement"
 	"github.com/borghives/kosmos-go"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
@@ -109,28 +110,40 @@ type MetaInfo struct {
 	Deeper          []LinkInfo    `xml:"deeper,omitempty" json:"Deeper,omitempty" bson:"deeper,omitempty"`
 }
 
-func (t SitePage) GetRootID() bson.ObjectID {
-	return t.Root
+func (p SitePage) TransitionStates(frame entanglement.Session) entanglement.TypeStateCorrelation {
+	correlation := make(entanglement.TypeStateCorrelation)
+
+	frame.EntangleProperty("pageid", p.ID.Hex())
+	frame.EntangleProperty("rootid", p.Root.Hex())
+
+	pageID := p.ID.Hex()
+	nextPageID := frame.GenerateCorrelation(pageID)
+	correlation.AddCorrelation("page", pageID, nextPageID)
+
+	stanzaframe := frame.CreateSubFrame("stanza_system")
+	stanzaframe.EntangleProperty("baseid", nextPageID)
+
+	if len(p.Contents) > 0 {
+		for _, content := range p.Contents {
+			stanzaID := content.Hex()
+			nextStanzaID := stanzaframe.GenerateCorrelation(stanzaID)
+			correlation.AddCorrelation("stanza", stanzaID, nextStanzaID)
+		}
+	}
+
+	return correlation
 }
 
-func (t SitePage) SystemFrame() string {
-	return "page_system"
+func (t SitePage) GetRootID() bson.ObjectID {
+	return t.Root
 }
 
 func (t Stanza) GetRootID() bson.ObjectID {
 	return t.BasePage
 }
 
-func (t Stanza) SystemFrame() string {
-	return "stanza_system"
-}
-
 func (t Comment) GetRootID() bson.ObjectID {
 	return t.Root
-}
-
-func (t Comment) SystemFrame() string {
-	return "comment_system"
 }
 
 func SaveSitePages(file string, pages []SitePage) error {
