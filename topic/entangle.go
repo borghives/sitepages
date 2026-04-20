@@ -2,6 +2,7 @@ package topic
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/borghives/entanglement"
 	"github.com/borghives/sitepages"
@@ -20,12 +21,34 @@ func NewResponse() Response {
 	return &EntangledResponse{}
 }
 
-func (e *EntangleProperties) SetCorrelationProperties(typeName string, properties CorrelationMap) {
+func (e *EntangleProperties) SetCorrelationProperties(name string, properties CorrelationMap) {
 	if e.Correlations == nil {
 		e.Correlations = make(map[string]CorrelationMap)
 	}
 
-	e.Correlations[typeName] = properties
+	e.Correlations[name] = properties
+}
+
+func (e EntangleProperties) GetCorrelationProperties(name string) CorrelationMap {
+	if e.Correlations == nil {
+		return nil
+	}
+	return e.Correlations[name]
+}
+
+func (e *EntangleProperties) AddCorrelation(frame entanglement.Session, origin string) {
+	frameName := frame.Frame
+	frameName = strings.TrimSuffix(frameName, "_system")
+	properties := e.GetCorrelationProperties(frameName)
+	if properties == nil {
+		properties = make(CorrelationMap)
+	}
+
+	derived := frame.GenerateCorrelation(origin)
+	properties[origin] = derived
+
+	e.SetCorrelationProperties(frameName, properties)
+
 }
 
 type Entangleable interface {
@@ -69,29 +92,32 @@ func (e *EntangledResponse) EntangleFrame(frameSession entanglement.Session) {
 	}
 }
 
-func EntanglePage(state *EntangleProperties, sessionframe entanglement.Session, page *sitepages.SitePage) *EntangleProperties {
+func EntanglePage(state *EntangleProperties, pageframe entanglement.Session, page *sitepages.SitePage) *EntangleProperties {
 	if page == nil || state == nil {
 		return state
 	}
 
-	sessionframe.EntangleProperty("pageid", page.ID.Hex())
-	sessionframe.EntangleProperty("rootid", page.Root.Hex())
+	pageframe.EntangleProperty("pageid", page.ID.Hex())
+	pageframe.EntangleProperty("rootid", page.Root.Hex())
 
-	pageId := sessionframe.GenerateCorrelation(page.ID.Hex())
-	state.SetCorrelationProperties("page", CorrelationMap{
-		page.ID.Hex(): pageId,
-	})
+	pageId := pageframe.GenerateCorrelation(page.ID.Hex())
+	state.AddCorrelation(pageframe, page.ID.Hex())
 
-	stanzaWeb := sessionframe.CreateSubFrame("stanza_system")
-	stanzaWeb.EntangleProperty("baseid", pageId)
+	// state.SetCorrelationProperties("page", CorrelationMap{
+	// 	page.ID.Hex(): pageId,
+	// })
+
+	stanzaframe := pageframe.CreateSubFrame("stanza_system")
+	stanzaframe.EntangleProperty("baseid", pageId)
 
 	if len(page.Contents) > 0 {
-		stanzaCorrelation := CorrelationMap{}
+		// stanzaCorrelation := CorrelationMap{}
 		for _, content := range page.Contents {
-			stanzaCorrelation[content.Hex()] = stanzaWeb.GenerateCorrelation(content.Hex())
+			// stanzaCorrelation[content.Hex()] = stanzaframe.GenerateCorrelation(content.Hex())
+			state.AddCorrelation(stanzaframe, content.Hex())
 		}
 
-		state.Correlations["stanza"] = stanzaCorrelation
+		// state.SetCorrelationProperties("stanza", stanzaCorrelation)
 	}
 
 	return state
@@ -172,6 +198,6 @@ func (h ServeEntangled) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // 	}
 // }
 
-func SetupEntanglement(r *http.Request) entanglement.WebFrame {
+func SetupEntanglement(r *http.Request) entanglement.SystemFrame {
 	return entanglement.CreateWeb(r.Header.Get("x-entanglement-nonce"), r.Header.Get("x-entanglement-token"))
 }
