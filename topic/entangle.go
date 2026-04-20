@@ -74,8 +74,8 @@ func EntanglePage(state *EntangleProperties, sessionframe entanglement.Session, 
 		return state
 	}
 
-	sessionframe.SetProperty("pageid", page.ID.Hex())
-	sessionframe.SetProperty("rootid", page.Root.Hex())
+	sessionframe.EntangleProperty("pageid", page.ID.Hex())
+	sessionframe.EntangleProperty("rootid", page.Root.Hex())
 
 	pageId := sessionframe.GenerateCorrelation(page.ID.Hex())
 	state.SetCorrelationProperties("page", CorrelationMap{
@@ -83,7 +83,7 @@ func EntanglePage(state *EntangleProperties, sessionframe entanglement.Session, 
 	})
 
 	stanzaWeb := sessionframe.CreateSubFrame("stanza_system")
-	stanzaWeb.SetProperty("baseid", pageId)
+	stanzaWeb.EntangleProperty("baseid", pageId)
 
 	if len(page.Contents) > 0 {
 		stanzaCorrelation := CorrelationMap{}
