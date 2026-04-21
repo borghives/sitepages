@@ -3,6 +3,7 @@ package sitepages
 import (
 	"encoding/json"
 	"encoding/xml"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -132,6 +133,27 @@ func (p SitePage) TransitionStates(frame entanglement.Session) entanglement.Type
 	}
 
 	return correlation
+}
+
+func (p SitePage) CheckExpectation(frame entanglement.Session) error {
+	return nil
+}
+
+func (p Stanza) TransitionStates(frame entanglement.Session) entanglement.TypeStateCorrelation {
+	correlation := make(entanglement.TypeStateCorrelation)
+	return correlation
+}
+
+func (s Stanza) CheckExpectation(frame entanglement.Session) error {
+	frame.SetFrame("stanza_system")
+	frame.EntangleProperty("baseid", s.BasePage.Hex())
+	correlatedId := frame.GenerateCorrelation(s.PreviousVersion.Hex())
+
+	if correlatedId != s.ID.Hex() {
+		log.Printf("Missmatch stanza id: %s, expected %s, base: %s index: %d", s.ID.Hex(), correlatedId, s.BasePage.Hex(), int(s.ChunkIndex))
+		return fmt.Errorf("Failed ID Expectation")
+	}
+	return nil
 }
 
 func (t SitePage) GetRootID() bson.ObjectID {

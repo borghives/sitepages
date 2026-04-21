@@ -24,7 +24,7 @@ func (e *EntangledResponse) Append(data any) bson.ObjectID {
 	case entanglement.Session:
 		e.EntangleFrame(data)
 	default:
-		return e.Append(data)
+		return e.Response.Append(data)
 	}
 	return bson.ObjectID{}
 }
