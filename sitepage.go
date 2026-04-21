@@ -113,11 +113,13 @@ type MetaInfo struct {
 
 func (p SitePage) TransitionStates(frame entanglement.Session) entanglement.TypeStateCorrelation {
 	correlation := make(entanglement.TypeStateCorrelation)
-
-	frame.EntangleProperty("pageid", p.ID.Hex())
-	frame.EntangleProperty("rootid", p.Root.Hex())
+	frame.SetFrame("page_system")
 
 	pageID := p.ID.Hex()
+
+	frame.EntangleProperty("pageid", pageID)
+	frame.EntangleProperty("rootid", p.Root.Hex())
+
 	nextPageID := frame.GenerateCorrelation(pageID)
 	correlation.AddCorrelation("page", pageID, nextPageID)
 
@@ -136,6 +138,14 @@ func (p SitePage) TransitionStates(frame entanglement.Session) entanglement.Type
 }
 
 func (p SitePage) CheckExpectation(frame entanglement.Session) error {
+	frame.SetFrame("page_system")
+	frame.EntangleProperty("pageid", p.PreviousVersion.Hex())
+	frame.EntangleProperty("rootid", p.Root.Hex())
+	correlatedId := frame.GenerateCorrelation(p.PreviousVersion.Hex())
+	if correlatedId != p.ID.Hex() {
+		log.Printf("Missmatch page id: %s, expected %s := pageid: %s rootid: %s", p.ID.Hex(), correlatedId, p.PreviousVersion.Hex(), p.Root.Hex())
+		return fmt.Errorf("Failed ID Expectation")
+	}
 	return nil
 }
 
@@ -150,7 +160,7 @@ func (s Stanza) CheckExpectation(frame entanglement.Session) error {
 	correlatedId := frame.GenerateCorrelation(s.PreviousVersion.Hex())
 
 	if correlatedId != s.ID.Hex() {
-		log.Printf("Missmatch stanza id: %s, expected %s, base: %s index: %d", s.ID.Hex(), correlatedId, s.BasePage.Hex(), int(s.ChunkIndex))
+		log.Printf("Missmatch stanza id: %s, expected %s := baseid: %s index: %d", s.ID.Hex(), correlatedId, s.BasePage.Hex(), int(s.ChunkIndex))
 		return fmt.Errorf("Failed ID Expectation")
 	}
 	return nil

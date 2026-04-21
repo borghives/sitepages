@@ -37,10 +37,10 @@ func (e *EntangledResponse) EntangleFrame(frameSession entanglement.Session) {
 	e.EntanglementState.Token = frameSession.GenerateToken()
 	topic := e.GetTarget()
 
-	page, ok := topic.(entanglement.Correlatable)
+	entity, ok := topic.(entanglement.Correlatable)
 	if ok {
-		pageCorrelation := page.TransitionStates(frameSession)
-		e.EntanglementState.UpdateCorrelationProperties(pageCorrelation)
+		correlation := entity.TransitionStates(frameSession)
+		e.EntanglementState.UpdateCorrelationProperties(correlation)
 	}
 }
 
