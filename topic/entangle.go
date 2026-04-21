@@ -108,19 +108,6 @@ func (h ServeEntangled) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	MarshalResponse(topicResponse, w)
 }
 
-// func EntangleCommentProperties(web entanglement.Web, sourceId bson.ObjectID, rootId bson.ObjectID, coolDown time.Duration) CorrelationMap {
-// 	moment := sitepages.GenerateMomentString(coolDown)
-// 	commentEntanglement := web.CreateSubFrame("comment_system")
-// 	commentEntanglement.SetProperty("sourceid", sourceId.Hex())
-// 	commentEntanglement.SetProperty("rootid", rootId.Hex())
-// 	commentEntanglement.SetProperty("moment", moment)
-// 	log.Println("sourceid", sourceId.Hex(), "rootid", rootId.Hex(), "moment", moment)
-// 	return CorrelationMap{
-// 		"--page-comment-creator": commentEntanglement.GenerateCorrelation("--page-comment-creator"),
-// 		"moment":                 moment,
-// 	}
-// }
-
 func SetupEntanglement(r *http.Request) entanglement.SystemFrame {
 	return entanglement.Create(r.Header.Get("x-entanglement-nonce"), r.Header.Get("x-entanglement-token"))
 }

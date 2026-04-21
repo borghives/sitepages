@@ -3,6 +3,7 @@ package topic
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/borghives/entanglement"
 	"github.com/borghives/sitepages"
@@ -16,39 +17,30 @@ func (t Page) GetRootID() bson.ObjectID {
 	return t.Root
 }
 
-func (p Page) TransitionStates(frame entanglement.Session) entanglement.TypeStateCorrelation {
+func (t Page) TransitionStates(frame entanglement.Session) entanglement.TypeStateCorrelation {
 	correlation := make(entanglement.TypeStateCorrelation)
 	frame.SetFrame("page_system")
 
-	pageID := p.ID.Hex()
+	pageID := t.ID.Hex()
 
 	frame.EntangleProperty("pageid", pageID)
-	frame.EntangleProperty("rootid", p.Root.Hex())
+	frame.EntangleProperty("rootid", t.Root.Hex())
 
 	nextPageID := frame.GenerateCorrelation(pageID)
 	correlation.AddCorrelation("page", pageID, nextPageID)
-
-	stanzaframe := frame.CreateSubFrame("stanza_system")
-	stanzaframe.EntangleProperty("baseid", nextPageID)
-
-	if len(p.Contents) > 0 {
-		for _, content := range p.Contents {
-			stanzaID := content.Hex()
-			nextStanzaID := stanzaframe.GenerateCorrelation(stanzaID)
-			correlation.AddCorrelation("stanza", stanzaID, nextStanzaID)
-		}
-	}
+	correlation.Update(EntangleStanzaProperties(frame, nextPageID, t.Contents...))
+	correlation.Update(EntangleCommentProperties(frame, t.ID, t.Root, 0))
 
 	return correlation
 }
 
-func (p Page) CheckTransition(frame entanglement.Session) error {
+func (t Page) CheckTransition(frame entanglement.Session) error {
 	frame.SetFrame("page_system")
-	frame.EntangleProperty("pageid", p.PreviousVersion.Hex())
-	frame.EntangleProperty("rootid", p.Root.Hex())
-	correlatedId := frame.GenerateCorrelation(p.PreviousVersion.Hex())
-	if correlatedId != p.ID.Hex() {
-		log.Printf("Missmatch page id: %s, expected %s := pageid: %s rootid: %s", p.ID.Hex(), correlatedId, p.PreviousVersion.Hex(), p.Root.Hex())
+	frame.EntangleProperty("pageid", t.PreviousVersion.Hex())
+	frame.EntangleProperty("rootid", t.Root.Hex())
+	correlatedId := frame.GenerateCorrelation(t.PreviousVersion.Hex())
+	if correlatedId != t.ID.Hex() {
+		log.Printf("Missmatch page id: %s, expected %s := pageid: %s rootid: %s", t.ID.Hex(), correlatedId, t.PreviousVersion.Hex(), t.Root.Hex())
 		return fmt.Errorf("Failed ID Expectation")
 	}
 	return nil
@@ -61,21 +53,35 @@ func (t Stanza) GetRootID() bson.ObjectID {
 	return t.BasePage
 }
 
-func (p Stanza) TransitionStates(frame entanglement.Session) entanglement.TypeStateCorrelation {
+func (t Stanza) TransitionStates(frame entanglement.Session) entanglement.TypeStateCorrelation {
 	correlation := make(entanglement.TypeStateCorrelation)
 	return correlation
 }
 
-func (s Stanza) CheckTransition(frame entanglement.Session) error {
-	frame.SetFrame("stanza_system")
-	frame.EntangleProperty("baseid", s.BasePage.Hex())
-	correlatedId := frame.GenerateCorrelation(s.PreviousVersion.Hex())
+func (t Stanza) CheckTransition(frame entanglement.Session) error {
+	frame = frame.CreateSubFrame("stanza_system")
+	frame.EntangleProperty("baseid", t.BasePage.Hex())
+	correlatedId := frame.GenerateCorrelation(t.PreviousVersion.Hex())
 
-	if correlatedId != s.ID.Hex() {
-		log.Printf("Missmatch stanza id: %s, expected %s := baseid: %s index: %d", s.ID.Hex(), correlatedId, s.BasePage.Hex(), int(s.ChunkIndex))
+	if correlatedId != t.ID.Hex() {
+		log.Printf("Missmatch stanza id: %s, expected %s := baseid: %s index: %d", t.ID.Hex(), correlatedId, t.BasePage.Hex(), int(t.ChunkIndex))
 		return fmt.Errorf("Failed ID Expectation")
 	}
 	return nil
+}
+
+func EntangleStanzaProperties(frame entanglement.Session, baseid string, contents ...bson.ObjectID) entanglement.TypeStateCorrelation {
+	correlation := make(entanglement.TypeStateCorrelation)
+	if len(contents) > 0 {
+		frame.CreateSubFrame("stanza_system")
+		frame.EntangleProperty("baseid", baseid)
+		for _, content := range contents {
+			stanzaID := content.Hex()
+			nextStanzaID := frame.GenerateCorrelation(stanzaID)
+			correlation.AddCorrelation("stanza", stanzaID, nextStanzaID)
+		}
+	}
+	return correlation
 }
 
 // ##### Comment #####
@@ -83,4 +89,47 @@ type Comment sitepages.Comment
 
 func (t Comment) GetRootID() bson.ObjectID {
 	return t.Root
+}
+
+func (t Comment) TransitionStates(frame entanglement.Session) entanglement.TypeStateCorrelation {
+	correlation := make(entanglement.TypeStateCorrelation)
+	return correlation
+}
+
+func (t Comment) CheckTransition(frame entanglement.Session) error {
+	now := time.Now().UTC()
+	tmoment, err := sitepages.ParseMomementString(t.Moment)
+	if err != nil {
+		return fmt.Errorf("Check Comment Transistion: %v", err)
+	}
+
+	age := now.Sub(tmoment.UTC())
+	if age.Minutes() > 30 {
+		return fmt.Errorf("Check Comment Transistion: stale moment %v", t.Moment)
+	}
+	frame = frame.CreateSubFrame("comment_system")
+	frame.EntangleProperty("sourceid", t.Infos.SourceId.Hex())
+	frame.EntangleProperty("rootid", t.Root.Hex())
+	frame.EntangleProperty("moment", t.Moment)
+	derivedHexID := frame.GenerateCorrelation("--page-comment-creator")
+	log.Println("Comment Check Id ", derivedHexID, frame.StateString())
+	if derivedHexID != t.ID.Hex() {
+		return fmt.Errorf("Check Comment Transistion: mismatch comment id (%s) expect (%s)", t.ID.Hex(), derivedHexID)
+	}
+	return nil
+}
+
+func EntangleCommentProperties(frame entanglement.Session, sourceId bson.ObjectID, rootId bson.ObjectID, coolDown time.Duration) entanglement.TypeStateCorrelation {
+	correlation := make(entanglement.TypeStateCorrelation)
+	moment := sitepages.GenerateMomentString(coolDown)
+
+	frame = frame.CreateSubFrame("comment_system")
+	frame.EntangleProperty("sourceid", sourceId.Hex())
+	frame.EntangleProperty("rootid", rootId.Hex())
+	frame.EntangleProperty("moment", moment)
+	nextId := frame.GenerateCorrelation("--page-comment-creator")
+	log.Println("Entangle Comment Id", nextId, frame.StateString())
+	correlation.AddCorrelation("comment", "--page-comment-creator", nextId)
+	correlation.AddCorrelation("comment", "moment", moment)
+	return correlation
 }

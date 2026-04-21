@@ -10,7 +10,7 @@ type List struct {
 }
 
 type ListTopicResponse struct {
-	BaseResponse
+	EntangledResponse
 	ListData []List `xml:"-" json:"ListData,omitempty" bson:"listdata,omitempty" `
 }
 
@@ -20,7 +20,7 @@ func NewListTopicResponse() Response {
 
 func (t *ListTopicResponse) Append(data any) bson.ObjectID {
 
-	id := t.BaseResponse.Append(data)
+	id := t.EntangledResponse.Append(data)
 	if !id.IsZero() {
 		if len(t.ListData) > 0 {
 			t.ListData[0].Contents = append(t.ListData[0].Contents, id)
