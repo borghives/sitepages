@@ -147,6 +147,8 @@ func (t *BaseResponse) Append(data any) bson.ObjectID {
 	case *sitepages.Bundle:
 		t.BundleData = append(t.BundleData, *response)
 		id = response.ID
+	default:
+		log.Printf("Append unknown type: %T", data)
 	}
 
 	return id

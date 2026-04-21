@@ -35,7 +35,6 @@ func (p Page) TransitionStates(frame entanglement.Session) entanglement.TypeStat
 		for _, content := range p.Contents {
 			stanzaID := content.Hex()
 			nextStanzaID := stanzaframe.GenerateCorrelation(stanzaID)
-			log.Printf("stanza expected %s := baseid: %s ", nextStanzaID, nextPageID)
 			correlation.AddCorrelation("stanza", stanzaID, nextStanzaID)
 		}
 	}
