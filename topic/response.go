@@ -73,11 +73,11 @@ func (e StatusResponse) HasError() bool {
 
 type BaseResponse struct {
 	StatusResponse
-	TargetID    bson.ObjectID        `json:"TargetId,omitempty,omitzero" `
-	PageData    []sitepages.SitePage `json:"PageData,omitempty" `
-	StanzaData  []sitepages.Stanza   `json:"StanzaData,omitempty" `
-	CommentData []sitepages.Comment  `json:"CommentData,omitempty" `
-	BundleData  []sitepages.Bundle   `json:"BundleData,omitempty" `
+	TargetID    bson.ObjectID      `json:"TargetId,omitempty,omitzero" `
+	PageData    []Page             `json:"PageData,omitempty" `
+	StanzaData  []Stanza           `json:"StanzaData,omitempty" `
+	CommentData []Comment          `json:"CommentData,omitempty" `
+	BundleData  []sitepages.Bundle `json:"BundleData,omitempty" `
 }
 
 func (t *BaseResponse) SetTargetID(id bson.ObjectID) {
@@ -123,25 +123,25 @@ func (t BaseResponse) GetTarget() Topic {
 func (t *BaseResponse) Append(data any) bson.ObjectID {
 	var id bson.ObjectID
 	switch response := data.(type) {
-	case sitepages.SitePage:
+	case Page:
 		t.PageData = append(t.PageData, response)
 		id = response.ID
-	case sitepages.Stanza:
+	case Stanza:
 		t.StanzaData = append(t.StanzaData, response)
 		id = response.ID
-	case sitepages.Comment:
+	case Comment:
 		t.CommentData = append(t.CommentData, response)
 		id = response.ID
 	case sitepages.Bundle:
 		t.BundleData = append(t.BundleData, response)
 		id = response.ID
-	case *sitepages.SitePage:
+	case *Page:
 		t.PageData = append(t.PageData, *response)
 		id = response.ID
-	case *sitepages.Stanza:
+	case *Stanza:
 		t.StanzaData = append(t.StanzaData, *response)
 		id = response.ID
-	case *sitepages.Comment:
+	case *Comment:
 		t.CommentData = append(t.CommentData, *response)
 		id = response.ID
 	case *sitepages.Bundle:

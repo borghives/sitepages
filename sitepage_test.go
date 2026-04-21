@@ -19,7 +19,7 @@ func TestSaveSitePages(t *testing.T) {
 	tmpFile.Close() // Close it so SaveSitePages can open and write to it.
 
 	eventTime := time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC)
-	pages := []SitePage{
+	pages := []Page{
 		{
 			LinkName: "testpage1",
 			Title:    "Test Page 1",
@@ -39,7 +39,7 @@ func TestSaveSitePages(t *testing.T) {
 		t.Fatalf("Failed to read back saved file: %v", err)
 	}
 
-	var loadedPages []SitePage
+	var loadedPages []Page
 	err = json.Unmarshal(savedData, &loadedPages)
 	if err != nil {
 		t.Fatalf("Failed to unmarshal saved data: %v", err)

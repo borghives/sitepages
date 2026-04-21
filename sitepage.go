@@ -3,12 +3,10 @@ package sitepages
 import (
 	"encoding/json"
 	"encoding/xml"
-	"fmt"
 	"log"
 	"os"
 	"time"
 
-	"github.com/borghives/entanglement"
 	"github.com/borghives/kosmos-go"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
@@ -22,7 +20,7 @@ var MAX_TITLE_LENGTH = 255
 var MAX_CHUNK_INDEX = 100
 var MAX_ABSTRACT_LENGTH = 255
 
-type SitePage struct {
+type Page struct {
 	kosmos.BaseModel `bson:",inline" kosmos:"page"`
 	XMLName          xml.Name        `xml:"page" json:"-" bson:"-"`
 	Root             bson.ObjectID   `xml:"root" json:"Root" bson:"root"`
@@ -48,7 +46,7 @@ type Bundle struct {
 	Contents         []bson.ObjectID `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
 	EventAt          time.Time       `xml:"eventat" json:"EventAt" bson:"event_at"`
 	PreviousBundleId bson.ObjectID   `xml:"previousbundleid" json:"PreviousBundleId" bson:"previous_bundle_id"`
-	PageData         []SitePage      `xml:"-" json:"PageData,omitempty" bson:"page_data,omitempty"` //for aggregate querying and not for storing into database or display as xml model
+	PageData         []Page          `xml:"-" json:"PageData,omitempty" bson:"page_data,omitempty"` //for aggregate querying and not for storing into database or display as xml model
 }
 
 type Stanza struct {
@@ -69,7 +67,7 @@ type PageList struct {
 	kosmos.BaseModel `bson:",inline" kosmos:"pagelist"`
 	XMLName          xml.Name        `xml:"pagelist" json:"-" bson:"-"`
 	Contents         []bson.ObjectID `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
-	PageData         []SitePage      `xml:"-" json:"PageData,omitempty" bson:"page_data,omitempty"`
+	PageData         []Page          `xml:"-" json:"PageData,omitempty" bson:"page_data,omitempty"`
 }
 
 type Comment struct {
@@ -111,74 +109,7 @@ type MetaInfo struct {
 	Deeper          []LinkInfo    `xml:"deeper,omitempty" json:"Deeper,omitempty" bson:"deeper,omitempty"`
 }
 
-func (p SitePage) TransitionStates(frame entanglement.Session) entanglement.TypeStateCorrelation {
-	correlation := make(entanglement.TypeStateCorrelation)
-	frame.SetFrame("page_system")
-
-	pageID := p.ID.Hex()
-
-	frame.EntangleProperty("pageid", pageID)
-	frame.EntangleProperty("rootid", p.Root.Hex())
-
-	nextPageID := frame.GenerateCorrelation(pageID)
-	correlation.AddCorrelation("page", pageID, nextPageID)
-
-	stanzaframe := frame.CreateSubFrame("stanza_system")
-	stanzaframe.EntangleProperty("baseid", nextPageID)
-
-	if len(p.Contents) > 0 {
-		for _, content := range p.Contents {
-			stanzaID := content.Hex()
-			nextStanzaID := stanzaframe.GenerateCorrelation(stanzaID)
-			correlation.AddCorrelation("stanza", stanzaID, nextStanzaID)
-		}
-	}
-
-	return correlation
-}
-
-func (p SitePage) CheckExpectation(frame entanglement.Session) error {
-	frame.SetFrame("page_system")
-	frame.EntangleProperty("pageid", p.PreviousVersion.Hex())
-	frame.EntangleProperty("rootid", p.Root.Hex())
-	correlatedId := frame.GenerateCorrelation(p.PreviousVersion.Hex())
-	if correlatedId != p.ID.Hex() {
-		log.Printf("Missmatch page id: %s, expected %s := pageid: %s rootid: %s", p.ID.Hex(), correlatedId, p.PreviousVersion.Hex(), p.Root.Hex())
-		return fmt.Errorf("Failed ID Expectation")
-	}
-	return nil
-}
-
-func (p Stanza) TransitionStates(frame entanglement.Session) entanglement.TypeStateCorrelation {
-	correlation := make(entanglement.TypeStateCorrelation)
-	return correlation
-}
-
-func (s Stanza) CheckExpectation(frame entanglement.Session) error {
-	frame.SetFrame("stanza_system")
-	frame.EntangleProperty("baseid", s.BasePage.Hex())
-	correlatedId := frame.GenerateCorrelation(s.PreviousVersion.Hex())
-
-	if correlatedId != s.ID.Hex() {
-		log.Printf("Missmatch stanza id: %s, expected %s := baseid: %s index: %d", s.ID.Hex(), correlatedId, s.BasePage.Hex(), int(s.ChunkIndex))
-		return fmt.Errorf("Failed ID Expectation")
-	}
-	return nil
-}
-
-func (t SitePage) GetRootID() bson.ObjectID {
-	return t.Root
-}
-
-func (t Stanza) GetRootID() bson.ObjectID {
-	return t.BasePage
-}
-
-func (t Comment) GetRootID() bson.ObjectID {
-	return t.Root
-}
-
-func SaveSitePages(file string, pages []SitePage) error {
+func SaveSitePages(file string, pages []Page) error {
 	// Open the file for writing
 	f, err := os.Create(file)
 	if err != nil {
@@ -198,14 +129,14 @@ func ParseMomementString(moment string) (time.Time, error) {
 	return time.Parse("2006-01-02 15:04", moment)
 }
 
-func LoadSitePages(site string) []SitePage {
+func LoadSitePages(site string) []Page {
 	file, err := os.Open(site)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer file.Close()
 
-	var retval []SitePage
+	var retval []Page
 	err = json.NewDecoder(file).Decode(&retval)
 	if err != nil {
 		log.Fatal(err)

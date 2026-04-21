@@ -1,6 +1,7 @@
 package topic
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/borghives/entanglement"
@@ -9,12 +10,12 @@ import (
 )
 
 type EntangledResponse struct {
-	Response
+	BaseResponse
 	EntanglementState *entanglement.EntangleProperties `xml:"-" json:"EntangleProperties,omitempty" bson:"-" `
 }
 
 func NewResponse() Response {
-	return &EntangledResponse{Response: &BaseResponse{}}
+	return &EntangledResponse{}
 }
 
 func (e *EntangledResponse) Append(data any) bson.ObjectID {
@@ -24,7 +25,7 @@ func (e *EntangledResponse) Append(data any) bson.ObjectID {
 	case entanglement.Session:
 		e.EntangleFrame(data)
 	default:
-		return e.Response.Append(data)
+		return e.BaseResponse.Append(data)
 	}
 	return bson.ObjectID{}
 }
@@ -68,6 +69,7 @@ func HandleEntangled(frame string, doCheck bool, handler Handler) *ServeEntangle
 }
 
 func (s ServeEntangled) ServeTopic(response Response, r *http.Request) {
+	log.Printf("Serve Frame: %s", s.Frame)
 	frame := SetupEntanglement(r)
 
 	if s.Frame != "" {
