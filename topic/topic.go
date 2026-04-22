@@ -19,7 +19,7 @@ func (t Page) GetRootID() bson.ObjectID {
 
 func (t Page) TransitionStates(frame entanglement.Session) entanglement.TypeStateCorrelation {
 	correlation := make(entanglement.TypeStateCorrelation)
-	frame.SetFrame("page_system")
+	frame = frame.CreateSubFrame("page_system")
 
 	pageID := t.ID.Hex()
 
@@ -30,12 +30,12 @@ func (t Page) TransitionStates(frame entanglement.Session) entanglement.TypeStat
 	correlation.AddCorrelation("page", pageID, nextPageID)
 	correlation.Update(EntangleStanzaProperties(frame, nextPageID, t.Contents...))
 	correlation.Update(EntangleCommentProperties(frame, t.ID, t.Root, 0))
-
+	log.Println("Entangle Page Id", nextPageID, frame.StateString())
 	return correlation
 }
 
 func (t Page) CheckTransition(frame entanglement.Session) error {
-	frame.SetFrame("page_system")
+	frame = frame.CreateSubFrame("page_system")
 	frame.EntangleProperty("pageid", t.PreviousVersion.Hex())
 	frame.EntangleProperty("rootid", t.Root.Hex())
 	correlatedId := frame.GenerateCorrelation(t.PreviousVersion.Hex())
@@ -64,7 +64,7 @@ func (t Stanza) CheckTransition(frame entanglement.Session) error {
 	correlatedId := frame.GenerateCorrelation(t.PreviousVersion.Hex())
 
 	if correlatedId != t.ID.Hex() {
-		log.Printf("Missmatch stanza id: %s, expected %s := baseid: %s index: %d", t.ID.Hex(), correlatedId, t.BasePage.Hex(), int(t.ChunkIndex))
+		log.Printf("Missmatch stanza id: %s, expected %s := %s", t.ID.Hex(), correlatedId, frame.StateString())
 		return fmt.Errorf("Failed ID Expectation")
 	}
 	return nil
@@ -73,11 +73,12 @@ func (t Stanza) CheckTransition(frame entanglement.Session) error {
 func EntangleStanzaProperties(frame entanglement.Session, baseid string, contents ...bson.ObjectID) entanglement.TypeStateCorrelation {
 	correlation := make(entanglement.TypeStateCorrelation)
 	if len(contents) > 0 {
-		frame.CreateSubFrame("stanza_system")
+		frame = frame.CreateSubFrame("stanza_system")
 		frame.EntangleProperty("baseid", baseid)
 		for _, content := range contents {
 			stanzaID := content.Hex()
 			nextStanzaID := frame.GenerateCorrelation(stanzaID)
+			log.Println("Entangle Stanza Id", stanzaID, nextStanzaID, frame.StateString())
 			correlation.AddCorrelation("stanza", stanzaID, nextStanzaID)
 		}
 	}

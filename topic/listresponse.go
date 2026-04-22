@@ -14,8 +14,21 @@ type ListTopicResponse struct {
 	ListData []List `xml:"-" json:"ListData,omitempty" bson:"listdata,omitempty" `
 }
 
-func NewListTopicResponse() Response {
-	return &ListTopicResponse{}
+func NewListTopicResponse(name string) Response {
+	listName := name
+	var list *List
+	if listName != "" {
+		list = &List{ID: listName}
+	}
+
+	var listData []List
+	if list != nil {
+		listData = []List{*list}
+	}
+
+	return &ListTopicResponse{
+		ListData: listData,
+	}
 }
 
 func (t *ListTopicResponse) Append(data any) bson.ObjectID {
