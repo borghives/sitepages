@@ -1,4 +1,4 @@
-package query
+package topic
 
 import (
 	"encoding/json"
@@ -10,14 +10,13 @@ import (
 	"github.com/borghives/entanglement"
 	"github.com/borghives/kosmos-go"
 	"github.com/borghives/kosmos-go/observation"
-	"github.com/borghives/sitepages/topic"
 	"github.com/borghives/websession"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type RequestSession struct {
 	Request        *http.Request
-	Response       topic.Response
+	Response       Response
 	EntangleFrame  entanglement.SystemFrame
 	TopicId        *bson.ObjectID
 	LatestTopic    bool
@@ -113,7 +112,7 @@ func (t Handler[T]) AggregateSession(r *http.Request) (*Session[T], error) {
 func ServeError(w http.ResponseWriter, err error) {
 	log.Printf("Error Handling Topic Request Chain: %v", err)
 	w.Header().Set("Content-Type", "application/json")
-	status, ok := err.(topic.ErrorResponse)
+	status, ok := err.(ErrorResponse)
 	if ok {
 		w.WriteHeader(status.ErrorCode())
 		return
@@ -124,7 +123,7 @@ func ServeError(w http.ResponseWriter, err error) {
 func CreateEntangleResponse[T observation.Detectable]() HandlerFunc[T] {
 	return func(s *Session[T]) error {
 		if s.Response == nil {
-			s.Response = topic.NewResponse()
+			s.Response = NewResponse()
 		}
 		return nil
 	}
@@ -133,7 +132,7 @@ func CreateEntangleResponse[T observation.Detectable]() HandlerFunc[T] {
 func CreateRelationResponse[T observation.Detectable]() HandlerFunc[T] {
 	return func(s *Session[T]) error {
 		if s.Response == nil {
-			s.Response = topic.NewRelationTopicResponse()
+			s.Response = NewRelationTopicResponse()
 		}
 		return nil
 	}
@@ -142,7 +141,7 @@ func CreateRelationResponse[T observation.Detectable]() HandlerFunc[T] {
 func CreateListResponse[T observation.Detectable](name string) HandlerFunc[T] {
 	return func(s *Session[T]) error {
 		if s.Response == nil {
-			s.Response = topic.NewListTopicResponse(name)
+			s.Response = NewListTopicResponse(name)
 		}
 		return nil
 	}
@@ -162,7 +161,7 @@ func SetIDFromPath[T observation.Detectable](allowLatest bool) HandlerFunc[T] {
 
 		id, err := bson.ObjectIDFromHex(idStr)
 		if err != nil {
-			return topic.NewStatusError(fmt.Errorf("invalid id from path"), http.StatusBadRequest)
+			return NewStatusError(fmt.Errorf("invalid id from path"), http.StatusBadRequest)
 		}
 		s.TopicId = &id
 		return nil
@@ -223,11 +222,11 @@ func CheckEntanglementToken[T observation.Detectable]() HandlerFunc[T] {
 	return func(s *Session[T]) error {
 		session, err := s.VerifySession()
 		if err != nil {
-			return topic.NewStatusError(err, http.StatusExpectationFailed)
+			return NewStatusError(err, http.StatusExpectationFailed)
 		}
 
 		if err := s.EntangleFrame.VerifyTokenAlignment(*session); err != nil {
-			return topic.NewStatusError(err, http.StatusExpectationFailed)
+			return NewStatusError(err, http.StatusExpectationFailed)
 		}
 		return nil
 	}
@@ -237,7 +236,7 @@ func GenerateEntanglement[T observation.Detectable]() HandlerFunc[T] {
 	return func(s *Session[T]) error {
 		session, err := s.VerifySession()
 		if err != nil {
-			return topic.NewStatusError(err, http.StatusExpectationFailed)
+			return NewStatusError(err, http.StatusExpectationFailed)
 		}
 		s.Response.Append(entanglement.EntangleSession(s.EntangleFrame, *session))
 		return nil
@@ -248,7 +247,7 @@ func CheckBodyCorrelation[T observation.Detectable]() HandlerFunc[T] {
 	return func(s *Session[T]) error {
 		session, err := s.VerifySession()
 		if err != nil {
-			return topic.NewStatusError(err, http.StatusExpectationFailed)
+			return NewStatusError(err, http.StatusExpectationFailed)
 		}
 
 		topicBody := any(s.Body)

@@ -1,4 +1,4 @@
-package query
+package topic
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 
 	"github.com/borghives/kosmos-go"
 	"github.com/borghives/kosmos-go/observation/expression"
-	"github.com/borghives/sitepages/topic"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
@@ -43,7 +42,7 @@ func (t *FilterAccumulator) Chain(chains ...FilterFunc) *FilterAccumulator {
 func (t *FilterAccumulator) ByID(allowLatest bool) *FilterAccumulator {
 	return t.Chain(func(f *FilterSession, s *RequestSession) error {
 		if !allowLatest && s.TopicId == nil {
-			return topic.NewStatusError(fmt.Errorf("invalid id"), http.StatusBadRequest)
+			return NewStatusError(fmt.Errorf("invalid id"), http.StatusBadRequest)
 		}
 
 		if s.TopicId == nil {
@@ -85,7 +84,7 @@ func (t *FilterAccumulator) ByIDFromPath(fieldName string, pathName string) *Fil
 
 		id, err := bson.ObjectIDFromHex(idStr)
 		if err != nil {
-			return topic.NewStatusError(fmt.Errorf("invalid id from path"), http.StatusBadRequest)
+			return NewStatusError(fmt.Errorf("invalid id from path"), http.StatusBadRequest)
 		}
 
 		f.AddFilter(
@@ -131,12 +130,12 @@ func (t *FilterAccumulator) ByAuthID(fieldName string, allowUserZero bool) *Filt
 	return t.Chain(func(f *FilterSession, s *RequestSession) error {
 		clientSession, err := s.VerifySession()
 		if err != nil {
-			return topic.NewStatusError(err, http.StatusUnauthorized)
+			return NewStatusError(err, http.StatusUnauthorized)
 		}
 
 		userid := clientSession.UserId
 		if !allowUserZero && userid.IsZero() {
-			return topic.NewStatusError(fmt.Errorf("Failed to filter. User id is zero"), http.StatusUnauthorized)
+			return NewStatusError(fmt.Errorf("Failed to filter. User id is zero"), http.StatusUnauthorized)
 		}
 
 		f.AddFilter(kosmos.Fld(fieldName).Eq(userid))
@@ -148,12 +147,12 @@ func (t *FilterAccumulator) ByAuthName(fieldName string, auth AuthType) *FilterA
 	return t.Chain(func(f *FilterSession, s *RequestSession) error {
 		clientSession, err := s.VerifySession()
 		if err != nil {
-			return topic.NewStatusError(err, http.StatusUnauthorized)
+			return NewStatusError(err, http.StatusUnauthorized)
 		}
 
 		username := clientSession.UserName
 		if clientSession.UserName == "" {
-			return topic.NewStatusError(fmt.Errorf("missing required auth parameter: user_name"), http.StatusUnauthorized)
+			return NewStatusError(fmt.Errorf("missing required auth parameter: user_name"), http.StatusUnauthorized)
 		}
 		f.AddFilter(kosmos.Fld(fieldName).Eq(username))
 
