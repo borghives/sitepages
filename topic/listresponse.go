@@ -31,12 +31,12 @@ func NewListTopicResponse(name string) Response {
 	}
 }
 
-func (t *ListTopicResponse) Append(data any) bson.ObjectID {
+func (lr *ListTopicResponse) Append(data any) bson.ObjectID {
 
-	id := t.EntangledResponse.Append(data)
+	id := lr.EntangledResponse.Append(data)
 	if !id.IsZero() {
-		if len(t.ListData) > 0 {
-			t.ListData[0].Contents = append(t.ListData[0].Contents, id)
+		if len(lr.ListData) > 0 {
+			lr.ListData[0].Contents = append(lr.ListData[0].Contents, id)
 		}
 	}
 	return id

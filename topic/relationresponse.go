@@ -14,21 +14,21 @@ func NewRelationTopicResponse() Response {
 	return &RelationTopicResponse{}
 }
 
-func (t *RelationTopicResponse) Append(data any) bson.ObjectID {
+func (rr *RelationTopicResponse) Append(data any) bson.ObjectID {
 	switch response := data.(type) {
 	case sitepages.UserToPageLink:
-		t.LinkDescs = append(t.LinkDescs, response.LinkDescription)
+		rr.LinkDescs = append(rr.LinkDescs, response.LinkDescription)
 		return response.ObjectId
 	case *sitepages.UserToPageLink:
-		t.LinkDescs = append(t.LinkDescs, response.LinkDescription)
+		rr.LinkDescs = append(rr.LinkDescs, response.LinkDescription)
 		return response.ObjectId
 	case sitepages.UserToCommentLink:
-		t.LinkDescs = append(t.LinkDescs, response.LinkDescription)
+		rr.LinkDescs = append(rr.LinkDescs, response.LinkDescription)
 		return response.ObjectId
 	case *sitepages.UserToCommentLink:
-		t.LinkDescs = append(t.LinkDescs, response.LinkDescription)
+		rr.LinkDescs = append(rr.LinkDescs, response.LinkDescription)
 		return response.ObjectId
 	}
 
-	return t.BaseResponse.Append(data)
+	return rr.BaseResponse.Append(data)
 }

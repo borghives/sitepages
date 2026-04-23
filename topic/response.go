@@ -62,39 +62,39 @@ type BaseResponse struct {
 	BundleData  []sitepages.Bundle `json:"BundleData,omitempty" `
 }
 
-func (t *BaseResponse) SetTargetID(id bson.ObjectID) {
-	t.TargetID = id
+func (br *BaseResponse) SetTargetID(id bson.ObjectID) {
+	br.TargetID = id
 }
 
-func (t BaseResponse) GetTargetID() bson.ObjectID {
-	return t.TargetID
+func (br BaseResponse) GetTargetID() bson.ObjectID {
+	return br.TargetID
 }
 
-func (t BaseResponse) GetTarget() Topic {
-	if t.TargetID.IsZero() {
+func (br BaseResponse) GetTarget() Topic {
+	if br.TargetID.IsZero() {
 		return nil
 	}
 
-	for _, entity := range t.PageData {
-		if entity.GetID() == t.TargetID {
+	for _, entity := range br.PageData {
+		if entity.GetID() == br.TargetID {
 			return entity
 		}
 	}
 
-	for _, entity := range t.StanzaData {
-		if entity.GetID() == t.TargetID {
+	for _, entity := range br.StanzaData {
+		if entity.GetID() == br.TargetID {
 			return entity
 		}
 	}
 
-	for _, entity := range t.CommentData {
-		if entity.GetID() == t.TargetID {
+	for _, entity := range br.CommentData {
+		if entity.GetID() == br.TargetID {
 			return entity
 		}
 	}
 
-	for _, entity := range t.BundleData {
-		if entity.GetID() == t.TargetID {
+	for _, entity := range br.BundleData {
+		if entity.GetID() == br.TargetID {
 			return entity
 		}
 	}
@@ -102,32 +102,32 @@ func (t BaseResponse) GetTarget() Topic {
 	return nil
 }
 
-func (t *BaseResponse) Append(data any) bson.ObjectID {
+func (br *BaseResponse) Append(data any) bson.ObjectID {
 	var id bson.ObjectID
 	switch response := data.(type) {
 	case Page:
-		t.PageData = append(t.PageData, response)
+		br.PageData = append(br.PageData, response)
 		id = response.ID
 	case Stanza:
-		t.StanzaData = append(t.StanzaData, response)
+		br.StanzaData = append(br.StanzaData, response)
 		id = response.ID
 	case Comment:
-		t.CommentData = append(t.CommentData, response)
+		br.CommentData = append(br.CommentData, response)
 		id = response.ID
 	case sitepages.Bundle:
-		t.BundleData = append(t.BundleData, response)
+		br.BundleData = append(br.BundleData, response)
 		id = response.ID
 	case *Page:
-		t.PageData = append(t.PageData, *response)
+		br.PageData = append(br.PageData, *response)
 		id = response.ID
 	case *Stanza:
-		t.StanzaData = append(t.StanzaData, *response)
+		br.StanzaData = append(br.StanzaData, *response)
 		id = response.ID
 	case *Comment:
-		t.CommentData = append(t.CommentData, *response)
+		br.CommentData = append(br.CommentData, *response)
 		id = response.ID
 	case *sitepages.Bundle:
-		t.BundleData = append(t.BundleData, *response)
+		br.BundleData = append(br.BundleData, *response)
 		id = response.ID
 	default:
 		log.Printf("Append unknown type: %T", data)

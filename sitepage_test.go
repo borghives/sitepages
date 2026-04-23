@@ -128,24 +128,24 @@ func TestGenerateMomentString(t *testing.T) {
 	}
 }
 
-// TestParseMomentString tests the ParseMomementString function (note typo in original func name)
-func TestParseMomementString(t *testing.T) {
-	// The format used by ParseMomementString is "2006-01-02 15:04"
+// TestParseMomentString tests the ParseMomentString function
+func TestParseMomentString(t *testing.T) {
+	// The format used by ParseMomentString is "2006-01-02 15:04"
 	timeStr := "2023-10-26 10:30"
 	expected, _ := time.Parse("2006-01-02 15:04", timeStr) // Use same format for expected
 
-	result, err := ParseMomementString(timeStr)
+	result, err := ParseMomentString(timeStr)
 	if err != nil {
-		t.Fatalf("ParseMomementString(%q) error: %v", timeStr, err)
+		t.Fatalf("ParseMomentString(%q) error: %v", timeStr, err)
 	}
 	if !result.Equal(expected) {
-		t.Errorf("ParseMomementString(%q) = %v, want %v", timeStr, result, expected)
+		t.Errorf("ParseMomentString(%q) = %v, want %v", timeStr, result, expected)
 	}
 
 	// Test invalid string
 	invalidStr := "not-a-time-string"
-	_, err = ParseMomementString(invalidStr)
+	result, err = ParseMomentString(invalidStr)
 	if err == nil {
-		t.Errorf("ParseMomementString(%q) expected error, got nil", invalidStr)
+		t.Errorf("ParseMomentString(%q) expected error, got nil", invalidStr)
 	}
 }

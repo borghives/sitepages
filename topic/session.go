@@ -35,20 +35,20 @@ func NewRequestSession(r *http.Request) *RequestSession {
 	}
 }
 
-func (t *RequestSession) URLQuery() url.Values {
-	if t.urlQuery == nil {
-		q := t.Request.URL.Query()
-		t.urlQuery = &q
+func (rs *RequestSession) URLQuery() url.Values {
+	if rs.urlQuery == nil {
+		q := rs.Request.URL.Query()
+		rs.urlQuery = &q
 	}
-	return *t.urlQuery
+	return *rs.urlQuery
 }
 
-func (t *RequestSession) VerifySession() (*websession.Session, error) {
-	if t.userSession == nil && t.userSessionErr == nil {
-		t.userSession, t.userSessionErr = websession.Manager().GetAndVerifySession(t.Request)
+func (rs *RequestSession) VerifySession() (*websession.Session, error) {
+	if rs.userSession == nil && rs.userSessionErr == nil {
+		rs.userSession, rs.userSessionErr = websession.Manager().GetAndVerifySession(rs.Request)
 	}
 
-	return t.userSession, t.userSessionErr
+	return rs.userSession, rs.userSessionErr
 }
 
 type Session[T observation.Detectable] struct {
@@ -63,20 +63,20 @@ func NewRequestTopicSession[T observation.Detectable](r *http.Request) *Session[
 	}
 }
 
-func (t *Session[T]) TopicDetector() *observation.EntityDetector[T] {
-	if t.Detector == nil {
-		t.Detector = kosmos.All[T]()
+func (s *Session[T]) TopicDetector() *observation.EntityDetector[T] {
+	if s.Detector == nil {
+		s.Detector = kosmos.All[T]()
 	}
 
-	return t.Detector
+	return s.Detector
 }
 
-func (t *Session[T]) DecodeBody() error {
-	if t.Request.Body == nil {
-		return fmt.Errorf("Null Body in request")
+func (s *Session[T]) DecodeBody() error {
+	if s.Request.Body == nil {
+		return fmt.Errorf("nil body in request")
 	}
 
-	return json.NewDecoder(t.Request.Body).Decode(&t.Body)
+	return json.NewDecoder(s.Request.Body).Decode(&s.Body)
 }
 
 type HandlerFunc[T observation.Detectable] func(session *Session[T]) error
@@ -89,19 +89,19 @@ func NewQuery[T observation.Detectable](responseCreator HandlerFunc[T]) *Handler
 	return session.Chain(responseCreator)
 }
 
-func (t *Handler[T]) Chain(chains ...HandlerFunc[T]) *Handler[T] {
-	t.Pipe = append(t.Pipe, chains...)
-	return t
+func (h *Handler[T]) Chain(chains ...HandlerFunc[T]) *Handler[T] {
+	h.Pipe = append(h.Pipe, chains...)
+	return h
 }
 
-func (t *Handler[T]) ChainTop(chain HandlerFunc[T]) *Handler[T] {
-	t.Pipe = append([]HandlerFunc[T]{chain}, t.Pipe...)
-	return t
+func (h *Handler[T]) ChainTop(chain HandlerFunc[T]) *Handler[T] {
+	h.Pipe = append([]HandlerFunc[T]{chain}, h.Pipe...)
+	return h
 }
 
-func (t Handler[T]) AggregateSession(r *http.Request) (*Session[T], error) {
+func (h Handler[T]) AggregateSession(r *http.Request) (*Session[T], error) {
 	session := NewRequestTopicSession[T](r)
-	for _, chainExecution := range t.Pipe {
+	for _, chainExecution := range h.Pipe {
 		if err := chainExecution(session); err != nil {
 			return nil, err
 		}
@@ -253,7 +253,7 @@ func CheckBodyCorrelation[T observation.Detectable]() HandlerFunc[T] {
 		topicBody := any(s.Body)
 		entangleTopic, ok := topicBody.(entanglement.Correlatable)
 		if !ok {
-			log.Printf("Called to CheckBodyCorrelation on uncompatible type %v", s.Body)
+			log.Printf("Called to CheckBodyCorrelation on incompatible type %v", s.Body)
 			return fmt.Errorf("Error CheckBodyCorrelation")
 		}
 

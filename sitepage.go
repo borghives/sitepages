@@ -125,7 +125,7 @@ func GenerateMomentString(coolDown time.Duration) string {
 	return now.Add(coolDown).Format("2006-01-02 15:04")
 }
 
-func ParseMomementString(moment string) (time.Time, error) {
+func ParseMomentString(moment string) (time.Time, error) {
 	return time.Parse("2006-01-02 15:04", moment)
 }
 

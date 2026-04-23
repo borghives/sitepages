@@ -14,9 +14,9 @@ type FilterSession struct {
 	Filters []expression.QueryFieldPredicate
 }
 
-func (t *FilterSession) AddFilter(filter ...expression.QueryFieldPredicate) *FilterSession {
-	t.Filters = append(t.Filters, filter...)
-	return t
+func (fs *FilterSession) AddFilter(filter ...expression.QueryFieldPredicate) *FilterSession {
+	fs.Filters = append(fs.Filters, filter...)
+	return fs
 }
 
 type FilterFunc func(filter *FilterSession, session *RequestSession) error
@@ -28,13 +28,13 @@ func Filter() *FilterAccumulator {
 	return &FilterAccumulator{}
 }
 
-func (t *FilterAccumulator) Chain(chains ...FilterFunc) *FilterAccumulator {
-	t.Pipe = append(t.Pipe, chains...)
-	return t
+func (fa *FilterAccumulator) Chain(chains ...FilterFunc) *FilterAccumulator {
+	fa.Pipe = append(fa.Pipe, chains...)
+	return fa
 }
 
-func (t *FilterAccumulator) ByID(allowLatest bool) *FilterAccumulator {
-	return t.Chain(func(f *FilterSession, s *RequestSession) error {
+func (fa *FilterAccumulator) ByID(allowLatest bool) *FilterAccumulator {
+	return fa.Chain(func(f *FilterSession, s *RequestSession) error {
 		if !allowLatest && s.TopicId == nil {
 			return NewStatusError(fmt.Errorf("invalid id"), http.StatusBadRequest)
 		}
@@ -49,8 +49,8 @@ func (t *FilterAccumulator) ByID(allowLatest bool) *FilterAccumulator {
 	})
 }
 
-func (t *FilterAccumulator) ByString(fieldName string, value string) *FilterAccumulator {
-	return t.Chain(func(f *FilterSession, s *RequestSession) error {
+func (fa *FilterAccumulator) ByString(fieldName string, value string) *FilterAccumulator {
+	return fa.Chain(func(f *FilterSession, s *RequestSession) error {
 		f.AddFilter(
 			kosmos.Fld(fieldName).Eq(value),
 		)
@@ -58,8 +58,8 @@ func (t *FilterAccumulator) ByString(fieldName string, value string) *FilterAccu
 	})
 }
 
-func (t *FilterAccumulator) ByPathParam(fieldName string, pathName string) *FilterAccumulator {
-	return t.Chain(func(f *FilterSession, s *RequestSession) error {
+func (fa *FilterAccumulator) ByPathParam(fieldName string, pathName string) *FilterAccumulator {
+	return fa.Chain(func(f *FilterSession, s *RequestSession) error {
 		value := s.Request.PathValue(pathName)
 
 		f.AddFilter(
@@ -69,8 +69,8 @@ func (t *FilterAccumulator) ByPathParam(fieldName string, pathName string) *Filt
 	})
 }
 
-func (t *FilterAccumulator) ByIDFromPath(fieldName string, pathName string) *FilterAccumulator {
-	return t.Chain(func(f *FilterSession, s *RequestSession) error {
+func (fa *FilterAccumulator) ByIDFromPath(fieldName string, pathName string) *FilterAccumulator {
+	return fa.Chain(func(f *FilterSession, s *RequestSession) error {
 		idStr := s.Request.PathValue(pathName)
 		if idStr == "" {
 			return fmt.Errorf("empty id from path")
@@ -88,8 +88,8 @@ func (t *FilterAccumulator) ByIDFromPath(fieldName string, pathName string) *Fil
 	})
 }
 
-func (t *FilterAccumulator) ByIDSetFromQuery(fieldName string, queryName string) *FilterAccumulator {
-	return t.Chain(func(f *FilterSession, s *RequestSession) error {
+func (fa *FilterAccumulator) ByIDSetFromQuery(fieldName string, queryName string) *FilterAccumulator {
+	return fa.Chain(func(f *FilterSession, s *RequestSession) error {
 		values := s.URLQuery()[queryName]
 
 		ids, err := convertStringToIDs(values)
@@ -107,8 +107,8 @@ func (t *FilterAccumulator) ByIDSetFromQuery(fieldName string, queryName string)
 	})
 }
 
-func (t *FilterAccumulator) AddFilterFromQuery(fieldName string, queryName string) *FilterAccumulator {
-	return t.Chain(func(f *FilterSession, s *RequestSession) error {
+func (fa *FilterAccumulator) AddFilterFromQuery(fieldName string, queryName string) *FilterAccumulator {
+	return fa.Chain(func(f *FilterSession, s *RequestSession) error {
 		values := s.URLQuery()[queryName]
 
 		if len(values) == 1 {
@@ -120,8 +120,8 @@ func (t *FilterAccumulator) AddFilterFromQuery(fieldName string, queryName strin
 	})
 }
 
-func (t *FilterAccumulator) ByAuthID(fieldName string, allowUserZero bool) *FilterAccumulator {
-	return t.Chain(func(f *FilterSession, s *RequestSession) error {
+func (fa *FilterAccumulator) ByAuthID(fieldName string, allowUserZero bool) *FilterAccumulator {
+	return fa.Chain(func(f *FilterSession, s *RequestSession) error {
 		clientSession, err := s.VerifySession()
 		if err != nil {
 			return NewStatusError(err, http.StatusUnauthorized)
@@ -137,8 +137,8 @@ func (t *FilterAccumulator) ByAuthID(fieldName string, allowUserZero bool) *Filt
 	})
 }
 
-func (t *FilterAccumulator) ByAuthName(fieldName string) *FilterAccumulator {
-	return t.Chain(func(f *FilterSession, s *RequestSession) error {
+func (fa *FilterAccumulator) ByAuthName(fieldName string) *FilterAccumulator {
+	return fa.Chain(func(f *FilterSession, s *RequestSession) error {
 		clientSession, err := s.VerifySession()
 		if err != nil {
 			return NewStatusError(err, http.StatusUnauthorized)
@@ -154,9 +154,9 @@ func (t *FilterAccumulator) ByAuthName(fieldName string) *FilterAccumulator {
 	})
 }
 
-func (t FilterAccumulator) Accumulate(s *RequestSession) ([]expression.QueryFieldPredicate, error) {
+func (fa FilterAccumulator) Accumulate(s *RequestSession) ([]expression.QueryFieldPredicate, error) {
 	filter := &FilterSession{}
-	for _, chainExecution := range t.Pipe {
+	for _, chainExecution := range fa.Pipe {
 		if err := chainExecution(filter, s); err != nil {
 			return nil, err
 		}
