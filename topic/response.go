@@ -15,8 +15,6 @@ type Topic interface {
 }
 
 type Response interface {
-	SetOnError(err error, code int) error
-	GetStatus() StatusResponse
 	SetTargetID(id bson.ObjectID)
 	GetTargetID() bson.ObjectID
 	GetTarget() Topic
@@ -52,27 +50,11 @@ func (e StatusResponse) Error() string {
 	return fmt.Sprintf("Response Status %d: %s", e.StatusCode, e.StatusMsg)
 }
 
-func (e *StatusResponse) SetOnError(err error, code int) error {
-	if err != nil {
-		log.Printf("Response Error: %s", err.Error())
-		if !e.HasError() {
-
-			//Personal rule: only set the first error
-			e.StatusMsg = err.Error()
-			e.StatusCode = code
-		}
-
-		return e
-	}
-	return nil
-}
-
 func (e StatusResponse) HasError() bool {
 	return e.StatusCode >= 400
 }
 
 type BaseResponse struct {
-	StatusResponse
 	TargetID    bson.ObjectID      `json:"TargetId,omitempty,omitzero" `
 	PageData    []Page             `json:"PageData,omitempty" `
 	StanzaData  []Stanza           `json:"StanzaData,omitempty" `
@@ -156,13 +138,6 @@ func (t *BaseResponse) Append(data any) bson.ObjectID {
 
 func MarshalResponse[T Response](entity T, w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
-	status := entity.GetStatus()
-	if status.HasError() {
-		w.WriteHeader(status.StatusCode)
-		json.NewEncoder(w).Encode(status)
-		return
-	}
-
 	json.NewEncoder(w).Encode(entity)
 
 }

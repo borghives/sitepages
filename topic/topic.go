@@ -78,7 +78,7 @@ func EntangleStanzaProperties(frame entanglement.Session, baseid string, content
 		for _, content := range contents {
 			stanzaID := content.Hex()
 			nextStanzaID := frame.GenerateCorrelation(stanzaID)
-			log.Println("Entangle Stanza Id", stanzaID, nextStanzaID, frame.StateString())
+			// log.Println("Entangle Stanza Id", stanzaID, nextStanzaID, frame.StateString())
 			correlation.AddCorrelation("stanza", stanzaID, nextStanzaID)
 		}
 	}
