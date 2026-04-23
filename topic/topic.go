@@ -30,7 +30,7 @@ func (p Page) TransitionStates(frame entanglement.Session) entanglement.TypeStat
 	correlation.AddCorrelation("page", pageID, nextPageID)
 	correlation.Update(EntangleStanzaProperties(frame, nextPageID, p.Contents...))
 	correlation.Update(EntangleCommentProperties(frame, p.ID, p.Root, 0))
-	log.Println("Entangle Page Id", nextPageID, frame.StateString())
+	// log.Println("Entangle Page Id", nextPageID, frame.StateString())
 	return correlation
 }
 
@@ -113,9 +113,8 @@ func (c Comment) CheckTransition(frame entanglement.Session) error {
 	frame.EntangleProperty("rootid", c.Root.Hex())
 	frame.EntangleProperty("moment", c.Moment)
 	derivedHexID := frame.GenerateCorrelation("--page-comment-creator")
-	log.Println("Comment Check Id ", derivedHexID, frame.StateString())
 	if derivedHexID != c.ID.Hex() {
-		return fmt.Errorf("Check Comment Transition: mismatch comment id (%s) expect (%s)", c.ID.Hex(), derivedHexID)
+		return fmt.Errorf("Check Comment Transition: mismatch comment id (%s) expect (%s): %s", c.ID.Hex(), derivedHexID, frame.StateString())
 	}
 	return nil
 }
@@ -129,7 +128,7 @@ func EntangleCommentProperties(frame entanglement.Session, sourceId bson.ObjectI
 	frame.EntangleProperty("rootid", rootId.Hex())
 	frame.EntangleProperty("moment", moment)
 	nextId := frame.GenerateCorrelation("--page-comment-creator")
-	log.Println("Entangle Comment Id", nextId, frame.StateString())
+	// log.Println("Entangle Comment Id", nextId, frame.StateString())
 	correlation.AddCorrelation("comment", "--page-comment-creator", nextId)
 	correlation.AddCorrelation("comment", "moment", moment)
 	return correlation
