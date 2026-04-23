@@ -1,6 +1,7 @@
 package query
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -54,6 +55,7 @@ func (t *RequestSession) VerifySession() (*websession.Session, error) {
 type Session[T observation.Detectable] struct {
 	RequestSession
 	Detector *observation.EntityDetector[T]
+	Body     T
 }
 
 func NewRequestTopicSession[T observation.Detectable](r *http.Request) *Session[T] {
@@ -70,45 +72,12 @@ func (t *Session[T]) TopicDetector() *observation.EntityDetector[T] {
 	return t.Detector
 }
 
-func (t *Session[T]) Pull(limit int64) error {
-	if t.Detector == nil {
-		return fmt.Errorf("Topic Query Session missing Detector")
+func (t *Session[T]) DecodeBody() error {
+	if t.Request.Body == nil {
+		return fmt.Errorf("Null Body in request")
 	}
 
-	if t.Response == nil {
-		return fmt.Errorf("Topic Query Session missing Response structure")
-	}
-
-	//clone directive
-	entityDetector := *t.Detector
-
-	//if query uses latest topic. sort and limit to 1
-	if t.LatestTopic {
-		entityDetector = *entityDetector.SortLatest()
-	}
-
-	results, err := entityDetector.Limit(limit).PullAll(t.Request.Context())
-	if err != nil {
-		return fmt.Errorf("TopicQuery PullAll request error: %v", err)
-	}
-
-	//if query uses latest topic. fill the target id in response of the latest topic
-	if len(results) > 0 && t.TopicId == nil && t.LatestTopic {
-		id := results[0].GetID()
-		t.TopicId = &id
-		t.Response.SetTargetID(id)
-	}
-
-	//if query uses latest topic. fill the target id in response of the latest topic
-	if len(results) > 0 && t.TopicId != nil && t.Response.GetTargetID().IsZero() {
-		t.Response.SetTargetID(*t.TopicId)
-	}
-
-	for _, result := range results {
-		t.Response.Append(result)
-	}
-
-	return nil
+	return json.NewDecoder(t.Request.Body).Decode(&t.Body)
 }
 
 type HandlerFunc[T observation.Detectable] func(session *Session[T]) error
@@ -200,6 +169,49 @@ func SetIDFromPath[T observation.Detectable](allowLatest bool) HandlerFunc[T] {
 	}
 }
 
+func Pull[T observation.Detectable](limit int64) HandlerFunc[T] {
+	return func(s *Session[T]) error {
+		if s.Detector == nil {
+			return fmt.Errorf("Topic Query Session missing Detector")
+		}
+
+		if s.Response == nil {
+			return fmt.Errorf("Topic Query Session missing Response structure")
+		}
+
+		//clone directive
+		entityDetector := *s.Detector
+
+		//if query uses latest topic. sort and limit to 1
+		if s.LatestTopic {
+			entityDetector = *entityDetector.SortLatest()
+		}
+
+		results, err := entityDetector.Limit(limit).PullAll(s.Request.Context())
+		if err != nil {
+			return fmt.Errorf("TopicQuery PullAll request error: %v", err)
+		}
+
+		//if query uses latest topic. fill the target id in response of the latest topic
+		if len(results) > 0 && s.TopicId == nil && s.LatestTopic {
+			id := results[0].GetID()
+			s.TopicId = &id
+			s.Response.SetTargetID(id)
+		}
+
+		//if query uses latest topic. fill the target id in response of the latest topic
+		if len(results) > 0 && s.TopicId != nil && s.Response.GetTargetID().IsZero() {
+			s.Response.SetTargetID(*s.TopicId)
+		}
+
+		for _, result := range results {
+			s.Response.Append(result)
+		}
+
+		return nil
+	}
+}
+
 func SetEntanglementFrame[T observation.Detectable](frame string) HandlerFunc[T] {
 	return func(s *Session[T]) error {
 		s.EntangleFrame.SetFrame(frame)
@@ -229,5 +241,23 @@ func GenerateEntanglement[T observation.Detectable]() HandlerFunc[T] {
 		}
 		s.Response.Append(entanglement.EntangleSession(s.EntangleFrame, *session))
 		return nil
+	}
+}
+
+func CheckBodyCorrelation[T observation.Detectable]() HandlerFunc[T] {
+	return func(s *Session[T]) error {
+		session, err := s.VerifySession()
+		if err != nil {
+			return topic.NewStatusError(err, http.StatusExpectationFailed)
+		}
+
+		topicBody := any(s.Body)
+		entangleTopic, ok := topicBody.(entanglement.Correlatable)
+		if !ok {
+			log.Printf("Called to CheckBodyCorrelation on uncompatible type %v", s.Body)
+			return fmt.Errorf("Error CheckBodyCorrelation")
+		}
+
+		return entangleTopic.CheckTransition(entanglement.EntangleSession(s.EntangleFrame, *session))
 	}
 }
