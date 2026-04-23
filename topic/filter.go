@@ -9,12 +9,6 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-type AuthType string
-
-const (
-	AuthType_UserId   AuthType = "userid"
-	AuthType_UserName AuthType = "username"
-)
 
 type FilterSession struct {
 	Filters []expression.QueryFieldPredicate
@@ -143,7 +137,7 @@ func (t *FilterAccumulator) ByAuthID(fieldName string, allowUserZero bool) *Filt
 	})
 }
 
-func (t *FilterAccumulator) ByAuthName(fieldName string, auth AuthType) *FilterAccumulator {
+func (t *FilterAccumulator) ByAuthName(fieldName string) *FilterAccumulator {
 	return t.Chain(func(f *FilterSession, s *RequestSession) error {
 		clientSession, err := s.VerifySession()
 		if err != nil {
