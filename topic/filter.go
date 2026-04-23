@@ -9,7 +9,6 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-
 type FilterSession struct {
 	Filters []expression.QueryFieldPredicate
 }
@@ -19,7 +18,7 @@ func (fs *FilterSession) AddFilter(filter ...expression.QueryFieldPredicate) *Fi
 	return fs
 }
 
-type FilterFunc func(filter *FilterSession, session *RequestSession) error
+type FilterFunc func(filter *FilterSession, session *RequestContext) error
 type FilterAccumulator struct {
 	Pipe []FilterFunc
 }
@@ -34,7 +33,7 @@ func (fa *FilterAccumulator) Chain(chains ...FilterFunc) *FilterAccumulator {
 }
 
 func (fa *FilterAccumulator) ByID(allowLatest bool) *FilterAccumulator {
-	return fa.Chain(func(f *FilterSession, s *RequestSession) error {
+	return fa.Chain(func(f *FilterSession, s *RequestContext) error {
 		if !allowLatest && s.TopicId == nil {
 			return NewStatusError(fmt.Errorf("invalid id"), http.StatusBadRequest)
 		}
@@ -50,7 +49,7 @@ func (fa *FilterAccumulator) ByID(allowLatest bool) *FilterAccumulator {
 }
 
 func (fa *FilterAccumulator) ByString(fieldName string, value string) *FilterAccumulator {
-	return fa.Chain(func(f *FilterSession, s *RequestSession) error {
+	return fa.Chain(func(f *FilterSession, s *RequestContext) error {
 		f.AddFilter(
 			kosmos.Fld(fieldName).Eq(value),
 		)
@@ -59,7 +58,7 @@ func (fa *FilterAccumulator) ByString(fieldName string, value string) *FilterAcc
 }
 
 func (fa *FilterAccumulator) ByPathParam(fieldName string, pathName string) *FilterAccumulator {
-	return fa.Chain(func(f *FilterSession, s *RequestSession) error {
+	return fa.Chain(func(f *FilterSession, s *RequestContext) error {
 		value := s.Request.PathValue(pathName)
 
 		f.AddFilter(
@@ -70,7 +69,7 @@ func (fa *FilterAccumulator) ByPathParam(fieldName string, pathName string) *Fil
 }
 
 func (fa *FilterAccumulator) ByIDFromPath(fieldName string, pathName string) *FilterAccumulator {
-	return fa.Chain(func(f *FilterSession, s *RequestSession) error {
+	return fa.Chain(func(f *FilterSession, s *RequestContext) error {
 		idStr := s.Request.PathValue(pathName)
 		if idStr == "" {
 			return fmt.Errorf("empty id from path")
@@ -89,7 +88,7 @@ func (fa *FilterAccumulator) ByIDFromPath(fieldName string, pathName string) *Fi
 }
 
 func (fa *FilterAccumulator) ByIDSetFromQuery(fieldName string, queryName string) *FilterAccumulator {
-	return fa.Chain(func(f *FilterSession, s *RequestSession) error {
+	return fa.Chain(func(f *FilterSession, s *RequestContext) error {
 		values := s.URLQuery()[queryName]
 
 		ids, err := convertStringToIDs(values)
@@ -108,7 +107,7 @@ func (fa *FilterAccumulator) ByIDSetFromQuery(fieldName string, queryName string
 }
 
 func (fa *FilterAccumulator) AddFilterFromQuery(fieldName string, queryName string) *FilterAccumulator {
-	return fa.Chain(func(f *FilterSession, s *RequestSession) error {
+	return fa.Chain(func(f *FilterSession, s *RequestContext) error {
 		values := s.URLQuery()[queryName]
 
 		if len(values) == 1 {
@@ -121,7 +120,7 @@ func (fa *FilterAccumulator) AddFilterFromQuery(fieldName string, queryName stri
 }
 
 func (fa *FilterAccumulator) ByAuthID(fieldName string, allowUserZero bool) *FilterAccumulator {
-	return fa.Chain(func(f *FilterSession, s *RequestSession) error {
+	return fa.Chain(func(f *FilterSession, s *RequestContext) error {
 		clientSession, err := s.VerifySession()
 		if err != nil {
 			return NewStatusError(err, http.StatusUnauthorized)
@@ -138,7 +137,7 @@ func (fa *FilterAccumulator) ByAuthID(fieldName string, allowUserZero bool) *Fil
 }
 
 func (fa *FilterAccumulator) ByAuthName(fieldName string) *FilterAccumulator {
-	return fa.Chain(func(f *FilterSession, s *RequestSession) error {
+	return fa.Chain(func(f *FilterSession, s *RequestContext) error {
 		clientSession, err := s.VerifySession()
 		if err != nil {
 			return NewStatusError(err, http.StatusUnauthorized)
@@ -154,7 +153,7 @@ func (fa *FilterAccumulator) ByAuthName(fieldName string) *FilterAccumulator {
 	})
 }
 
-func (fa FilterAccumulator) Accumulate(s *RequestSession) ([]expression.QueryFieldPredicate, error) {
+func (fa FilterAccumulator) Accumulate(s *RequestContext) ([]expression.QueryFieldPredicate, error) {
 	filter := &FilterSession{}
 	for _, chainExecution := range fa.Pipe {
 		if err := chainExecution(filter, s); err != nil {

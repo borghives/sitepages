@@ -18,16 +18,16 @@ func TestFilterAccumulator_ByID(t *testing.T) {
 		expectLatest bool
 	}{
 		{
-			name:         "ByID with valid ID",
-			allowLatest:  false,
-			topicId:      &objId,
-			expected:     false,
+			name:        "ByID with valid ID",
+			allowLatest: false,
+			topicId:     &objId,
+			expected:    false,
 		},
 		{
-			name:         "ByID without ID, not allowed latest",
-			allowLatest:  false,
-			topicId:      nil,
-			expected:     true,
+			name:        "ByID without ID, not allowed latest",
+			allowLatest: false,
+			topicId:     nil,
+			expected:    true,
 		},
 		{
 			name:         "ByID without ID, allowed latest",
@@ -40,7 +40,7 @@ func TestFilterAccumulator_ByID(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &RequestSession{
+			s := &RequestContext{
 				TopicId: tt.topicId,
 			}
 			f := Filter().ByID(tt.allowLatest)
@@ -66,7 +66,7 @@ func TestFilterAccumulator_ByID(t *testing.T) {
 }
 
 func TestFilterAccumulator_ByString(t *testing.T) {
-	s := &RequestSession{}
+	s := &RequestContext{}
 	f := Filter().ByString("test_field", "test_value")
 
 	filters, err := f.Accumulate(s)
@@ -81,7 +81,7 @@ func TestFilterAccumulator_ByString(t *testing.T) {
 func TestFilterAccumulator_ByPathParam(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/test/123", nil)
 	req.SetPathValue("id", "123")
-	s := &RequestSession{
+	s := &RequestContext{
 		Request: req,
 	}
 
@@ -98,7 +98,7 @@ func TestFilterAccumulator_ByPathParam(t *testing.T) {
 func TestFilterAccumulator_ByIDFromPath(t *testing.T) {
 	req1, _ := http.NewRequest("GET", "/test/invalid", nil)
 	req1.SetPathValue("id", "invalid")
-	s1 := &RequestSession{Request: req1}
+	s1 := &RequestContext{Request: req1}
 	f1 := Filter().ByIDFromPath("test_field", "id")
 	_, err1 := f1.Accumulate(s1)
 	if err1 == nil {
@@ -107,7 +107,7 @@ func TestFilterAccumulator_ByIDFromPath(t *testing.T) {
 
 	req2, _ := http.NewRequest("GET", "/test/empty", nil)
 	req2.SetPathValue("id", "")
-	s2 := &RequestSession{Request: req2}
+	s2 := &RequestContext{Request: req2}
 	f2 := Filter().ByIDFromPath("test_field", "id")
 	_, err2 := f2.Accumulate(s2)
 	if err2 == nil {
@@ -117,7 +117,7 @@ func TestFilterAccumulator_ByIDFromPath(t *testing.T) {
 	validHex := bson.NewObjectID().Hex()
 	req3, _ := http.NewRequest("GET", "/test/valid", nil)
 	req3.SetPathValue("id", validHex)
-	s3 := &RequestSession{Request: req3}
+	s3 := &RequestContext{Request: req3}
 	f3 := Filter().ByIDFromPath("test_field", "id")
 	filters, err3 := f3.Accumulate(s3)
 	if err3 != nil {
@@ -131,7 +131,7 @@ func TestFilterAccumulator_ByIDFromPath(t *testing.T) {
 func TestFilterAccumulator_ByIDSetFromQuery(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/test?id="+bson.NewObjectID().Hex()+"&id="+bson.NewObjectID().Hex(), nil)
 	q := req.URL.Query()
-	s := &RequestSession{
+	s := &RequestContext{
 		Request:  req,
 		urlQuery: &q,
 	}
@@ -149,7 +149,7 @@ func TestFilterAccumulator_ByIDSetFromQuery(t *testing.T) {
 func TestFilterAccumulator_AddFilterFromQuery(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/test?name=foo&name=bar", nil)
 	q := req.URL.Query()
-	s := &RequestSession{
+	s := &RequestContext{
 		Request:  req,
 		urlQuery: &q,
 	}
@@ -168,7 +168,7 @@ func TestFilterAccumulator_ByAuthID(t *testing.T) {
 	validUserSession := &websession.Session{
 		UserId: bson.NewObjectID(),
 	}
-	s := &RequestSession{
+	s := &RequestContext{
 		userSession: validUserSession,
 	}
 
@@ -184,7 +184,7 @@ func TestFilterAccumulator_ByAuthID(t *testing.T) {
 	zeroUserSession := &websession.Session{
 		UserId: bson.NilObjectID,
 	}
-	sZero := &RequestSession{
+	sZero := &RequestContext{
 		userSession: zeroUserSession,
 	}
 	fZero := Filter().ByAuthID("test_field", false)
@@ -207,7 +207,7 @@ func TestFilterAccumulator_ByAuthName(t *testing.T) {
 	validUserSession := &websession.Session{
 		UserName: "testuser",
 	}
-	s := &RequestSession{
+	s := &RequestContext{
 		userSession: validUserSession,
 	}
 
@@ -223,7 +223,7 @@ func TestFilterAccumulator_ByAuthName(t *testing.T) {
 	emptyUserSession := &websession.Session{
 		UserName: "",
 	}
-	sEmpty := &RequestSession{
+	sEmpty := &RequestContext{
 		userSession: emptyUserSession,
 	}
 	fEmpty := Filter().ByAuthName("test_field")

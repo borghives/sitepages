@@ -14,7 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-type RequestSession struct {
+type RequestContext struct {
 	Request        *http.Request
 	Response       Response
 	EntangleFrame  entanglement.SystemFrame
@@ -25,8 +25,8 @@ type RequestSession struct {
 	userSessionErr error
 }
 
-func NewRequestSession(r *http.Request) *RequestSession {
-	return &RequestSession{
+func NewRequestContext(r *http.Request) *RequestContext {
+	return &RequestContext{
 		Request: r,
 		EntangleFrame: entanglement.Create(
 			r.Header.Get("x-entanglement-nonce"),
@@ -35,7 +35,7 @@ func NewRequestSession(r *http.Request) *RequestSession {
 	}
 }
 
-func (rs *RequestSession) URLQuery() url.Values {
+func (rs *RequestContext) URLQuery() url.Values {
 	if rs.urlQuery == nil {
 		q := rs.Request.URL.Query()
 		rs.urlQuery = &q
@@ -43,7 +43,7 @@ func (rs *RequestSession) URLQuery() url.Values {
 	return *rs.urlQuery
 }
 
-func (rs *RequestSession) VerifySession() (*websession.Session, error) {
+func (rs *RequestContext) VerifySession() (*websession.Session, error) {
 	if rs.userSession == nil && rs.userSessionErr == nil {
 		rs.userSession, rs.userSessionErr = websession.Manager().GetAndVerifySession(rs.Request)
 	}
@@ -52,14 +52,14 @@ func (rs *RequestSession) VerifySession() (*websession.Session, error) {
 }
 
 type Session[T observation.Detectable] struct {
-	RequestSession
+	RequestContext
 	Detector *observation.EntityDetector[T]
 	Body     T
 }
 
 func NewRequestTopicSession[T observation.Detectable](r *http.Request) *Session[T] {
 	return &Session[T]{
-		RequestSession: *NewRequestSession(r),
+		RequestContext: *NewRequestContext(r),
 	}
 }
 
@@ -77,47 +77,6 @@ func (s *Session[T]) DecodeBody() error {
 	}
 
 	return json.NewDecoder(s.Request.Body).Decode(&s.Body)
-}
-
-type HandlerFunc[T observation.Detectable] func(session *Session[T]) error
-type Handler[T observation.Detectable] struct {
-	Pipe []HandlerFunc[T]
-}
-
-func NewQuery[T observation.Detectable](responseCreator HandlerFunc[T]) *Handler[T] {
-	session := &Handler[T]{}
-	return session.Chain(responseCreator)
-}
-
-func (h *Handler[T]) Chain(chains ...HandlerFunc[T]) *Handler[T] {
-	h.Pipe = append(h.Pipe, chains...)
-	return h
-}
-
-func (h *Handler[T]) ChainTop(chain HandlerFunc[T]) *Handler[T] {
-	h.Pipe = append([]HandlerFunc[T]{chain}, h.Pipe...)
-	return h
-}
-
-func (h Handler[T]) AggregateSession(r *http.Request) (*Session[T], error) {
-	session := NewRequestTopicSession[T](r)
-	for _, chainExecution := range h.Pipe {
-		if err := chainExecution(session); err != nil {
-			return nil, err
-		}
-	}
-	return session, nil
-}
-
-func ServeError(w http.ResponseWriter, err error) {
-	log.Printf("Error Handling Topic Request Chain: %v", err)
-	w.Header().Set("Content-Type", "application/json")
-	status, ok := err.(ErrorResponse)
-	if ok {
-		w.WriteHeader(status.ErrorCode())
-		return
-	}
-	w.WriteHeader(http.StatusInternalServerError)
 }
 
 func CreateEntangleResponse[T observation.Detectable]() HandlerFunc[T] {
@@ -195,7 +154,6 @@ func Pull[T observation.Detectable](limit int64) HandlerFunc[T] {
 		if len(results) > 0 && s.TopicId == nil && s.LatestTopic {
 			id := results[0].GetID()
 			s.TopicId = &id
-			s.Response.SetTargetID(id)
 		}
 
 		//if query uses latest topic. fill the target id in response of the latest topic
