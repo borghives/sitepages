@@ -218,3 +218,21 @@ func CheckBodyCorrelation[T observation.Detectable]() HandlerFunc[T] {
 		return entangleTopic.CheckTransition(entanglement.EntangleSession(s.EntangleFrame, *session))
 	}
 }
+
+func CheckAuthenticatedUser[T observation.Detectable](niceExit bool) HandlerFunc[T] {
+	return func(s *Session[T]) error {
+		session, err := s.VerifySession()
+		if err != nil {
+			return NewStatusError(err, http.StatusExpectationFailed)
+		}
+
+		if session.UserId.IsZero() || session.UserName == "" {
+			if niceExit {
+				return NewStatusError(fmt.Errorf("No user early nice exit"), http.StatusAccepted)
+			}
+			return NewStatusError(fmt.Errorf("No User"), http.StatusUnauthorized)
+		}
+
+		return nil
+	}
+}

@@ -5,8 +5,9 @@ import (
 )
 
 type List struct {
-	ID       string          `xml:"-" json:"ID" bson:"name"`
-	Contents []bson.ObjectID `xml:"-" json:"Contents" bson:"contents"`
+	ID        string            `xml:"-" json:"ID" bson:"name"`
+	Contents  []bson.ObjectID   `xml:"-" json:"Contents" bson:"contents"`
+	LinkDescs []LinkDescription `xml:"-" json:"LinkDescs,omitempty" bson:"linkdescs,omitempty" `
 }
 
 type ListTopicResponse struct {
@@ -32,11 +33,24 @@ func NewListTopicResponse(name string) Response {
 }
 
 func (lr *ListTopicResponse) Append(data any) bson.ObjectID {
-
-	id := lr.EntangledResponse.Append(data)
-	if !id.IsZero() {
-		if len(lr.ListData) > 0 {
+	var id bson.ObjectID
+	var link *LinkDescription
+	switch data := data.(type) {
+	case UserToPageLink:
+		id = data.ObjectId
+		link = &data.LinkDescription
+	case UserToCommentLink:
+		id = data.ObjectId
+		link = &data.LinkDescription
+	default:
+		id = lr.EntangledResponse.Append(data)
+	}
+	if len(lr.ListData) > 0 {
+		if !id.IsZero() {
 			lr.ListData[0].Contents = append(lr.ListData[0].Contents, id)
+		}
+		if link != nil {
+			lr.ListData[0].LinkDescs = append(lr.ListData[0].LinkDescs, *link)
 		}
 	}
 	return id

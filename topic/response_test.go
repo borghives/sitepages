@@ -161,17 +161,17 @@ func TestListTopicResponse(t *testing.T) {
 func TestRelationTopicResponse(t *testing.T) {
 	resp := NewRelationTopicResponse().(*RelationTopicResponse)
 
-	linkDesc := sitepages.LinkDescription{
+	linkDesc := LinkDescription{
 		ObjectId: bson.NewObjectID(),
 	}
-	pageLink := sitepages.UserToPageLink{
+	pageLink := UserToPageLink{
 		LinkDescription: linkDesc,
 	}
 
-	linkDesc2 := sitepages.LinkDescription{
+	linkDesc2 := LinkDescription{
 		ObjectId: bson.NewObjectID(),
 	}
-	commentLink := sitepages.UserToCommentLink{
+	commentLink := UserToCommentLink{
 		LinkDescription: linkDesc2,
 	}
 

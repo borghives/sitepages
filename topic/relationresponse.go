@@ -1,13 +1,12 @@
 package topic
 
 import (
-	"github.com/borghives/sitepages"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type RelationTopicResponse struct {
-	BaseResponse
-	LinkDescs []sitepages.LinkDescription `xml:"-" json:"LinkDescs,omitempty" bson:"-" `
+	EntangledResponse
+	LinkDescs []LinkDescription `xml:"-" json:"LinkDescs,omitempty" bson:"-" `
 }
 
 func NewRelationTopicResponse() Response {
@@ -16,16 +15,16 @@ func NewRelationTopicResponse() Response {
 
 func (rr *RelationTopicResponse) Append(data any) bson.ObjectID {
 	switch response := data.(type) {
-	case sitepages.UserToPageLink:
+	case UserToPageLink:
 		rr.LinkDescs = append(rr.LinkDescs, response.LinkDescription)
 		return response.ObjectId
-	case *sitepages.UserToPageLink:
+	case *UserToPageLink:
 		rr.LinkDescs = append(rr.LinkDescs, response.LinkDescription)
 		return response.ObjectId
-	case sitepages.UserToCommentLink:
+	case UserToCommentLink:
 		rr.LinkDescs = append(rr.LinkDescs, response.LinkDescription)
 		return response.ObjectId
-	case *sitepages.UserToCommentLink:
+	case *UserToCommentLink:
 		rr.LinkDescs = append(rr.LinkDescs, response.LinkDescription)
 		return response.ObjectId
 	}
