@@ -6,7 +6,7 @@ require (
 	github.com/borghives/entanglement v0.4.0
 	github.com/borghives/kosmos-go v1.3.4
 	github.com/borghives/websession v1.1.6
-	go.mongodb.org/mongo-driver/v2 v2.5.1
+	go.mongodb.org/mongo-driver/v2 v2.6.0
 )
 
 require (
