@@ -4,7 +4,7 @@ go 1.26.1
 
 require (
 	github.com/borghives/entanglement v0.4.0
-	github.com/borghives/kosmos-go v1.3.6
+	github.com/borghives/kosmos-go v1.3.7
 	github.com/borghives/websession v1.1.6
 	go.mongodb.org/mongo-driver/v2 v2.6.0
 )
