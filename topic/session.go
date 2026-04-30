@@ -51,10 +51,26 @@ func (rs *RequestContext) VerifySession() (*websession.Session, error) {
 	return rs.userSession, rs.userSessionErr
 }
 
+func (rs *RequestContext) GetVerifyEntanglement() (*entanglement.Session, error) {
+	session, err := rs.VerifySession()
+	if err != nil {
+		return nil, NewStatusError(err, http.StatusExpectationFailed)
+	}
+
+	if err := rs.EntangleFrame.VerifyTokenAlignment(*session); err != nil {
+		return nil, NewStatusError(err, http.StatusExpectationFailed)
+	}
+
+	retval := entanglement.EntangleSession(rs.EntangleFrame, *session)
+	return &retval, nil
+
+}
+
 type Session[T observation.Detectable] struct {
 	RequestContext
 	Detector *observation.EntityDetector[T]
 	InBody   T
+	Output   []any
 }
 
 func NewRequestTopicSession[T observation.Detectable](r *http.Request) *Session[T] {
@@ -178,32 +194,25 @@ func SetEntanglementFrame[T observation.Detectable](frame string) HandlerFunc[T]
 
 func CheckEntanglementToken[T observation.Detectable]() HandlerFunc[T] {
 	return func(s *Session[T]) error {
-		session, err := s.VerifySession()
-		if err != nil {
-			return NewStatusError(err, http.StatusExpectationFailed)
-		}
-
-		if err := s.EntangleFrame.VerifyTokenAlignment(*session); err != nil {
-			return NewStatusError(err, http.StatusExpectationFailed)
-		}
-		return nil
+		_, err := s.GetVerifyEntanglement()
+		return err
 	}
 }
 
 func GenerateEntanglement[T observation.Detectable]() HandlerFunc[T] {
 	return func(s *Session[T]) error {
-		session, err := s.VerifySession()
+		session, err := s.GetVerifyEntanglement()
 		if err != nil {
-			return NewStatusError(err, http.StatusExpectationFailed)
+			return err
 		}
-		s.Response.Append(entanglement.EntangleSession(s.EntangleFrame, *session))
+		s.Response.Append(session)
 		return nil
 	}
 }
 
-func CheckBodyCorrelation[T observation.Detectable]() HandlerFunc[T] {
+func CheckInBodyCorrelation[T observation.Detectable]() HandlerFunc[T] {
 	return func(s *Session[T]) error {
-		session, err := s.VerifySession()
+		session, err := s.GetVerifyEntanglement()
 		if err != nil {
 			return NewStatusError(err, http.StatusExpectationFailed)
 		}
@@ -215,7 +224,7 @@ func CheckBodyCorrelation[T observation.Detectable]() HandlerFunc[T] {
 			return fmt.Errorf("Error CheckBodyCorrelation")
 		}
 
-		return entangleTopic.CheckTransition(entanglement.EntangleSession(s.EntangleFrame, *session))
+		return entangleTopic.CheckTransition(*session)
 	}
 }
 

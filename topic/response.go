@@ -35,6 +35,10 @@ func NewStatusError(err error, code int) ErrorResponse {
 	return &StatusResponse{StatusCode: code, StatusMsg: err.Error()}
 }
 
+func NewStatusString(message string, code int) ErrorResponse {
+	return &StatusResponse{StatusCode: code, StatusMsg: message}
+}
+
 func (e StatusResponse) GetStatus() StatusResponse {
 	return e
 }

@@ -1,7 +1,7 @@
 package topic
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/borghives/kosmos-go/observation"
@@ -44,12 +44,14 @@ func (t *Handler[T]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func ServeError(w http.ResponseWriter, err error) {
-	log.Printf("Error Handling Topic Request Chain: %v", err)
+
 	w.Header().Set("Content-Type", "application/json")
 	status, ok := err.(ErrorResponse)
 	if ok {
+		slog.Info("ErrorResponse Request Chain ", slog.Any("error", err))
 		w.WriteHeader(status.ErrorCode())
 		return
 	}
+	slog.Error("Error Handling Request Chain", slog.Any("error", err))
 	w.WriteHeader(http.StatusInternalServerError)
 }

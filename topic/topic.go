@@ -3,9 +3,13 @@ package topic
 import (
 	"fmt"
 	"log"
+	"log/slog"
+	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/borghives/entanglement"
+	"github.com/borghives/kosmos-go"
 	"github.com/borghives/sitepages"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
@@ -28,9 +32,12 @@ func (p Page) TransitionStates(frame entanglement.Session) entanglement.TypeStat
 
 	nextPageID := frame.GenerateCorrelation(pageID)
 	correlation.AddCorrelation("page", pageID, nextPageID)
-	correlation.Update(EntangleStanzaProperties(frame, nextPageID, p.Contents...))
+	correlation.Update(EntangleStanzaProperties(frame, nextPageID, 0, p.Contents...))
 	correlation.Update(EntangleCommentProperties(frame, p.ID, p.Root, 0))
-	// log.Println("Entangle Page Id", nextPageID, frame.StateString())
+	slog.Debug("Entangle Page Id",
+		slog.String("NextId", nextPageID),
+		slog.String("FrameState", frame.StateString()),
+	)
 	return correlation
 }
 
@@ -41,17 +48,17 @@ func (p Page) CheckTransition(frame entanglement.Session) error {
 	correlatedId := frame.GenerateCorrelation(p.PreviousVersion.Hex())
 	if correlatedId != p.ID.Hex() {
 		log.Printf("Mismatch page id: %s, expected %s := pageid: %s rootid: %s", p.ID.Hex(), correlatedId, p.PreviousVersion.Hex(), p.Root.Hex())
-		return fmt.Errorf("Failed ID Expectation")
+		return NewStatusString("Failed ID Expectation", http.StatusExpectationFailed)
 	}
 	return nil
 }
 
 // ##### Stanza  #####
 type Stanza struct {
-	sitepages.Stanza
-	ChunkIndex  uint16   `xml:"chunkidx" json:"ChunkIdx" bson:"-"`
-	ChunkOffset uint16   `xml:"chunkoffset" json:"ChunkOffset" bson:"-"`
-	Chunkings   []uint16 `xml:"chunkings>content,omitempty" json:"chunkings,omitempty" bson:"-"`
+	sitepages.Stanza `bson:",inline"`
+	ChunkIndex       int   `xml:"chunkidx" json:"ChunkIdx" bson:"-"`
+	ChunkOffset      int   `xml:"chunkoffset" json:"ChunkOffset" bson:"chunkoffset"`
+	Chunkings        []int `xml:"chunkings>content,omitempty" json:"chunkings,omitempty" bson:"-"`
 }
 
 func (s Stanza) GetRootID() bson.ObjectID {
@@ -59,31 +66,101 @@ func (s Stanza) GetRootID() bson.ObjectID {
 }
 
 func (s Stanza) TransitionStates(frame entanglement.Session) entanglement.TypeStateCorrelation {
-	correlation := make(entanglement.TypeStateCorrelation)
-	return correlation
+	return EntangleStanzaProperties(frame, s.BasePage.Hex(), s.ChunkIndex, s.ID)
 }
 
 func (s Stanza) CheckTransition(frame entanglement.Session) error {
 	frame = frame.CreateSubFrame("stanza_system")
 	frame.EntangleProperty("baseid", s.BasePage.Hex())
+	frame.EntangleProperty("chunkidx", strconv.Itoa(s.ChunkIndex))
 	correlatedId := frame.GenerateCorrelation(s.PreviousVersion.Hex())
 
 	if correlatedId != s.ID.Hex() {
-		log.Printf("Mismatch stanza id: %s, expected %s := %s", s.ID.Hex(), correlatedId, frame.StateString())
-		return fmt.Errorf("Failed ID Expectation")
+		slog.Debug("Mismatch stanza id",
+			slog.String("ID", s.ID.Hex()),
+			slog.String("ExpectedID", correlatedId),
+			slog.String("FrameState", frame.StateString()),
+		)
+		return NewStatusString("Failed ID Expectation", http.StatusExpectationFailed)
 	}
 	return nil
 }
 
-func EntangleStanzaProperties(frame entanglement.Session, baseid string, contents ...bson.ObjectID) entanglement.TypeStateCorrelation {
+func CreateEntangledStanza(session entanglement.Session, content string, prevId bson.ObjectID, baseid bson.ObjectID, index int, finalOffset int) Stanza {
+	session = session.CreateSubFrame("stanza_system")
+	session.EntangleProperty("baseid", baseid.Hex())
+	session.EntangleProperty("chunkidx", strconv.Itoa(index))
+	newIdStr := session.GenerateCorrelation(prevId.Hex())
+	newId, err := bson.ObjectIDFromHex(newIdStr)
+	if err != nil {
+		slog.Error("Error CreateStanza: newId", "error", err)
+		return Stanza{}
+	}
+
+	return Stanza{
+		Stanza: sitepages.Stanza{
+			BaseModel: kosmos.BaseModel{
+				ID: newId,
+			},
+			Content:         content,
+			BasePage:        baseid,
+			PreviousVersion: prevId,
+		},
+		ChunkIndex:  index,
+		ChunkOffset: finalOffset,
+	}
+}
+
+func SplitStanzaToOutput() HandlerFunc[Stanza] {
+	return func(s *Session[Stanza]) error {
+		session, err := s.GetVerifyEntanglement()
+		if err != nil {
+			return err
+		}
+
+		chunks := s.InBody.Chunkings
+		slog.Debug("Chunking", slog.Any("chunks", chunks))
+		switch len(chunks) {
+		case 0:
+			s.Output = append(s.Output, s.InBody)
+		case 1:
+			start := chunks[0]
+			finalOffset := s.InBody.ChunkOffset + 2
+			s.Output = append(s.Output,
+				CreateEntangledStanza(*session, s.InBody.Content[:start], s.InBody.PreviousVersion, s.InBody.BasePage, s.InBody.ChunkOffset+1, finalOffset),
+				CreateEntangledStanza(*session, s.InBody.Content[start:], s.InBody.PreviousVersion, s.InBody.BasePage, s.InBody.ChunkOffset+2, finalOffset),
+			)
+		case 2:
+			start := chunks[0]
+			end := chunks[1]
+			finalOffset := s.InBody.ChunkOffset + 3
+			if end > start {
+				s.Output = append(s.Output,
+					CreateEntangledStanza(*session, s.InBody.Content[:start], s.InBody.PreviousVersion, s.InBody.BasePage, s.InBody.ChunkOffset+1, finalOffset),
+					CreateEntangledStanza(*session, s.InBody.Content[start:end], s.InBody.PreviousVersion, s.InBody.BasePage, s.InBody.ChunkOffset+2, finalOffset),
+					CreateEntangledStanza(*session, s.InBody.Content[end:], s.InBody.PreviousVersion, s.InBody.BasePage, s.InBody.ChunkOffset+3, finalOffset),
+				)
+			}
+		}
+
+		return nil
+	}
+}
+
+func EntangleStanzaProperties(frame entanglement.Session, baseid string, index int, contents ...bson.ObjectID) entanglement.TypeStateCorrelation {
 	correlation := make(entanglement.TypeStateCorrelation)
 	if len(contents) > 0 {
 		frame = frame.CreateSubFrame("stanza_system")
 		frame.EntangleProperty("baseid", baseid)
+		frame.EntangleProperty("chunkidx", strconv.Itoa(index))
 		for _, content := range contents {
 			stanzaID := content.Hex()
 			nextStanzaID := frame.GenerateCorrelation(stanzaID)
-			// log.Println("Entangle Stanza Id", stanzaID, nextStanzaID, frame.StateString())
+			slog.Debug("Entangle Stanza ID",
+				slog.String("ID", stanzaID),
+				slog.String("NextID", nextStanzaID),
+				slog.String("FrameState", frame.StateString()),
+			)
 			correlation.AddCorrelation("stanza", stanzaID, nextStanzaID)
 		}
 	}
@@ -119,7 +196,12 @@ func (c Comment) CheckTransition(frame entanglement.Session) error {
 	frame.EntangleProperty("moment", c.Moment)
 	derivedHexID := frame.GenerateCorrelation("--page-comment-creator")
 	if derivedHexID != c.ID.Hex() {
-		return fmt.Errorf("Check Comment Transition: mismatch comment id (%s) expect (%s): %s", c.ID.Hex(), derivedHexID, frame.StateString())
+		slog.Debug("Check Comment Transition: mismatch comment id",
+			slog.String("ID", c.ID.Hex()),
+			slog.String("ExpectedID", derivedHexID),
+			slog.String("FrameState", frame.StateString()),
+		)
+		return NewStatusString("Failed ID Expectation", http.StatusExpectationFailed)
 	}
 	return nil
 }
