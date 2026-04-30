@@ -54,7 +54,7 @@ func (rs *RequestContext) VerifySession() (*websession.Session, error) {
 type Session[T observation.Detectable] struct {
 	RequestContext
 	Detector *observation.EntityDetector[T]
-	Body     T
+	InBody   T
 }
 
 func NewRequestTopicSession[T observation.Detectable](r *http.Request) *Session[T] {
@@ -76,7 +76,7 @@ func (s *Session[T]) DecodeBody() error {
 		return fmt.Errorf("nil body in request")
 	}
 
-	return json.NewDecoder(s.Request.Body).Decode(&s.Body)
+	return json.NewDecoder(s.Request.Body).Decode(&s.InBody)
 }
 
 func CreateEntangleResponse[T observation.Detectable]() HandlerFunc[T] {
@@ -208,10 +208,10 @@ func CheckBodyCorrelation[T observation.Detectable]() HandlerFunc[T] {
 			return NewStatusError(err, http.StatusExpectationFailed)
 		}
 
-		topicBody := any(s.Body)
+		topicBody := any(s.InBody)
 		entangleTopic, ok := topicBody.(entanglement.Correlatable)
 		if !ok {
-			log.Printf("Called to CheckBodyCorrelation on incompatible type %v", s.Body)
+			log.Printf("Called to CheckBodyCorrelation on incompatible type %v", s.InBody)
 			return fmt.Errorf("Error CheckBodyCorrelation")
 		}
 
