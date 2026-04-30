@@ -47,7 +47,12 @@ func (p Page) CheckTransition(frame entanglement.Session) error {
 }
 
 // ##### Stanza  #####
-type Stanza sitepages.Stanza
+type Stanza struct {
+	sitepages.Stanza
+	ChunkIndex  uint16   `xml:"chunkidx" json:"ChunkIdx" bson:"-"`
+	ChunkOffset uint16   `xml:"chunkoffset" json:"ChunkOffset" bson:"-"`
+	Chunkings   []uint16 `xml:"chunkings>content,omitempty" json:"chunkings,omitempty" bson:"-"`
+}
 
 func (s Stanza) GetRootID() bson.ObjectID {
 	return s.BasePage

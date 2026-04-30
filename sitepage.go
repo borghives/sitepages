@@ -53,14 +53,10 @@ type Stanza struct {
 	kosmos.BaseModel `bson:",inline" kosmos:"stanza"`
 	XMLName          xml.Name      `xml:"stanza" json:"-" bson:"-"`
 	Content          string        `xml:"content" json:"Content" bson:"content"`
-	UpdatedTime      time.Time     `xml:"-" json:"UpdatedTime" bson:"updated_time"`
 	Context          bson.ObjectID `xml:"context,omitempty" json:"Context,omitempty" bson:"context,omitempty"`
 	BasePage         bson.ObjectID `xml:"basepage" json:"BasePage" bson:"base_page"`
 	PreviousVersion  bson.ObjectID `xml:"previousversion" json:"PreviousVersion" bson:"previous_version"`
 	TtlStart         time.Time     `xml:"-" json:"-" bson:"ttl_start,omitempty"`
-	ChunkIndex       uint16        `xml:"chunkidx" json:"ChunkIdx" bson:"-"`                               //only for control and not for persist in state
-	ChunkOffset      uint16        `xml:"chunkoffset" json:"ChunkOffset" bson:"-"`                         //only for control and not for persist in state
-	Chunkings        []uint16      `xml:"chunkings>content,omitempty" json:"chunkings,omitempty" bson:"-"` //only for control and not for persist in state
 }
 
 type PageList struct {
