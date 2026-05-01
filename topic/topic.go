@@ -11,11 +11,16 @@ import (
 	"github.com/borghives/entanglement"
 	"github.com/borghives/kosmos-go"
 	"github.com/borghives/sitepages"
+	"github.com/borghives/websession"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-type RenewableRootTopic interface {
-	RegenRootID() bson.ObjectID
+type Hiarchical interface {
+	GetRootID() bson.ObjectID
+}
+
+type Renewable interface {
+	Renew() error
 }
 
 // ##### Page  #####
@@ -25,9 +30,10 @@ func (p Page) GetRootID() bson.ObjectID {
 	return p.Root
 }
 
-func (p *Page) RegenRootID() bson.ObjectID {
+func (p *Page) Renew() error {
 	p.Root = bson.NewObjectID()
-	return p.Root
+	p.LinkName = websession.MakeUrlSafe(p.Title)
+	return nil
 }
 
 func (p Page) TransitionStates(frame entanglement.Session) entanglement.TypeStateCorrelation {
