@@ -48,6 +48,21 @@ func (fa *FilterAccumulator) ByID(allowLatest bool) *FilterAccumulator {
 	})
 }
 
+func (fa *FilterAccumulator) ByRootID(ignoreZero bool) *FilterAccumulator {
+	return fa.Chain(func(f *FilterSession, s *RequestContext) error {
+		if s.RootId == nil {
+			return NewStatusError(fmt.Errorf("invalid id"), http.StatusBadRequest)
+		}
+
+		if ignoreZero && s.RootId.IsZero() {
+			return nil
+		}
+
+		f.AddFilter(kosmos.Fld("ID").Eq(s.TopicId))
+		return nil
+	})
+}
+
 func (fa *FilterAccumulator) ByString(fieldName string, value string) *FilterAccumulator {
 	return fa.Chain(func(f *FilterSession, s *RequestContext) error {
 		f.AddFilter(

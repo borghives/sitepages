@@ -19,6 +19,7 @@ type RequestContext struct {
 	Response       Response
 	EntangleFrame  entanglement.SystemFrame
 	TopicId        *bson.ObjectID
+	RootId         *bson.ObjectID
 	LatestTopic    bool
 	urlQuery       *url.Values
 	userSession    *websession.Session
@@ -143,6 +144,22 @@ func SetIDFromPath[T observation.Detectable](allowLatest bool) HandlerFunc[T] {
 	}
 }
 
+func SetRootIDFromPath[T observation.Detectable]() HandlerFunc[T] {
+	return func(s *Session[T]) error {
+		idStr := s.Request.PathValue("rid")
+		if idStr == "" {
+			return fmt.Errorf("missing required parameter: rid") //this is most likely internal mux setup error
+		}
+
+		id, err := bson.ObjectIDFromHex(idStr)
+		if err != nil {
+			return NewStatusError(fmt.Errorf("invalid rid from path"), http.StatusBadRequest)
+		}
+		s.RootId = &id
+		return nil
+	}
+}
+
 func Pull[T observation.Detectable](limit int64) HandlerFunc[T] {
 	return func(s *Session[T]) error {
 		if s.Detector == nil {
@@ -178,6 +195,14 @@ func Pull[T observation.Detectable](limit int64) HandlerFunc[T] {
 		}
 
 		for _, result := range results {
+			//if root is set and is zero (randomize root)
+			if s.RootId != nil && s.RootId.IsZero() {
+				renewRoot, ok := any(result).(RenewableRootTopic)
+				if ok {
+					renewRoot.RegenRootID()
+				}
+			}
+
 			s.Response.Append(result)
 		}
 

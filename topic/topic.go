@@ -14,10 +14,19 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
+type RenewableRootTopic interface {
+	RegenRootID() bson.ObjectID
+}
+
 // ##### Page  #####
 type Page sitepages.Page
 
 func (p Page) GetRootID() bson.ObjectID {
+	return p.Root
+}
+
+func (p *Page) RegenRootID() bson.ObjectID {
+	p.Root = bson.NewObjectID()
 	return p.Root
 }
 
