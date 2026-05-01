@@ -197,7 +197,7 @@ func Pull[T observation.Detectable](limit int64) HandlerFunc[T] {
 		for _, result := range results {
 			//if root is set and is zero (randomize root)
 			if s.RootId != nil && s.RootId.IsZero() {
-				renewRoot, ok := any(result).(RenewableRootTopic)
+				renewRoot, ok := any(&result).(RenewableRootTopic)
 				if ok {
 					renewRoot.RegenRootID()
 				}
