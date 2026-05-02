@@ -147,7 +147,7 @@ func (f FieldPredicate) ByAuthName() Filter {
 	}
 }
 
-func (f FieldPredicate) ByString(value string) Filter {
+func (f FieldPredicate) Eq(value any) Filter {
 	return func(s RequestContext) (*expression.QueryFieldPredicate, error) {
 		pred := kosmos.Fld(f.FieldName).Eq(value)
 		return &pred, nil
