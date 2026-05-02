@@ -195,17 +195,13 @@ func Pull[T matter.Detectable](limit int64) HandlerFunc[T] {
 		}
 
 		for _, result := range results {
-			//if root is set and is zero (randomize root)
-			if s.RootId != nil && s.RootId.IsZero() {
-				renewRoot, ok := any(&result).(Renewable)
-				if ok {
-					err = renewRoot.Renew()
-					if err != nil {
-						return NewStatusError(fmt.Errorf("New Page error %v", err), http.StatusBadRequest)
-					}
+			sanObj, ok := any(&result).(Sanitizable)
+			if ok {
+				err := sanObj.Sanitize(s.RequestContext)
+				if err != nil {
+					return NewStatusError(fmt.Errorf("Topic Sanitize error %v", err), http.StatusBadRequest)
 				}
 			}
-
 			s.Response.Append(result)
 		}
 

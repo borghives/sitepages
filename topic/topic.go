@@ -1,6 +1,7 @@
 package topic
 
 import (
+	"encoding/base64"
 	"fmt"
 	"log"
 	"log/slog"
@@ -19,8 +20,8 @@ type Hiarchical interface {
 	GetRootID() bson.ObjectID
 }
 
-type Renewable interface {
-	Renew() error
+type Sanitizable interface {
+	Sanitize(context RequestContext) error
 }
 
 // ##### Page  #####
@@ -30,9 +31,27 @@ func (p Page) GetRootID() bson.ObjectID {
 	return p.Root
 }
 
-func (p *Page) Renew() error {
-	p.Root = bson.NewObjectID()
-	p.LinkName = websession.MakeUrlSafe(p.Title)
+func (p *Page) Sanitize(context RequestContext) error {
+	if context.RootId != nil {
+		p.Root = *context.RootId
+	}
+
+	if p.Root.IsZero() {
+		//new page
+		p.Root = bson.NewObjectID()
+	}
+
+	name := p.Title
+	if context.userSession != nil && context.userSession.UserName != "" {
+		p.Author = context.userSession.UserName
+	} else {
+		//unattributed session add extra id into the linkname
+		urlSafeID := base64.RawURLEncoding.EncodeToString(p.Root[:])
+		name += "-" + urlSafeID[:6]
+		p.Author = ""
+	}
+
+	p.LinkName = websession.MakeUrlSafe(name)
 	return nil
 }
 
