@@ -12,8 +12,8 @@ cloud.google.com/go/secretmanager v1.20.0 h1:GjE3NoyFXo7ipRPy26PMmg4oRX1Ra8fswH4
 cloud.google.com/go/secretmanager v1.20.0/go.mod h1:9OmSuOeiiUicANglrbdKWSnT3gYkRcXuUQDk7dDW0zU=
 github.com/borghives/entanglement v0.4.0 h1:WYErTG1d0Gbf3kadnb5zcULe4CQzdezDb6GsBT+LfJ4=
 github.com/borghives/entanglement v0.4.0/go.mod h1:osB3/Qx+xXaImahAK9nn54GhILJO2CmpNx+l1O3wYfg=
-github.com/borghives/kosmos-go v1.3.9 h1:9zf61Ru2d3V7WPtZmta6Xyzn145KLzewIgwFZElSQkE=
-github.com/borghives/kosmos-go v1.3.9/go.mod h1:r9V+lutB44YvwLC14Ne2PH9Ut4z2SbXVu+2QmOxPaYk=
+github.com/borghives/kosmos-go v1.4.0 h1:6XkPtip3ysqgHiVFwyUAo4SBjzlIqlMyxZRV5dZugTw=
+github.com/borghives/kosmos-go v1.4.0/go.mod h1:r9V+lutB44YvwLC14Ne2PH9Ut4z2SbXVu+2QmOxPaYk=
 github.com/borghives/websession v1.1.6 h1:jUwlJWOBwKaHwT4DbmR08oyAIF5CLpZec655S3RU9NI=
 github.com/borghives/websession v1.1.6/go.mod h1:RHnLg2nfpnJxcxriFPI/TYalEv7zikFznZfxTD0EKqw=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=

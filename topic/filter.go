@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/borghives/kosmos-go"
-	"github.com/borghives/kosmos-go/observation/expression"
+	"github.com/borghives/kosmos-go/matter/expression"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 

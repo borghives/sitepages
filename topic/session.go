@@ -9,7 +9,7 @@ import (
 
 	"github.com/borghives/entanglement"
 	"github.com/borghives/kosmos-go"
-	"github.com/borghives/kosmos-go/observation"
+	"github.com/borghives/kosmos-go/matter"
 	"github.com/borghives/websession"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
@@ -67,20 +67,20 @@ func (rs *RequestContext) GetVerifyEntanglement() (*entanglement.Session, error)
 
 }
 
-type Session[T observation.Detectable] struct {
+type Session[T matter.Detectable] struct {
 	RequestContext
-	Detector *observation.EntityDetector[T]
+	Detector *matter.EntityDetector[T]
 	InBody   T
 	Output   []any
 }
 
-func NewRequestTopicSession[T observation.Detectable](r *http.Request) *Session[T] {
+func NewRequestTopicSession[T matter.Detectable](r *http.Request) *Session[T] {
 	return &Session[T]{
 		RequestContext: *NewRequestContext(r),
 	}
 }
 
-func (s *Session[T]) TopicDetector() *observation.EntityDetector[T] {
+func (s *Session[T]) TopicDetector() *matter.EntityDetector[T] {
 	if s.Detector == nil {
 		s.Detector = kosmos.All[T]()
 	}
@@ -96,7 +96,7 @@ func (s *Session[T]) DecodeBody() error {
 	return json.NewDecoder(s.Request.Body).Decode(&s.InBody)
 }
 
-func CreateEntangleResponse[T observation.Detectable]() HandlerFunc[T] {
+func CreateEntangleResponse[T matter.Detectable]() HandlerFunc[T] {
 	return func(s *Session[T]) error {
 		if s.Response == nil {
 			s.Response = NewResponse()
@@ -105,7 +105,7 @@ func CreateEntangleResponse[T observation.Detectable]() HandlerFunc[T] {
 	}
 }
 
-func CreateRelationResponse[T observation.Detectable]() HandlerFunc[T] {
+func CreateRelationResponse[T matter.Detectable]() HandlerFunc[T] {
 	return func(s *Session[T]) error {
 		if s.Response == nil {
 			s.Response = NewRelationTopicResponse()
@@ -114,7 +114,7 @@ func CreateRelationResponse[T observation.Detectable]() HandlerFunc[T] {
 	}
 }
 
-func CreateListResponse[T observation.Detectable](name string) HandlerFunc[T] {
+func CreateListResponse[T matter.Detectable](name string) HandlerFunc[T] {
 	return func(s *Session[T]) error {
 		if s.Response == nil {
 			s.Response = NewListTopicResponse(name)
@@ -123,7 +123,7 @@ func CreateListResponse[T observation.Detectable](name string) HandlerFunc[T] {
 	}
 }
 
-func SetIDFromPath[T observation.Detectable](allowLatest bool) HandlerFunc[T] {
+func SetIDFromPath[T matter.Detectable](allowLatest bool) HandlerFunc[T] {
 	return func(s *Session[T]) error {
 		idStr := s.Request.PathValue("id")
 		if idStr == "" {
@@ -144,7 +144,7 @@ func SetIDFromPath[T observation.Detectable](allowLatest bool) HandlerFunc[T] {
 	}
 }
 
-func SetRootIDFromPath[T observation.Detectable]() HandlerFunc[T] {
+func SetRootIDFromPath[T matter.Detectable]() HandlerFunc[T] {
 	return func(s *Session[T]) error {
 		idStr := s.Request.PathValue("rid")
 		if idStr == "" {
@@ -160,7 +160,7 @@ func SetRootIDFromPath[T observation.Detectable]() HandlerFunc[T] {
 	}
 }
 
-func Pull[T observation.Detectable](limit int64) HandlerFunc[T] {
+func Pull[T matter.Detectable](limit int64) HandlerFunc[T] {
 	return func(s *Session[T]) error {
 		if s.Detector == nil {
 			return fmt.Errorf("Topic Query Session missing Detector")
@@ -213,21 +213,21 @@ func Pull[T observation.Detectable](limit int64) HandlerFunc[T] {
 	}
 }
 
-func SetEntanglementFrame[T observation.Detectable](frame string) HandlerFunc[T] {
+func SetEntanglementFrame[T matter.Detectable](frame string) HandlerFunc[T] {
 	return func(s *Session[T]) error {
 		s.EntangleFrame.SetFrame(frame)
 		return nil
 	}
 }
 
-func CheckEntanglementToken[T observation.Detectable]() HandlerFunc[T] {
+func CheckEntanglementToken[T matter.Detectable]() HandlerFunc[T] {
 	return func(s *Session[T]) error {
 		_, err := s.GetVerifyEntanglement()
 		return err
 	}
 }
 
-func GenerateEntanglement[T observation.Detectable]() HandlerFunc[T] {
+func GenerateEntanglement[T matter.Detectable]() HandlerFunc[T] {
 	return func(s *Session[T]) error {
 		session, err := s.GetVerifyEntanglement()
 		if err != nil {
@@ -238,7 +238,7 @@ func GenerateEntanglement[T observation.Detectable]() HandlerFunc[T] {
 	}
 }
 
-func CheckInBodyCorrelation[T observation.Detectable]() HandlerFunc[T] {
+func CheckInBodyCorrelation[T matter.Detectable]() HandlerFunc[T] {
 	return func(s *Session[T]) error {
 		session, err := s.GetVerifyEntanglement()
 		if err != nil {
@@ -256,7 +256,7 @@ func CheckInBodyCorrelation[T observation.Detectable]() HandlerFunc[T] {
 	}
 }
 
-func CheckAuthenticatedUser[T observation.Detectable](niceExit bool) HandlerFunc[T] {
+func CheckAuthenticatedUser[T matter.Detectable](niceExit bool) HandlerFunc[T] {
 	return func(s *Session[T]) error {
 		session, err := s.VerifySession()
 		if err != nil {

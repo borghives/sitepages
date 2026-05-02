@@ -4,11 +4,11 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/borghives/kosmos-go/observation"
+	"github.com/borghives/kosmos-go/matter"
 )
 
-type HandlerFunc[T observation.Detectable] func(session *Session[T]) error
-type Handler[T observation.Detectable] struct {
+type HandlerFunc[T matter.Detectable] func(session *Session[T]) error
+type Handler[T matter.Detectable] struct {
 	Pipe []HandlerFunc[T]
 }
 
