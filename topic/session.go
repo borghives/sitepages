@@ -69,7 +69,7 @@ func (rs *RequestContext) GetVerifyEntanglement() (*entanglement.Session, error)
 
 type Session[T matter.Detectable] struct {
 	RequestContext
-	Detector *matter.EntityDetector[T]
+	Detector *matter.Detector[T]
 	InBody   T
 	Output   []any
 }
@@ -80,7 +80,7 @@ func NewRequestTopicSession[T matter.Detectable](r *http.Request) *Session[T] {
 	}
 }
 
-func (s *Session[T]) TopicDetector() *matter.EntityDetector[T] {
+func (s *Session[T]) TopicDetector() *matter.Detector[T] {
 	if s.Detector == nil {
 		s.Detector = kosmos.All[T]()
 	}
