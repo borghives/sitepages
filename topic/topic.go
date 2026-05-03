@@ -1,7 +1,6 @@
 package topic
 
 import (
-	"encoding/base64"
 	"fmt"
 	"log"
 	"log/slog"
@@ -47,7 +46,7 @@ func (p *Page) Sanitize(context RequestContext) error {
 			return NewStatusString("Unauthorized to change page", http.StatusUnauthorized)
 		}
 
-		if p.Author != context.userSession.UserName {
+		if p.Author != "" && p.Author != context.userSession.UserName {
 			return NewStatusString("Unauthorized to change other user page", http.StatusUnauthorized)
 		}
 
@@ -55,11 +54,8 @@ func (p *Page) Sanitize(context RequestContext) error {
 			return NewStatusString("Page root is zero", http.StatusBadRequest)
 		}
 
-		p.CreatorSessionId = context.userSession.ID
-
-		urlSafeID := base64.RawURLEncoding.EncodeToString(p.Root[:])
-		name := p.Title + "-" + urlSafeID[:5]
-		p.LinkName = websession.MakeUrlSafe(name)
+		p.CreatorSessionID = context.userSession.ID
+		p.LinkName = websession.MakeUniqueURL(p.Title, p.CreatorSessionID[:], p.Root.Hex(), p.Author)
 	}
 
 	return nil

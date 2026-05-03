@@ -218,7 +218,7 @@ func SanitizeResult[T matter.Detectable](s *Session[T], result *T) error {
 	if ok {
 		err := sanObj.Sanitize(s.RequestContext)
 		if err != nil {
-			return NewStatusError(fmt.Errorf("Topic Sanitize error %v", err), http.StatusBadRequest)
+			return err
 		}
 	}
 	return nil

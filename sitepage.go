@@ -35,7 +35,7 @@ type Page struct {
 	CommentCount     uint32          `xml:"commentcount" json:"CommentCount" bson:"comment_count"`
 	EventAt          time.Time       `xml:"eventat" json:"EventAt" bson:"event_at"`
 	PreviousVersion  bson.ObjectID   `xml:"previousversion" json:"PreviousVersion" bson:"previous_version"`
-	CreatorSessionId bson.ObjectID   `xml:"-" json:"-" bson:"session_id"`
+	CreatorSessionID bson.ObjectID   `xml:"-" json:"-" bson:"session_id"`
 	StanzaData       []Stanza        `xml:"-" json:"StanzaData,omitempty" bson:"stanza_data,omitempty"` //mainly for aggregate querying and not for storing into database or display as xml model
 }
 
