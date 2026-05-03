@@ -32,26 +32,32 @@ func (p Page) GetRootID() bson.ObjectID {
 }
 
 func (p *Page) Sanitize(context RequestContext) error {
-	if context.RootId != nil {
-		p.Root = *context.RootId
-	}
-
-	if p.Root.IsZero() {
+	if context.RootId != nil && context.RootId.IsZero() {
 		//new page
-		p.Root = bson.NewObjectID()
+		p.Root = *context.RootId
+
+		if context.HasUserName() {
+			p.Root = bson.NewObjectID()
+		}
 	}
 
-	name := p.Title
-	if context.userSession != nil && context.userSession.UserName != "" {
+	if context.Request.Method == "PUT" {
+		if !context.HasUserName() {
+			return NewStatusString("Unauthorized to change page", http.StatusUnauthorized)
+		}
+
+		if p.Root.IsZero() {
+			return NewStatusString("Page root is zero", http.StatusBadRequest)
+		}
+
 		p.Author = context.userSession.UserName
-	} else {
-		//unattributed session add extra id into the linkname
+		p.CreatorSessionId = context.userSession.ID
+
 		urlSafeID := base64.RawURLEncoding.EncodeToString(p.Root[:])
-		name += "-" + urlSafeID[:6]
-		p.Author = ""
+		name := p.Title + "-" + urlSafeID[:5]
+		p.LinkName = websession.MakeUrlSafe(name)
 	}
 
-	p.LinkName = websession.MakeUrlSafe(name)
 	return nil
 }
 

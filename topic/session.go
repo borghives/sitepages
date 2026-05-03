@@ -52,6 +52,13 @@ func (rs *RequestContext) VerifySession() (*websession.Session, error) {
 	return rs.userSession, rs.userSessionErr
 }
 
+func (rs *RequestContext) HasUserName() bool {
+	if rs.userSessionErr != nil {
+		return false
+	}
+	return rs.userSession != nil && rs.userSession.UserName != ""
+}
+
 func (rs *RequestContext) GetVerifyEntanglement() (*entanglement.Session, error) {
 	session, err := rs.VerifySession()
 	if err != nil {
