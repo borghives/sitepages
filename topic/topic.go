@@ -32,12 +32,13 @@ func (p Page) GetRootID() bson.ObjectID {
 }
 
 func (p *Page) Sanitize(context RequestContext) error {
-	if context.RootId != nil && context.RootId.IsZero() {
-		//new page
-		p.Root = *context.RootId
 
-		if context.HasUserName() {
+	if context.RootId != nil {
+		p.Root = *context.RootId
+		if context.HasUserName() && p.Root.IsZero() {
+			//new page Root
 			p.Root = bson.NewObjectID()
+			p.Author = context.userSession.UserName
 		}
 	}
 
@@ -46,11 +47,14 @@ func (p *Page) Sanitize(context RequestContext) error {
 			return NewStatusString("Unauthorized to change page", http.StatusUnauthorized)
 		}
 
+		if p.Author != context.userSession.UserName {
+			return NewStatusString("Unauthorized to change other user page", http.StatusUnauthorized)
+		}
+
 		if p.Root.IsZero() {
 			return NewStatusString("Page root is zero", http.StatusBadRequest)
 		}
 
-		p.Author = context.userSession.UserName
 		p.CreatorSessionId = context.userSession.ID
 
 		urlSafeID := base64.RawURLEncoding.EncodeToString(p.Root[:])

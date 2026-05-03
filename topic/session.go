@@ -202,18 +202,26 @@ func Pull[T matter.Detectable](limit int64) HandlerFunc[T] {
 		}
 
 		for _, result := range results {
-			sanObj, ok := any(&result).(Sanitizable)
-			if ok {
-				err := sanObj.Sanitize(s.RequestContext)
-				if err != nil {
-					return NewStatusError(fmt.Errorf("Topic Sanitize error %v", err), http.StatusBadRequest)
-				}
+			err := SanitizeResult(s, &result)
+			if err != nil {
+				return err
 			}
 			s.Response.Append(result)
 		}
 
 		return nil
 	}
+}
+
+func SanitizeResult[T matter.Detectable](s *Session[T], result *T) error {
+	sanObj, ok := any(result).(Sanitizable)
+	if ok {
+		err := sanObj.Sanitize(s.RequestContext)
+		if err != nil {
+			return NewStatusError(fmt.Errorf("Topic Sanitize error %v", err), http.StatusBadRequest)
+		}
+	}
+	return nil
 }
 
 func SetEntanglementFrame[T matter.Detectable](frame string) HandlerFunc[T] {
