@@ -46,16 +46,12 @@ func (p *Page) Sanitize(context RequestContext) error {
 			return NewStatusString("Unauthorized to change page", http.StatusUnauthorized)
 		}
 
-		if p.Author != "" && p.Author != context.userSession.UserName {
-			return NewStatusString("Unauthorized to change other user page", http.StatusUnauthorized)
-		}
-
 		if p.Root.IsZero() {
 			return NewStatusString("Page root is zero", http.StatusBadRequest)
 		}
 
 		p.CreatorSessionID = context.userSession.ID
-		p.LinkName = websession.MakeUniqueURL(p.Title, p.CreatorSessionID[:], p.Root.Hex(), p.Author)
+		p.LinkName = websession.MakeUniqueURL(p.Title, p.Root[:], p.Author)
 	}
 
 	return nil
