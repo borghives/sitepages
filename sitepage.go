@@ -32,11 +32,11 @@ type Page struct {
 	Contents         []bson.ObjectID `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
 	Infos            MetaInfo        `xml:"infos,omitempty" json:"Infos,omitzero" bson:"infos,omitempty"`
 	Author           string          `xml:"Author,omitempty" json:"Author,omitempty" bson:"Author,omitempty"`
-	CommentCount     uint32          `xml:"commentcount" json:"CommentCount" bson:"comment_count"`
-	EventAt          time.Time       `xml:"eventat" json:"EventAt" bson:"event_at"`
-	PreviousVersion  bson.ObjectID   `xml:"previousversion" json:"PreviousVersion" bson:"previous_version"`
-	CreatorSessionID bson.ObjectID   `xml:"-" json:"-" bson:"session_id"`
-	StanzaData       []Stanza        `xml:"-" json:"StanzaData,omitempty" bson:"stanza_data,omitempty"` //mainly for aggregate querying and not for storing into database or display as xml model
+
+	EventAt          time.Time     `xml:"eventat" json:"EventAt" bson:"event_at"`
+	PreviousVersion  bson.ObjectID `xml:"previousversion" json:"PreviousVersion" bson:"previous_version"`
+	CreatorSessionID bson.ObjectID `xml:"-" json:"-" bson:"session_id"`
+	StanzaData       []Stanza      `xml:"-" json:"StanzaData,omitempty" bson:"stanza_data,omitempty"` //mainly for aggregate querying and not for storing into database or display as xml model
 }
 
 type Bundle struct {
