@@ -59,11 +59,12 @@ func (e StatusResponse) HasError() bool {
 }
 
 type BaseResponse struct {
-	TargetID    bson.ObjectID      `json:"TargetId,omitempty,omitzero" `
-	PageData    []Page             `json:"PageData,omitempty" `
-	StanzaData  []Stanza           `json:"StanzaData,omitempty" `
-	CommentData []Comment          `json:"CommentData,omitempty" `
-	BundleData  []sitepages.Bundle `json:"BundleData,omitempty" `
+	TargetID     bson.ObjectID      `json:"TargetId,omitempty,omitzero" `
+	PageData     []Page             `json:"PageData,omitempty" `
+	PagestatData []PageStat         `json:"PagestatData,omitempty" `
+	StanzaData   []Stanza           `json:"StanzaData,omitempty" `
+	CommentData  []Comment          `json:"CommentData,omitempty" `
+	BundleData   []sitepages.Bundle `json:"BundleData,omitempty" `
 }
 
 func (br *BaseResponse) SetTargetID(id bson.ObjectID) {
@@ -112,6 +113,9 @@ func (br *BaseResponse) Append(data any) bson.ObjectID {
 	case Page:
 		br.PageData = append(br.PageData, response)
 		id = response.ID
+	case PageStat:
+		br.PagestatData = append(br.PagestatData, response)
+		id = response.ID
 	case Stanza:
 		br.StanzaData = append(br.StanzaData, response)
 		id = response.ID
@@ -132,6 +136,9 @@ func (br *BaseResponse) Append(data any) bson.ObjectID {
 		id = response.ID
 	case *sitepages.Bundle:
 		br.BundleData = append(br.BundleData, *response)
+		id = response.ID
+	case *PageStat:
+		br.PagestatData = append(br.PagestatData, *response)
 		id = response.ID
 	default:
 		log.Printf("Append unknown type: %T", data)

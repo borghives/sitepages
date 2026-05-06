@@ -1,6 +1,7 @@
 package topic
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"log/slog"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/borghives/entanglement"
 	"github.com/borghives/kosmos-go"
+	"github.com/borghives/kosmos-go/matter"
 	"github.com/borghives/sitepages"
 	"github.com/borghives/websession"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -37,7 +39,7 @@ func (p *Page) Sanitize(context RequestContext) error {
 		if context.HasUserName() && p.Root.IsZero() {
 			//new page Root
 			p.Root = bson.NewObjectID()
-			p.Author = context.userSession.UserName
+			p.Author = context.GetUserName()
 		}
 	}
 
@@ -240,6 +242,25 @@ func (c Comment) CheckTransition(frame entanglement.Session) error {
 		return NewStatusString("Failed ID Expectation", http.StatusExpectationFailed)
 	}
 	return nil
+}
+
+func (p *Comment) Sanitize(context RequestContext) error {
+	if context.Request.Method == "PUT" {
+		p.UserName = context.GetUserName()
+	}
+	return nil
+}
+
+func (c *Comment) Decohere(ripple matter.Ripple) error {
+	err := c.BaseModel.Decohere(ripple)
+	if err != nil {
+		return err
+	}
+
+	stat := PageStat{}
+	stat.ID = c.Root
+	stat.IncrCommentCount()
+	return kosmos.Record(context.Background(), &stat)
 }
 
 func EntangleCommentProperties(frame entanglement.Session, sourceId bson.ObjectID, rootId bson.ObjectID, coolDown time.Duration) entanglement.TypeStateCorrelation {
