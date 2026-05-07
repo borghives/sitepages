@@ -1,4 +1,4 @@
-DEPS=sitepages websession kosmos-go entanglement
+DEPS=websession kosmos-go entanglement
 DEPS_DIR=$(addprefix ../,$(DEPS))
 DEPS_VERSION_TAG=$(addsuffix /tag,$(DEPS_DIR))
 
