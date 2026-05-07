@@ -3,9 +3,9 @@ module github.com/borghives/sitepages
 go 1.26.1
 
 require (
-	github.com/borghives/entanglement v0.4.47
+	github.com/borghives/entanglement v0.4.48
 	github.com/borghives/kosmos-go v1.4.10
-	github.com/borghives/websession v1.1.42
+	github.com/borghives/websession v1.1.43
 	go.mongodb.org/mongo-driver/v2 v2.6.0
 )
 
