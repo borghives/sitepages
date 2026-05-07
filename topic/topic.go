@@ -52,6 +52,7 @@ func (p *Page) Sanitize(context RequestContext) error {
 			return NewStatusString("Page root is zero", http.StatusBadRequest)
 		}
 
+		p.Author = context.GetUserName()
 		p.CreatorSessionID = context.userSession.ID
 		p.LinkName = websession.MakeUniqueURL(p.Title, p.Root[:], p.Author)
 	}
@@ -87,6 +88,22 @@ func (p Page) CheckTransition(frame entanglement.Session) error {
 	if correlatedId != p.ID.Hex() {
 		log.Printf("Mismatch page id: %s, expected %s := pageid: %s rootid: %s", p.ID.Hex(), correlatedId, p.PreviousVersion.Hex(), p.Root.Hex())
 		return NewStatusString("Failed ID Expectation", http.StatusExpectationFailed)
+	}
+	return nil
+}
+
+func (p *Page) Decohere(ripple matter.Ripple) error {
+	err := p.BaseModel.Decohere(ripple)
+	if err != nil {
+		return err
+	}
+
+	stat := PageStat{}
+	stat.ID = p.Root
+	stat.AddUniqueAuthor(p.Author)
+	err = kosmos.Record(context.Background(), &stat)
+	if err != nil {
+		log.Printf("Page Decohere: failed to add author to root stat %v", err)
 	}
 	return nil
 }
@@ -260,7 +277,11 @@ func (c *Comment) Decohere(ripple matter.Ripple) error {
 	stat := PageStat{}
 	stat.ID = c.Root
 	stat.IncrCommentCount()
-	return kosmos.Record(context.Background(), &stat)
+	err = kosmos.Record(context.Background(), &stat)
+	if err != nil {
+		log.Printf("Comment Decohere: Failed to add page comment stat %v", err)
+	}
+	return nil
 }
 
 func EntangleCommentProperties(frame entanglement.Session, sourceId bson.ObjectID, rootId bson.ObjectID, coolDown time.Duration) entanglement.TypeStateCorrelation {
