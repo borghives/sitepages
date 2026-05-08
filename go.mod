@@ -3,9 +3,9 @@ module github.com/borghives/sitepages
 go 1.26.1
 
 require (
-	github.com/borghives/entanglement v0.4.49
-	github.com/borghives/kosmos-go v1.4.10
-	github.com/borghives/websession v1.1.43
+	github.com/borghives/entanglement v0.4.50
+	github.com/borghives/kosmos-go v1.4.11
+	github.com/borghives/websession v1.1.44
 	go.mongodb.org/mongo-driver/v2 v2.6.0
 )
 
@@ -53,7 +53,7 @@ require (
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.44.0 // indirect
-	golang.org/x/text v0.36.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	google.golang.org/api v0.278.0 // indirect
 	google.golang.org/genproto v0.0.0-20260504160031-60b97b32f348 // indirect
