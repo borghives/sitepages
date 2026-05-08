@@ -3,9 +3,9 @@ module github.com/borghives/sitepages
 go 1.26.1
 
 require (
-	github.com/borghives/entanglement v0.4.52
-	github.com/borghives/kosmos-go v1.4.12
-	github.com/borghives/websession v1.1.46
+	github.com/borghives/entanglement v0.4.55
+	github.com/borghives/kosmos-go v1.4.14
+	github.com/borghives/websession v1.1.49
 	go.mongodb.org/mongo-driver/v2 v2.6.0
 )
 
@@ -49,7 +49,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.43.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/crypto v0.51.0 // indirect
-	golang.org/x/net v0.53.0 // indirect
+	golang.org/x/net v0.54.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.44.0 // indirect
