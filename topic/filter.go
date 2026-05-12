@@ -90,7 +90,7 @@ func (f FieldPredicate) ByIDSetFromQuery(queryName string) Filter {
 
 		ids, err := convertStringToIDs(values)
 		if err != nil {
-			return nil, err
+			return nil, NewStatusString("invalid id from query", http.StatusBadRequest)
 		}
 		var pred expression.QueryFieldPredicate
 		if len(values) == 1 {
