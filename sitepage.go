@@ -31,7 +31,7 @@ type Page struct {
 	Synapses         []Synapse       `xml:"synapse,omitempty" json:"Synapses,omitempty" bson:"synapses,omitempty"`
 	Contents         []bson.ObjectID `xml:"contents>content,omitempty" json:"Contents,omitempty" bson:"contents,omitempty"`
 	Infos            MetaInfo        `xml:"infos,omitempty" json:"Infos,omitzero" bson:"infos,omitempty"`
-	Author           string          `xml:"Author,omitempty" json:"Author,omitempty" bson:"Author,omitempty"`
+	Author           string          `xml:"Author,omitempty" json:"Author,omitempty" bson:"author,omitempty"`
 
 	EventAt          time.Time     `xml:"eventat" json:"EventAt" bson:"event_at"`
 	PreviousVersion  bson.ObjectID `xml:"previousversion" json:"PreviousVersion" bson:"previous_version"`

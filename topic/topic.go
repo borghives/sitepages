@@ -54,7 +54,7 @@ func (p *Page) Sanitize(context RequestContext) error {
 
 		p.Author = context.GetUserName()
 		p.CreatorSessionID = context.userSession.ID
-		p.LinkName = websession.MakeUniqueURL(p.Title, p.Root[:], p.Author)
+		p.LinkName = websession.MakeUniqueURL(p.Title, p.Root[:])
 	}
 
 	return nil
