@@ -1,12 +1,14 @@
 package topic
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/borghives/entanglement"
@@ -166,6 +168,62 @@ func CreateEntangledStanza(session entanglement.Session, content string, prevId 
 	}
 }
 
+// ChunkMarkdown splits a markdown string into logical chunks (paragraphs/blocks).
+// It ensures that fenced code blocks are never split, even if they contain blank lines.
+func ChunkMarkdown(md string) []string {
+	var chunks []string
+	var currentChunk strings.Builder
+
+	scanner := bufio.NewScanner(strings.NewReader(md))
+	inCodeBlock := false
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		trimmedLine := strings.TrimSpace(line)
+
+		// Toggle code block state if we encounter backticks
+		if strings.HasPrefix(trimmedLine, "```") {
+			inCodeBlock = !inCodeBlock
+		}
+
+		// If we are outside a code block and hit a blank line, it's a boundary.
+		if !inCodeBlock && trimmedLine == "" {
+			// Save the chunk if it contains actual content
+			if currentChunk.Len() > 0 {
+				chunks = append(chunks, strings.TrimSpace(currentChunk.String()))
+				currentChunk.Reset()
+			}
+		} else {
+			// Append the line to the current chunk
+			currentChunk.WriteString(line + "\n")
+		}
+	}
+
+	// Catch any remaining errors from the scanner
+	if err := scanner.Err(); err != nil {
+		slog.Error("Error reading markdown", "error", err)
+	}
+
+	// Append the final chunk if anything remains in the buffer
+	if currentChunk.Len() > 0 {
+		chunks = append(chunks, strings.TrimSpace(currentChunk.String()))
+	}
+
+	return chunks
+}
+
+func BreakupStanza(session entanglement.Session, in Stanza) []Stanza {
+	parts := ChunkMarkdown(in.Content)
+	partSize := len(parts)
+	finalOffset := in.ChunkOffset + partSize
+	var retval []Stanza
+
+	for i, part := range parts {
+		retval = append(retval, CreateEntangledStanza(session, part, in.PreviousVersion, in.BasePage, in.ChunkOffset+i+1, finalOffset))
+	}
+	return retval
+}
+
 func SplitStanzaToOutput() HandlerFunc[Stanza] {
 	return func(s *Session[Stanza]) error {
 		session, err := s.GetVerifyEntanglement()
@@ -177,7 +235,10 @@ func SplitStanzaToOutput() HandlerFunc[Stanza] {
 		slog.Debug("Chunking", slog.Any("chunks", chunks))
 		switch len(chunks) {
 		case 0:
-			s.Output = append(s.Output, s.InBody)
+			stanzas := BreakupStanza(*session, s.InBody)
+			for _, stanza := range stanzas {
+				s.Output = append(s.Output, stanza)
+			}
 		case 1:
 			start := chunks[0]
 			finalOffset := s.InBody.ChunkOffset + 2
