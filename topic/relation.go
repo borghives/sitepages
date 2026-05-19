@@ -51,7 +51,7 @@ func (l UserToPageLink) SelfScope() expression.Scope {
 		kosmos.Fld("SubjectId").Eq(l.SubjectId),
 		kosmos.Fld("ObjectId").Eq(l.ObjectId),
 		kosmos.Fld("Name").Eq(l.Name),
-		kosmos.Fld("Relation").Eq(l.Name),
+		kosmos.Fld("Relation").Eq(l.Relation),
 	)
 }
 
