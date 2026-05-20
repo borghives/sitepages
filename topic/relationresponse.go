@@ -6,7 +6,7 @@ import (
 
 type RelationTopicResponse struct {
 	EntangledResponse
-	LinkDescs []LinkDescription `xml:"-" json:"LinkDescs,omitempty" bson:"-" `
+	LinkDescs []LinkDescription `xml:"-" json:"linkdescs,omitempty" bson:"-" `
 }
 
 func NewRelationTopicResponse() Response {

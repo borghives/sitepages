@@ -195,7 +195,8 @@ func ChunkMarkdown(md string) []string {
 			}
 		} else {
 			// Append the line to the current chunk
-			currentChunk.WriteString(line + "\n")
+			currentChunk.WriteString(line)
+			currentChunk.WriteString("\n")
 		}
 	}
 

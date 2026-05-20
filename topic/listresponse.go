@@ -6,8 +6,8 @@ import (
 
 type List struct {
 	ID        string            `xml:"-" json:"ID" bson:"name"`
-	Contents  []bson.ObjectID   `xml:"-" json:"Contents" bson:"contents"`
-	LinkDescs []LinkDescription `xml:"-" json:"LinkDescs,omitempty" bson:"linkdescs,omitempty" `
+	Contents  []bson.ObjectID   `xml:"-" json:"contents" bson:"contents"`
+	LinkDescs []LinkDescription `xml:"-" json:"linkdescs,omitempty" bson:"linkdescs,omitempty" `
 }
 
 type ListTopicResponse struct {
