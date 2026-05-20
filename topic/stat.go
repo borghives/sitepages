@@ -11,9 +11,9 @@ import (
 type PageStat struct {
 	kosmos.BaseModel `bson:",inline" kosmos:"page_stat"`
 	XMLName          xml.Name `xml:"page_stat" json:"-" bson:"-"`
-	Title            string   `xml:"title" json:"Title" bson:"title"`
-	CommentCount     int      `xml:"commentcount" json:"CommentCount" bson:"comment_count,omitempty"`
-	Authors          []string `xml:"authors" json:"Authors" bson:"authors,omitempty"`
+	Title            string   `xml:"title" json:"title" bson:"title"`
+	CommentCount     int      `xml:"commentcount" json:"commentcount" bson:"comment_count,omitempty"`
+	Authors          []string `xml:"authors" json:"authors" bson:"authors,omitempty"`
 	commentIncr      int
 	authorsAdd       []string
 }
