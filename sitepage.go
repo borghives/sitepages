@@ -1,10 +1,7 @@
 package sitepages
 
 import (
-	"encoding/json"
 	"encoding/xml"
-	"log"
-	"os"
 	"time"
 
 	"github.com/borghives/kosmos-go"
@@ -44,7 +41,7 @@ type Bundle struct {
 	Contents         []bson.ObjectID `xml:"contents>content,omitempty" json:"contents,omitempty" bson:"contents,omitempty"`
 	EventAt          time.Time       `xml:"eventat" json:"eventat" bson:"event_at"`
 	PreviousBundleId bson.ObjectID   `xml:"previousbundleid" json:"previousbundleid" bson:"previous_bundle_id"`
-	PageData         []Page          `xml:"-" json:"PageData,omitempty" bson:"page_data,omitempty"` //for aggregate querying and not for storing into database or display as xml model
+	PageData         []Page          `xml:"pagedata" json:"PageData,omitempty" bson:"page_data,omitempty"`
 }
 
 type Stanza struct {
@@ -94,39 +91,4 @@ type MetaInfo struct {
 	HasMarketImpact bool          `xml:"hasmarketimpact,omitempty" json:"hasmarketimpact,omitempty" bson:"has_market_impact,omitempty"`
 	GenType         string        `xml:"-" json:"gentype,omitempty" bson:"gen_type,omitempty"`
 	Tags            []string      `xml:"tags,omitempty" json:"tags,omitempty" bson:"tags,omitempty"`
-}
-
-func SaveSitePages(file string, pages []Page) error {
-	// Open the file for writing
-	f, err := os.Create(file)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	return json.NewEncoder(f).Encode(pages)
-}
-
-func GenerateMomentString(coolDown time.Duration) string {
-	now := time.Now().UTC()
-	return now.Add(coolDown).Format("2006-01-02 15:04")
-}
-
-func ParseMomentString(moment string) (time.Time, error) {
-	return time.Parse("2006-01-02 15:04", moment)
-}
-
-func LoadSitePages(site string) []Page {
-	file, err := os.Open(site)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	var retval []Page
-	err = json.NewDecoder(file).Decode(&retval)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return retval
 }
