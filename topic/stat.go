@@ -184,7 +184,7 @@ func (p *PageRank) LinkScore(ctx context.Context) float32 {
 	return p.score
 }
 
-func TopPageByRoot(ctx context.Context, root bson.ObjectID) (*sitepages.Page, error) {
+func TopPageByRoot(ctx context.Context, root bson.ObjectID) (*PageRank, error) {
 	pages, err := km.Detect[PageRank](
 		km.Fld("Root").ID().Eq(root),
 	).SortLatest().Limit(100).PullAll(ctx)
@@ -203,7 +203,7 @@ func TopPageByRoot(ctx context.Context, root bson.ObjectID) (*sitepages.Page, er
 		return nil, err
 	}
 
-	return &pages[0].Page, nil
+	return &pages[0], nil
 }
 
 // func SelectPagesByRoot(ctx context.Context, roots []bson.ObjectID) (pages []Page, err error) {
