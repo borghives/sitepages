@@ -150,7 +150,7 @@ func (p *PageRank) LinkScore(ctx context.Context) float32 {
 
 	relationCounts, err := km.ProjectInto[RelationCount](
 		km.Fld("relation").With().GroupKey("relation"),
-		km.Fld("count").With().Field("count"),
+		km.Fld("count").With().One(),
 	).From(
 		km.Detect[UserToPageLink](
 			km.Fld("objid").ID().Eq(p.Page.ID),
