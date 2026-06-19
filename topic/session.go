@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"net/url"
 
+	"git.mypierian.com/borghives/kosmos-go"
+	"git.mypierian.com/borghives/kosmos-go/matter"
 	"github.com/borghives/entanglement"
-	"github.com/borghives/kosmos-go"
-	"github.com/borghives/kosmos-go/matter"
 	"github.com/borghives/websession"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )

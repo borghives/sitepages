@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/borghives/kosmos-go"
+	"git.mypierian.com/borghives/kosmos-go"
 )
 
 func NewBundle(name string) *Bundle {

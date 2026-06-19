@@ -8,8 +8,8 @@ import (
 	"slices"
 	"time"
 
-	km "github.com/borghives/kosmos-go"
-	"github.com/borghives/kosmos-go/matter"
+	km "git.mypierian.com/borghives/kosmos-go"
+	"git.mypierian.com/borghives/kosmos-go/matter"
 	"github.com/borghives/sitepages"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )

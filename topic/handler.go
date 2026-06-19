@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/borghives/kosmos-go/matter"
+	"git.mypierian.com/borghives/kosmos-go/matter"
 )
 
 type HandlerFunc[T matter.Detectable] func(session *Session[T]) error
