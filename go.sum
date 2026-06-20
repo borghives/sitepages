@@ -14,10 +14,8 @@ git.mypierian.com/borghives/kosmos-go v1.5.1 h1:1bin1GQVy7gpMAWG60lolQLYt7bX9Yjo
 git.mypierian.com/borghives/kosmos-go v1.5.1/go.mod h1:TizINBYUUClAeDkLk8YYpl+DgT/4bJYvwMqXvq2J9bU=
 git.mypierian.com/borghives/websession v1.3.0 h1:LoY66k5JEujPz3yvgIY0XQb9AxFFvLoUyCr1If7Keg8=
 git.mypierian.com/borghives/websession v1.3.0/go.mod h1:HlFndkV/u4RyYlWg+95IT1tqMc8Eb3t/GNRqRez8y00=
-github.com/borghives/entanglement v0.4.71 h1:mwZKVoF6YtOb8ij2q4U3D5q4spR2MbDTWsfNshBqd0M=
-github.com/borghives/entanglement v0.4.71/go.mod h1:KRCh9JK5FYxWHFsFMaU/qiPWXphPbcPbfYD0RLfurA8=
-github.com/borghives/websession v1.1.65 h1:zq8T5XHyUQaWjWYpkthtLLcI2QH2vODH84xqm2tglZY=
-github.com/borghives/websession v1.1.65/go.mod h1:KdPhC5z2Llh3m3+hnTFtWZcTe3xg96j+0VRkgzYBLvo=
+github.com/borghives/entanglement v0.4.72 h1:HgcQQ6aL9xSDiOaRZaWNxK5+5PBW8KYftsZ5elJqclw=
+github.com/borghives/entanglement v0.4.72/go.mod h1:5vJ5ucy/7cuJAVxcCEymvHU6l6/n3qqiHHlXKrJJGAA=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
 github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2 h1:aBangftG7EVZoUb69Os8IaYg++6uMOdKK83QtkkvJik=
