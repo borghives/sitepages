@@ -4,8 +4,8 @@ go 1.26.1
 
 require (
 	git.mypierian.com/borghives/kosmos-go v1.5.1
+	git.mypierian.com/borghives/websession v1.3.0
 	github.com/borghives/entanglement v0.4.71
-	github.com/borghives/websession v1.1.65
 	go.mongodb.org/mongo-driver/v2 v2.7.0
 )
 
@@ -15,6 +15,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.9.0 // indirect
 	cloud.google.com/go/iam v1.11.0 // indirect
 	cloud.google.com/go/secretmanager v1.20.0 // indirect
+	github.com/borghives/websession v1.1.65 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/danieljoos/wincred v1.2.3 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect

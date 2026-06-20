@@ -12,6 +12,8 @@ cloud.google.com/go/secretmanager v1.20.0 h1:GjE3NoyFXo7ipRPy26PMmg4oRX1Ra8fswH4
 cloud.google.com/go/secretmanager v1.20.0/go.mod h1:9OmSuOeiiUicANglrbdKWSnT3gYkRcXuUQDk7dDW0zU=
 git.mypierian.com/borghives/kosmos-go v1.5.1 h1:1bin1GQVy7gpMAWG60lolQLYt7bX9YjoDn0K51wy7uY=
 git.mypierian.com/borghives/kosmos-go v1.5.1/go.mod h1:TizINBYUUClAeDkLk8YYpl+DgT/4bJYvwMqXvq2J9bU=
+git.mypierian.com/borghives/websession v1.3.0 h1:LoY66k5JEujPz3yvgIY0XQb9AxFFvLoUyCr1If7Keg8=
+git.mypierian.com/borghives/websession v1.3.0/go.mod h1:HlFndkV/u4RyYlWg+95IT1tqMc8Eb3t/GNRqRez8y00=
 github.com/borghives/entanglement v0.4.71 h1:mwZKVoF6YtOb8ij2q4U3D5q4spR2MbDTWsfNshBqd0M=
 github.com/borghives/entanglement v0.4.71/go.mod h1:KRCh9JK5FYxWHFsFMaU/qiPWXphPbcPbfYD0RLfurA8=
 github.com/borghives/websession v1.1.65 h1:zq8T5XHyUQaWjWYpkthtLLcI2QH2vODH84xqm2tglZY=
