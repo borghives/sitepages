@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/borghives/entanglement"
+	"git.mypierian.com/borghives/entanglement"
 	"github.com/borghives/sitepages"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )

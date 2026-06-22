@@ -3,7 +3,7 @@ package topic
 import (
 	"net/http"
 
-	"github.com/borghives/entanglement"
+	"git.mypierian.com/borghives/entanglement"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 

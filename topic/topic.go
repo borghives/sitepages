@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
+	"git.mypierian.com/borghives/entanglement"
 	"git.mypierian.com/borghives/kosmos-go"
 	"git.mypierian.com/borghives/kosmos-go/matter"
 	"git.mypierian.com/borghives/websession"
-	"github.com/borghives/entanglement"
 	"github.com/borghives/sitepages"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )

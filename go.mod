@@ -3,9 +3,9 @@ module github.com/borghives/sitepages
 go 1.26.1
 
 require (
-	git.mypierian.com/borghives/kosmos-go v1.5.1
-	git.mypierian.com/borghives/websession v1.3.0
-	github.com/borghives/entanglement v0.4.72
+	git.mypierian.com/borghives/entanglement v0.5.1
+	git.mypierian.com/borghives/kosmos-go v1.5.3
+	git.mypierian.com/borghives/websession v1.3.2
 	go.mongodb.org/mongo-driver/v2 v2.7.0
 )
 
@@ -28,7 +28,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.22.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/klauspost/compress v1.18.6 // indirect
-	github.com/pelletier/go-toml/v2 v2.4.0 // indirect
+	github.com/pelletier/go-toml/v2 v2.4.1 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
@@ -55,10 +55,10 @@ require (
 	golang.org/x/sys v0.46.0 // indirect
 	golang.org/x/text v0.38.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
-	google.golang.org/api v0.285.0 // indirect
-	google.golang.org/genproto v0.0.0-20260618152121-87f3d3e198d3 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260618152121-87f3d3e198d3 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260618152121-87f3d3e198d3 // indirect
+	google.golang.org/api v0.286.0 // indirect
+	google.golang.org/genproto v0.0.0-20260622175928-b703f567277d // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260622175928-b703f567277d // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260622175928-b703f567277d // indirect
 	google.golang.org/grpc v1.81.1 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
