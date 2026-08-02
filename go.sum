@@ -12,10 +12,10 @@ cloud.google.com/go/secretmanager v1.21.0 h1:e56QQaKWRyzBdUz40AeZaio/ZHAl268cFx3
 cloud.google.com/go/secretmanager v1.21.0/go.mod h1:+nlV+GYqTD8DM+x7Kk3UF7ZPYgdYMowrkZxAmMXORQ8=
 git.mypierian.com/borghives/entanglement v0.5.1 h1:dRFLPy0s1+EI5wFdgsBNpLiBWRM9YV6/bwAONWQBGhI=
 git.mypierian.com/borghives/entanglement v0.5.1/go.mod h1:qicuXI4D9dJaxjlFHyxIh86GQvOkDGeLKatp3ky9/qc=
-git.mypierian.com/borghives/kosmos-go v1.5.4 h1:DjEIM7/CNMLiNj2GR756HLpm4XrrBonf3iYJtfdEz1Y=
-git.mypierian.com/borghives/kosmos-go v1.5.4/go.mod h1:DFta7sMQLqeqD5blATPEo/mAi9aFGYIsgLRZnxRJPWs=
-git.mypierian.com/borghives/websession v1.3.3 h1:xrktWZd5c38m3DSc4osq9D4x2pNOYrCr1zKm5jVUyIQ=
-git.mypierian.com/borghives/websession v1.3.3/go.mod h1:afi67S56KV8UxVP22a8kg3QJXQfgNCKN0jjeO56Bgx4=
+git.mypierian.com/borghives/kosmos-go v1.5.5 h1:HRDqFgRPiMIfcNBPzZE9AdaKCI8VpgJBTY/tuuiEFwY=
+git.mypierian.com/borghives/kosmos-go v1.5.5/go.mod h1:DFta7sMQLqeqD5blATPEo/mAi9aFGYIsgLRZnxRJPWs=
+git.mypierian.com/borghives/websession v1.3.4 h1:tjZSEwm4SMlRITcMiIG6gta4geASgf8k2V5OLmosqHU=
+git.mypierian.com/borghives/websession v1.3.4/go.mod h1:OnpOc2Ztinmp35/s9Jd60EbHJT+S/ufQjXHN5YKcx8A=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
 github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2 h1:aBangftG7EVZoUb69Os8IaYg++6uMOdKK83QtkkvJik=

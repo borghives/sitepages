@@ -4,8 +4,8 @@ go 1.26.1
 
 require (
 	git.mypierian.com/borghives/entanglement v0.5.1
-	git.mypierian.com/borghives/kosmos-go v1.5.4
-	git.mypierian.com/borghives/websession v1.3.3
+	git.mypierian.com/borghives/kosmos-go v1.5.5
+	git.mypierian.com/borghives/websession v1.3.4
 	go.mongodb.org/mongo-driver/v2 v2.8.0
 )
 
